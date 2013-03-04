@@ -1,0 +1,15 @@
+//
+// Prefix header for all source files of the 'PartyMusic' target in the 'PartyMusic' project
+//
+
+#import <Availability.h>
+
+#ifdef __OBJC__
+	#import <UIKit/UIKit.h>
+	#import <Foundation/Foundation.h>
+	#import <QuartzCore/QuartzCore.h>
+	#import <MediaPlayer/MediaPlayer.h>
+	#import <AVFoundation/AVFoundation.h>
+#endif
+
+#import "Additions.h"

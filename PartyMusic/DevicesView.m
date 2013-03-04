@@ -1,0 +1,114 @@
+//
+//  DevicesView.m
+//  PartyMusic
+//
+//  Created by Tom Irving on 12/02/2013.
+//  Copyright (c) 2013 Tom Irving. All rights reserved.
+//
+
+#import "DevicesView.h"
+#import "DeviceView.h"
+#import "Device.h"
+
+@interface DevicesView (Private)
+- (void)calculateDeviceViewCentersWithCallback:(void (^)(DeviceView * deviceView, CGPoint center, CGFloat scale))callback;
+@end
+
+@implementation DevicesView
+
+- (id)initWithFrame:(CGRect)frame {
+	
+	if ((self = [super initWithFrame:frame])){
+		
+		displayLink = [[CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkTick:)] retain];
+		[displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:(id)kCFRunLoopCommonModes];
+	}
+	
+	return self;
+}
+
+- (void)setFrame:(CGRect)frame {
+	[super setFrame:frame];
+	[self.layer setShadowPath:[[UIBezierPath bezierPathWithRect:self.bounds] CGPath]];
+	[self setNeedsLayout];
+}
+
+- (DeviceView *)ownDeviceView {
+	return (DeviceView *)[self.subviews objectAtIndex:0];
+}
+
+- (void)displayLinkTick:(CADisplayLink *)sender {
+	[self.subviews enumerateObjectsUsingBlock:^(DeviceView * deviceView, NSUInteger idx, BOOL *stop){
+		[deviceView simulateSpringWithDisplayLink:sender];
+	}];
+}
+
+- (void)addDeviceView:(DeviceView *)deviceView {
+	[self addSubview:deviceView];
+	[deviceView setCenter:CGPointMake(CGRectGetMidX(self.bounds), CGRectGetMidY(self.bounds))];
+	[self setNeedsLayout];
+}
+
+- (void)removeDeviceView:(DeviceView *)deviceView {
+	[deviceView removeFromSuperview];
+	[self setNeedsLayout];
+}
+
+- (void)calculateDeviceViewCentersWithCallback:(void (^)(DeviceView * deviceView, CGPoint center, CGFloat scale))callback {
+	
+	if (callback){
+		CGFloat scale = [[UIDevice currentDevice] isPhone] ? 1 : 1.5;
+		CGFloat padding = (self.subviews.count < 2 ? 100 : (self.subviews.count < 4 ? 75 : 50));
+		CGFloat circleRadius = MIN(self.bounds.size.width, self.bounds.size.height) / 2 - padding * scale;
+		if (self.subviews.count < 2) circleRadius = 0;
+		
+		CGFloat increments = M_PI * 2 / self.subviews.count;
+		__block CGFloat currentAngle = -M_PI / 2;
+		
+		[self.subviews enumerateObjectsUsingBlock:^(DeviceView * deviceView, NSUInteger idx, BOOL *stop) {
+			
+			CGPoint restCenter = CGPointMake(circleRadius * cosf(currentAngle), circleRadius * sinf(currentAngle));
+			restCenter.x += self.bounds.size.width / 2;
+			restCenter.y += self.bounds.size.height / 2;
+			currentAngle += increments;
+			
+			callback(deviceView, restCenter, scale);
+		}];
+	}
+}
+
+- (void)layoutSubviews {
+	
+	[self calculateDeviceViewCentersWithCallback:^(DeviceView *deviceView, CGPoint center, CGFloat scale) {
+		[deviceView setRestCenter:center];
+		[deviceView setTransform:CGAffineTransformMakeRotation(deviceView.rotation)];
+	}];
+}
+
+/*
+- (void)drawRect:(CGRect)rect {
+	
+	CGContextRef context = UIGraphicsGetCurrentContext();
+	CGContextSetStrokeColorWithColor(context, [[UIColor pm_darkerLightColor] CGColor]);
+	CGContextSetLineDash(context, 1, (CGFloat[2]){5, 5}, 2);
+	
+	[self calculateDeviceViewCentersWithCallback:^(DeviceView *deviceView, CGPoint center, CGFloat scale) {
+		
+		CGSize rotatedSize = deviceView.deviceSize;
+		if (deviceView.rotation != M_PI && deviceView.rotation != 0) rotatedSize = CGSizeMake(rotatedSize.height, rotatedSize.width);
+		
+		CGRect deviceRect = (CGRect){{center.x - deviceView.deviceSize.width / 2, center.y - deviceView.deviceSize.height / 2}, deviceView.deviceSize};
+		
+		CGContextAddPath(context, [[UIBezierPath bezierPathWithRoundedRect:deviceRect cornerRadius:5] CGPath]);
+		CGContextStrokePath(context);
+	}];
+}
+ */
+
+- (void)dealloc {
+	[displayLink invalidate];
+	[displayLink release];
+	[super dealloc];
+}
+
+@end

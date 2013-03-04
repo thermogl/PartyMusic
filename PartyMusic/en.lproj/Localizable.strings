@@ -1,0 +1,13 @@
+/* 
+  Localizable.strings
+  PartyMusic
+
+  Created by Tom Irving on 15/02/2013.
+  Copyright (c) 2013 Tom Irving. All rights reserved.
+*/
+
+"Artists" = "Artists";
+"Albums" = "Albums";
+"Songs" = "Songs";
+
+"Artists, Albums, Songs..." = "Artists, Albums, Songs...";
