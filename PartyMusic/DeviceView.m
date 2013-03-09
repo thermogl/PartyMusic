@@ -155,6 +155,7 @@
 #pragma mark - UIMenuController stuff
 - (void)becomeOutputMenuItemWasTapped:(id)sender {
 	[[[DevicesManager sharedManager] ownDevice] setIsOutput:YES];
+	[[NSNotificationCenter defaultCenter] postNotificationName:DevicesManagerDidReceiveHarlemNotificationName object:nil];
 	[[MusicQueueController sharedController] play];
 }
 

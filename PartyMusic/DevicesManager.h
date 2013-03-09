@@ -11,6 +11,7 @@
 extern NSString * const DevicesManagerDidAddDeviceNotificationName;
 extern NSString * const DevicesManagerDidRemoveDeviceNotificationName;
 extern NSString * const DevicesManagerDidReceiveShakeEventNotificationName;
+extern NSString * const DevicesManagerDidReceiveHarlemNotificationName;
 extern NSString * const DevicesManagerDidReceiveOrientationChangeNotificationName;
 extern NSString * const DevicesManagerDidReceiveOutputChangeNotificationName;
 extern NSString * const kUserInterfaceIdiomTXTRecordKeyName;

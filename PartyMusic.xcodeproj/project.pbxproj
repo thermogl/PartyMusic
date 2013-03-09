@@ -32,6 +32,8 @@
 		E230199D16C9FC85001685F6 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E230199C16C9FC85001685F6 /* QuartzCore.framework */; };
 		E23019A016CA9E6B001685F6 /* DevicesManager.m in Sources */ = {isa = PBXBuildFile; fileRef = E230199F16CA9E6B001685F6 /* DevicesManager.m */; };
 		E23019A316CAA188001685F6 /* Device.m in Sources */ = {isa = PBXBuildFile; fileRef = E23019A216CAA188001685F6 /* Device.m */; };
+		E234DC4A16EADF7500A8D2DA /* HarlemShake.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = E234DC4716EADF7500A8D2DA /* HarlemShake.mp3 */; };
+		E234DC4B16EADF7500A8D2DA /* VLMHarlemShake.m in Sources */ = {isa = PBXBuildFile; fileRef = E234DC4916EADF7500A8D2DA /* VLMHarlemShake.m */; };
 		E24CC0AC16CC8BB30061555A /* NSNetService+Additions.m in Sources */ = {isa = PBXBuildFile; fileRef = E24CC0AB16CC8BB20061555A /* NSNetService+Additions.m */; };
 		E24CC0B816CC99B70061555A /* OrientationAwareViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E24CC0B716CC99B70061555A /* OrientationAwareViewController.m */; };
 		E24CC0BB16CC9A040061555A /* UIDevice+Additions.m in Sources */ = {isa = PBXBuildFile; fileRef = E24CC0BA16CC9A040061555A /* UIDevice+Additions.m */; };
@@ -106,6 +108,9 @@
 		E230199F16CA9E6B001685F6 /* DevicesManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DevicesManager.m; sourceTree = "<group>"; };
 		E23019A116CAA188001685F6 /* Device.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Device.h; sourceTree = "<group>"; };
 		E23019A216CAA188001685F6 /* Device.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Device.m; sourceTree = "<group>"; };
+		E234DC4716EADF7500A8D2DA /* HarlemShake.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = HarlemShake.mp3; sourceTree = "<group>"; };
+		E234DC4816EADF7500A8D2DA /* VLMHarlemShake.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VLMHarlemShake.h; sourceTree = "<group>"; };
+		E234DC4916EADF7500A8D2DA /* VLMHarlemShake.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VLMHarlemShake.m; sourceTree = "<group>"; };
 		E24CC0AA16CC8BB20061555A /* NSNetService+Additions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSNetService+Additions.h"; sourceTree = "<group>"; };
 		E24CC0AB16CC8BB20061555A /* NSNetService+Additions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSNetService+Additions.m"; sourceTree = "<group>"; };
 		E24CC0B616CC99B70061555A /* OrientationAwareViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OrientationAwareViewController.h; sourceTree = "<group>"; };
@@ -245,6 +250,7 @@
 				E24CC0B116CC918B0061555A /* Devices */,
 				E2ADB5AC16CE86E100C8BF4B /* Music */,
 				E24CC0B216CC919C0061555A /* Additions */,
+				E234DC4C16EADFA100A8D2DA /* Harlem Shake */,
 				E230197A16C9F606001685F6 /* Supporting Files */,
 			);
 			path = PartyMusic;
@@ -261,6 +267,16 @@
 				E230198116C9F606001685F6 /* PartyMusic-Prefix.pch */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		E234DC4C16EADFA100A8D2DA /* Harlem Shake */ = {
+			isa = PBXGroup;
+			children = (
+				E234DC4816EADF7500A8D2DA /* VLMHarlemShake.h */,
+				E234DC4916EADF7500A8D2DA /* VLMHarlemShake.m */,
+				E234DC4716EADF7500A8D2DA /* HarlemShake.mp3 */,
+			);
+			name = "Harlem Shake";
 			sourceTree = "<group>";
 		};
 		E24CC0B116CC918B0061555A /* Devices */ = {
@@ -457,6 +473,7 @@
 				E2A7618516DBEF0000FD8547 /* Pause@2x.png in Resources */,
 				E2A7618816DBF0C100FD8547 /* SkipBackward@2x.png in Resources */,
 				E2A7618916DBF0C100FD8547 /* SkipForward@2x.png in Resources */,
+				E234DC4A16EADF7500A8D2DA /* HarlemShake.mp3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -498,6 +515,7 @@
 				E2A7618F16DBFE5500FD8547 /* QueueViewController.m in Sources */,
 				E2A7619516DEACC600FD8547 /* UIColor+Theming.m in Sources */,
 				E2E1449E16DEEE01005F73B9 /* TrackFetcher.m in Sources */,
+				E234DC4B16EADF7500A8D2DA /* VLMHarlemShake.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

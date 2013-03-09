@@ -17,6 +17,7 @@
 NSString * const DevicesManagerDidAddDeviceNotificationName = @"DevicesManagerDidAddDeviceNotificationName";
 NSString * const DevicesManagerDidRemoveDeviceNotificationName = @"DevicesManagerDidRemoveDeviceNotificationName";
 NSString * const DevicesManagerDidReceiveShakeEventNotificationName = @"DevicesManagerDidReceiveShakeEventNotificationName";
+NSString * const DevicesManagerDidReceiveHarlemNotificationName = @"DevicesManagerDidReceiveHarlemNotificationName";
 NSString * const DevicesManagerDidReceiveOrientationChangeNotificationName = @"DevicesManagerDidReceiveOrientationChangeNotificationName";
 NSString * const DevicesManagerDidReceiveOutputChangeNotificationName = @"DevicesManagerDidReceiveOutputChangeNotificationName";
 NSString * const kDeviceServiceType = @"_partymusic._tcp.";
@@ -254,6 +255,7 @@ NSString * const kUserInterfaceIdiomTXTRecordKeyName = @"UserInterfaceIdiomTXTRe
 	
 	if (action == DeviceActionShake) [[NSNotificationCenter defaultCenter] postNotificationName:DevicesManagerDidReceiveShakeEventNotificationName object:device];
 	else if (action == DeviceActionVibrate) AudioServicesPlayAlertSound(kSystemSoundID_Vibrate);
+	else if (action == DeviceActionHarlemShake) [[NSNotificationCenter defaultCenter] postNotificationName:DevicesManagerDidReceiveHarlemNotificationName object:nil];
 }
 
 - (NSDictionary *)device:(Device *)device didReceiveSearchRequest:(NSString *)searchString identifier:(NSString *)identifier {

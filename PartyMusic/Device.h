@@ -46,6 +46,7 @@ typedef NS_ENUM(NSInteger, DeviceSongType){
 typedef NS_ENUM(NSInteger, DeviceAction){
 	DeviceActionShake = 0,
 	DeviceActionVibrate = 1,
+	DeviceActionHarlemShake = 2,
 };
 
 typedef void (^DeviceSearchCallback)(NSDictionary * results);
