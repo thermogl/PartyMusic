@@ -267,6 +267,24 @@ NSString * const kUserInterfaceIdiomTXTRecordKeyName = @"UserInterfaceIdiomTXTRe
 	return [NSDictionary dictionary];
 }
 
+- (NSArray *)device:(Device *)device didReceiveArtistsRequestWithIdentifier:(NSString *)identifier {
+	return [NSArray array];
+}
+
+- (NSArray *)device:(Device *)device didReceiveAlbumsForArtistRequest:(NSNumber *)persistentID identifier:(NSString *)identifier {
+#if !TARGET_IPHONE_SIMULATOR
+	return [MusicContainer albumsForArtistPersistentID:persistentID dictionary:YES];
+#endif
+	return [NSArray array];
+}
+
+- (NSArray *)device:(Device *)device didReceiveSongsForAlbumRequest:(NSNumber *)persistentID identifier:(NSString *)identifier {
+#if !TARGET_IPHONE_SIMULATOR
+	return [MusicContainer songsForAlbumPersistentID:persistentID dictionary:YES];
+#endif
+	return [NSArray array];
+}
+
 - (void)device:(Device *)aDevice didReceiveSongRequest:(NSNumber *)persistentID identifier:(NSString *)identifier {
 	
 	__block TrackFetcher * trackFetcher = [[TrackFetcher alloc] init];

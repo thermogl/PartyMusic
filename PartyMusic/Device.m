@@ -16,7 +16,7 @@ NSString * const kDeviceUUIDKeyName = @"DeviceUUIDKeyName";
 NSString * const kDeviceInterfaceOrientationKeyName = @"DeviceInterfaceOrientationKeyName";
 NSString * const kDeviceIsOutputKeyName = @"DeviceIsOutputKeyName";
 NSString * const kDeviceActionKeyName = @"DeviceActionKeyName";
-NSString * const kDeviceSearchStringKeyName = @"DeviceSearchStringKeyName";
+NSString * const kDeviceSearchIdentifierKeyName = @"DeviceSearchIdentifierKeyName";
 NSString * const kDeviceSearchArtistsKeyName = @"DeviceSearchArtistsKeyName";
 NSString * const kDeviceSearchAlbumsKeyName = @"DeviceSearchResultAlbumsKeyName";
 NSString * const kDeviceSearchSongsKeyName = @"DeviceSearchSongsKeyName";
@@ -123,11 +123,33 @@ NSInteger const kSocketReadTagBody = 1;
 	
 	NSString * identifier = [NSString UUID];
 	[callbacks setObject:[[callback copy] autorelease] forKey:identifier];
-	[self sendDictionary:@{kDeviceSearchStringKeyName : searchString} payloadType:DevicePayloadTypeSearchRequest identifier:identifier];
+	[self sendDictionary:@{kDeviceSearchIdentifierKeyName : searchString} payloadType:DevicePayloadTypeSearchRequest identifier:identifier];
+}
+
+- (void)sendAlbumsForArtistRequest:(NSNumber *)persistentID callback:(DeviceSearchCallback)callback {
+	
+	NSString * identifier = [NSString UUID];
+	[callbacks setObject:[[callbacks copy] autorelease] forKey:identifier];
+	[self sendDictionary:@{kDeviceSearchIdentifierKeyName : persistentID} payloadType:DevicePayloadTypeAlbumsRequest identifier:identifier];
+}
+
+- (void)sendSongsForAlbumRequest:(NSNumber *)persistentID callback:(DeviceSearchCallback)callback {
+	
+	NSString * identifier = [NSString UUID];
+	[callbacks setObject:[[callbacks copy] autorelease] forKey:identifier];
+	[self sendDictionary:@{kDeviceSearchIdentifierKeyName : persistentID} payloadType:DevicePayloadTypeSongsRequest identifier:identifier];
 }
 
 - (void)sendSearchResults:(NSDictionary *)results identifier:(NSString *)identifier {
 	[self sendDictionary:results payloadType:DevicePayloadTypeSearchResults identifier:identifier];
+}
+
+- (void)sendAlbumsForArtistResults:(NSArray *)results identifier:(NSString *)identifier {
+	[self sendDictionary:@{kDeviceSearchAlbumsKeyName : results} payloadType:DevicePayloadTypeAlbumsResults identifier:identifier];
+}
+
+- (void)sendSongsForAlbumResults:(NSArray *)results identifier:(NSString *)identifier {
+	[self sendDictionary:@{kDeviceSearchSongsKeyName : results} payloadType:DevicePayloadTypeSongsResults identifier:identifier];
 }
 
 - (void)sendSongRequest:(NSNumber *)persistentID callback:(DeviceSongCallback)callback {
@@ -232,12 +254,12 @@ NSInteger const kSocketReadTagBody = 1;
 		
 		NSDictionary * results = nil;
 		if ([delegate respondsToSelector:@selector(device:didReceiveSearchRequest:identifier:)]){
-			results = [delegate device:self didReceiveSearchRequest:[payload objectForKey:kDeviceSearchStringKeyName] identifier:packet.identifier];
+			results = [delegate device:self didReceiveSearchRequest:[payload objectForKey:kDeviceSearchIdentifierKeyName] identifier:packet.identifier];
 		}
 		
 		if (results) [self sendSearchResults:results identifier:packet.identifier];
 	}
-	else if (type == DevicePayloadTypeSearchResults){
+	else if (type == DevicePayloadTypeSearchResults || type == DevicePayloadTypeAlbumsResults || type == DevicePayloadTypeSongsResults){
 		
 		DeviceSearchCallback callback = [callbacks objectForKey:packet.identifier];
 		if (callback) callback(payload);
@@ -272,6 +294,24 @@ NSInteger const kSocketReadTagBody = 1;
 		if ([delegate respondsToSelector:@selector(device:didReceiveQueue:)]){
 			dispatch_async(dispatch_get_main_queue(), ^{[delegate device:self didReceiveQueue:payload];});
 		}
+	}
+	else if (type == DevicePayloadTypeAlbumsRequest){
+		
+		NSArray * results = nil;
+		if ([delegate respondsToSelector:@selector(device:didReceiveAlbumsForArtistRequest:identifier:)]){
+			results = [delegate device:self didReceiveAlbumsForArtistRequest:[payload objectForKey:kDeviceSearchIdentifierKeyName] identifier:packet.identifier];
+		}
+		
+		if (results) [self sendAlbumsForArtistResults:results identifier:packet.identifier];
+	}
+	else if (type == DevicePayloadTypeSongsRequest){
+		
+		NSArray * results = nil;
+		if ([delegate respondsToSelector:@selector(device:didReceiveSongsForAlbumRequest:identifier:)]){
+			results = [delegate device:self didReceiveSongsForAlbumRequest:[payload objectForKey:kDeviceSearchIdentifierKeyName] identifier:packet.identifier];
+		}
+		
+		if (results) [self sendSongsForAlbumResults:results identifier:packet.identifier];
 	}
 }
 
@@ -388,6 +428,26 @@ NSInteger const kSocketReadTagBody = 1;
 #pragma mark - Instance Overrides
 - (void)queueItem:(MusicQueueItem *)item {
 	[[MusicQueueController sharedController] queueItem:item];
+}
+
+- (void)sendAlbumsForArtistRequest:(NSNumber *)persistentID callback:(DeviceSearchCallback)callback {
+	
+	dispatch_queue_t searchQueue = dispatch_queue_create("com.partymusic.albumssearchqueue", NULL);
+	dispatch_async(searchQueue, ^{
+		
+		NSArray * albums = [MusicContainer albumsForArtistPersistentID:persistentID dictionary:NO];
+		dispatch_async(dispatch_get_main_queue(), ^{callback(@{kDeviceSearchAlbumsKeyName : albums});});
+	});
+}
+
+- (void)sendSongsForAlbumRequest:(NSNumber *)persistentID callback:(DeviceSearchCallback)callback {
+	
+	dispatch_queue_t searchQueue = dispatch_queue_create("com.partymusic.songssearchqueue", NULL);
+	dispatch_async(searchQueue, ^{
+		
+		NSArray * songs = [MusicContainer songsForAlbumPersistentID:persistentID dictionary:NO];
+		dispatch_async(dispatch_get_main_queue(), ^{callback(@{kDeviceSearchSongsKeyName : songs});});
+	});
 }
 
 #pragma mark - OwnDevice Instance Methods

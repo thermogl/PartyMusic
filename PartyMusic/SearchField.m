@@ -36,6 +36,8 @@
 		[self.layer setShadowOpacity:0];
 		[self.layer setShadowRadius:5];
 		[self.layer setMasksToBounds:NO];
+		
+		[self setBackgroundColor:[UIColor pm_darkLightColor]];
 	}
 	
 	return self;

@@ -12,7 +12,7 @@
 @interface SearchViewController : OrientationAwareViewController <UITextFieldDelegate> {
 	
 	SearchField * searchField;
-	SearchResultsViewController * searchResultsViewController;
+	UINavigationController * navigationController;
 	
 	NSString * currentSearch;
 	NSInteger spinnerCount;

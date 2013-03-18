@@ -42,7 +42,6 @@ CGFloat const kQueueControlViewHeight = 56;
 	[searchField setTextColor:[UIColor pm_darkColor]];
 	[searchField setPlaceholder:Localized(@"Artists, Albums, Songs...")];
 	[searchField setContentVerticalAlignment:UIControlContentVerticalAlignmentCenter];
-	[searchField setBackgroundColor:[UIColor pm_darkLightColor]];
 	[searchField addTarget:self action:@selector(searchFieldDidBeginEditing:) forControlEvents:UIControlEventEditingDidBegin];
 	[scrollView addSubview:searchField];
 	[searchField release];

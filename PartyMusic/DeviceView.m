@@ -125,47 +125,55 @@
 #pragma mark - Gesture Handlers
 - (void)viewWasTapped:(UITapGestureRecognizer *)sender {
 	
-	/*
-	 [self shake];
-	 
-	 if (device.isOwnDevice) [[DevicesManager sharedManager] broadcastAction:DeviceActionShake];
-	 else [device sendAction:DeviceActionShake];
-	 */
+	NSMutableArray * items = [[NSMutableArray alloc] init];
+	
+	UIMenuItem * browseItem = [[UIMenuItem alloc] initWithTitle:@"Browse Library" action:@selector(browseLibraryMenuItemWasTapped:)];
+	[items addObject:browseItem];
+	[browseItem release];
+	
+	if (device.isOwnDevice){
+		if (!device.isOutput){
+			UIMenuItem * menuItem = [[UIMenuItem alloc] initWithTitle:@"Become Output" action:@selector(becomeOutputMenuItemWasTapped:)];
+			[items addObject:menuItem];
+			[menuItem release];
+		}
+	}
+	else
+	{
+		UIMenuItem * nudgeItem = [[UIMenuItem alloc] initWithTitle:@"Nudge" action:@selector(vibrateDeviceMenuItemWasTapped:)];
+		[items addObject:nudgeItem];
+		[nudgeItem release];
+	}
+	
+	if (items){
+		UIMenuController * menuController = [UIMenuController sharedMenuController];
+		[menuController setTargetRect:CGRectMake(CGRectGetMidX(self.bounds), 0, 1, 1) inView:self];
+		[menuController setMenuItems:items];
+		[self becomeFirstResponder];
+		[menuController setMenuVisible:YES animated:YES];
+	}
+	
+	[items release];
 }
 
 - (void)viewWasLongPressed:(UILongPressGestureRecognizer *)sender {
 	
 	if (sender.state == UIGestureRecognizerStateBegan){
 		
-		NSArray * items = nil;
-		if (device.isOwnDevice){
-			if (!device.isOutput){
-				UIMenuItem * menuItem = [[UIMenuItem alloc] initWithTitle:@"Become Output" action:@selector(becomeOutputMenuItemWasTapped:)];
-				items = @[menuItem];
-				[menuItem release];
-			}
-		}
-		else
-		{
-			UIMenuItem * vibrateItem = [[UIMenuItem alloc] initWithTitle:@"Vibrate" action:@selector(vibrateDeviceMenuItemWasTapped:)];
-			items = @[vibrateItem];
-			[vibrateItem release];
-		}
+		[self shake];
 		
-		if (items){
-			UIMenuController * menuController = [UIMenuController sharedMenuController];
-			[menuController setTargetRect:CGRectMake(CGRectGetMidX(self.bounds), 0, 1, 1) inView:self];
-			[menuController setMenuItems:items];
-			[self becomeFirstResponder];
-			[menuController setMenuVisible:YES animated:YES];
-		}
+		if (device.isOwnDevice) [[DevicesManager sharedManager] broadcastAction:DeviceActionShake];
+		else [device sendAction:DeviceActionShake];
 	}
 }
 
 #pragma mark - UIMenuController stuff
+- (void)browseLibraryMenuItemWasTapped:(id)sender {
+	[[NSNotificationCenter defaultCenter] postNotificationName:DevicesManagerDidReceiveHarlemNotificationName object:nil];
+}
+
 - (void)becomeOutputMenuItemWasTapped:(id)sender {
 	[[[DevicesManager sharedManager] ownDevice] setIsOutput:YES];
-	[[NSNotificationCenter defaultCenter] postNotificationName:DevicesManagerDidReceiveHarlemNotificationName object:nil];
 	[[MusicQueueController sharedController] play];
 }
 
@@ -175,7 +183,9 @@
 
 #pragma mark - Responder Chain
 - (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
-	return (action == @selector(becomeOutputMenuItemWasTapped:) || action == @selector(vibrateDeviceMenuItemWasTapped:));
+	return (action == @selector(browseLibraryMenuItemWasTapped:) ||
+			action == @selector(becomeOutputMenuItemWasTapped:) ||
+			action == @selector(vibrateDeviceMenuItemWasTapped:));
 }
 
 - (BOOL)canBecomeFirstResponder {

@@ -12,7 +12,7 @@ extern NSString * const kDeviceUUIDKeyName;
 extern NSString * const kDeviceInterfaceOrientationKeyName;
 extern NSString * const kDeviceIsOutputKeyName;
 extern NSString * const kDeviceActionKeyName;
-extern NSString * const kDeviceSearchStringKeyName;
+extern NSString * const kDeviceSearchIdentifierKeyName;
 extern NSString * const kDeviceSearchArtistsKeyName;
 extern NSString * const kDeviceSearchAlbumsKeyName;
 extern NSString * const kDeviceSearchSongsKeyName;
@@ -28,6 +28,10 @@ typedef NS_ENUM(NSInteger, DevicePayloadType){
 	DevicePayloadTypeSongResult = 6,
 	DevicePayloadTypeQueueChange = 7,
 	DevicePayloadTypeQueueStatus = 8,
+	DevicePayloadTypeAlbumsRequest = 9,
+	DevicePayloadTypeAlbumsResults = 10,
+	DevicePayloadTypeSongsRequest = 11,
+	DevicePayloadTypeSongsResults = 12,
 };
 
 typedef NS_ENUM(NSInteger, DeviceSearchType){
@@ -92,7 +96,12 @@ typedef void (^DeviceSongCallback)(NSData * songData, BOOL moreComing);
 - (void)sendAction:(DeviceAction)action;
 
 - (void)sendSearchRequest:(NSString *)searchString callback:(DeviceSearchCallback)callback;
+- (void)sendAlbumsForArtistRequest:(NSNumber *)persistentID callback:(DeviceSearchCallback)callback;
+- (void)sendSongsForAlbumRequest:(NSNumber *)persistentID callback:(DeviceSearchCallback)callback;
+
 - (void)sendSearchResults:(NSDictionary *)results identifier:(NSString *)identifier;
+- (void)sendAlbumsForArtistResults:(NSArray *)results identifier:(NSString *)identifier;
+- (void)sendSongsForAlbumResults:(NSArray *)results identifier:(NSString *)identifier;
 
 - (void)sendSongRequest:(NSNumber *)persistentID callback:(DeviceSongCallback)callback;
 - (void)cancelSongRequest:(NSNumber *)persistentID;
@@ -115,6 +124,9 @@ typedef void (^DeviceSongCallback)(NSData * songData, BOOL moreComing);
 - (void)device:(Device *)device didChangeInterfaceOrienation:(UIInterfaceOrientation)interfaceOrientation;
 - (void)device:(Device *)device didReceiveAction:(DeviceAction)action;
 - (NSDictionary *)device:(Device *)device didReceiveSearchRequest:(NSString *)searchString identifier:(NSString *)identifier;
+- (NSArray *)device:(Device *)device didReceiveArtistsRequestWithIdentifier:(NSString *)identifier;
+- (NSArray *)device:(Device *)device didReceiveAlbumsForArtistRequest:(NSNumber *)persistentID identifier:(NSString *)identifier;
+- (NSArray *)device:(Device *)device didReceiveSongsForAlbumRequest:(NSNumber *)persistentID identifier:(NSString *)identifier;
 - (void)device:(Device *)device didReceiveSongRequest:(NSNumber *)persistentID identifier:(NSString *)identifier;
 - (void)device:(Device *)device didReceiveSongCancel:(NSNumber *)persistentID;
 - (void)device:(Device *)device didReceiveQueue:(NSDictionary *)queue;

@@ -40,6 +40,9 @@ typedef NS_ENUM(NSInteger, MusicContainerType) {
 + (NSArray *)albumsContainingSubstring:(NSString *)substring dictionary:(BOOL)dictionary;
 + (NSArray *)songsContainingSubstring:(NSString *)substring dictionary:(BOOL)dictionary;
 
++ (NSArray *)albumsForArtistPersistentID:(NSNumber *)persistentID dictionary:(BOOL)dictionary;
++ (NSArray *)songsForAlbumPersistentID:(NSNumber *)persistentID dictionary:(BOOL)dictionary;
+
 + (NSArray *)containersFromJSONDictionaries:(NSArray *)jsonDictionaries device:(Device *)device;
 
 @end

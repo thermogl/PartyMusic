@@ -16,6 +16,7 @@
 
 @interface SearchViewController ()
 @property (nonatomic, copy) NSString * currentSearch;
+@property (nonatomic, readonly) SearchResultsViewController * rootResultsViewController;
 @end
 
 @interface SearchViewController (Private)
@@ -30,6 +31,10 @@
 @implementation SearchViewController
 @synthesize searchField;
 @synthesize currentSearch;
+
+- (SearchResultsViewController *)rootResultsViewController {
+	return (SearchResultsViewController *)[navigationController.viewControllers objectAtIndex:0];
+}
 
 - (void)viewDidLoad {
 	
@@ -46,12 +51,16 @@
 	[self.view addSubview:optionsView];
 	[optionsView release];
 	
-	searchResultsViewController = [[SearchResultsViewController alloc] init];
-	[self addChildViewController:searchResultsViewController];
+	SearchResultsViewController * searchResultsViewController = [[SearchResultsViewController alloc] init];
+	navigationController = [[UINavigationController alloc] initWithRootViewController:searchResultsViewController];
 	[searchResultsViewController release];
 	
-	[self.view addSubview:searchResultsViewController.view];
-	[searchResultsViewController.view setHidden:YES];
+	[self addChildViewController:navigationController];
+	[navigationController release];
+	
+	[navigationController setNavigationBarHidden:YES];
+	[self.view addSubview:navigationController.view];
+	[navigationController.view setHidden:YES];
 	
 	UITapGestureRecognizer * dismissRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewWasTapped:)];
 	[overlayView addGestureRecognizer:dismissRecognizer];
@@ -69,8 +78,8 @@
 
 - (void)viewDidResizeToNewOrientation {
 	[overlayView setFrame:self.view.bounds];
-	[searchResultsViewController.view setFrame:self.view.bounds];
-	[searchResultsViewController viewDidResizeToNewOrientation];
+	[navigationController.view setFrame:self.view.bounds];
+	[self.rootResultsViewController viewDidResizeToNewOrientation];
 }
 
 - (void)viewWasTapped:(UITapGestureRecognizer *)sender {
@@ -124,10 +133,11 @@
 	
 	[self setCurrentSearch:substring];
 	[searchField setSpinnerVisible:currentSearch.isNotEmpty];
-	[searchResultsViewController.view setHidden:!substring.isNotEmpty];
+	[navigationController.view setHidden:!substring.isNotEmpty];
+	[navigationController popToRootViewControllerAnimated:NO];
 	
 	if (currentSearch.isNotEmpty){
-		[searchResultsViewController setArtists:nil albums:nil songs:nil youTubes:nil soundClouds:nil];
+		[self.rootResultsViewController setArtists:nil albums:nil songs:nil youTubes:nil soundClouds:nil];
 #if !TARGET_IPHONE_SIMULATOR
 		[self showLocalMusicLibraryContentMatchingSubstring:currentSearch];
 #endif
@@ -143,8 +153,8 @@
 	dispatch_queue_t searchQueue = dispatch_queue_create("com.partymusic.searchqueue", NULL);
 	dispatch_async(searchQueue, ^{
 		
-		NSArray * artists = nil;// [MusicContainer artistsContainingSubstring:substring dictionary:NO];
-		NSArray * albums = nil;// [MusicContainer albumsContainingSubstring:substring dictionary:NO];
+		NSArray * artists = /*nil;/*/ [MusicContainer artistsContainingSubstring:substring dictionary:NO];
+		NSArray * albums = /*nil;/*/ [MusicContainer albumsContainingSubstring:substring dictionary:NO];
 		NSArray * songs = [MusicContainer songsContainingSubstring:substring dictionary:NO];
 		dispatch_async(dispatch_get_main_queue(), ^{[self updateArtists:artists albums:albums songs:songs youTubes:nil soundClouds:nil searchString:substring];});
 	});
@@ -191,7 +201,7 @@
 		[searchField setSpinnerVisible:NO];
 	
 	if ([searchString isEqualToString:currentSearch])
-		[searchResultsViewController setArtists:artists albums:albums songs:songs youTubes:youTubes soundClouds:soundClouds];
+		[self.rootResultsViewController setArtists:artists albums:albums songs:songs youTubes:youTubes soundClouds:soundClouds];
 }
 
 #pragma mark - Presentation
@@ -207,7 +217,7 @@
 
 - (void)dismissAnimatedWithDuration:(NSTimeInterval)duration animations:(void (^)(void))animations completion:(void (^)(BOOL))completion {
 	
-	[searchResultsViewController.view setHidden:YES];
+	[navigationController.view setHidden:YES];
 	
 	[UIView animateWithDuration:duration animations:^{
 		if (animations) animations();

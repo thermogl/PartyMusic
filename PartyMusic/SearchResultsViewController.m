@@ -22,6 +22,13 @@ NSString * const SearchResultsViewControllerScrolledNotificationName = @"SearchR
 @end
 
 @implementation SearchResultsViewController
+@synthesize hideHeaders;
+
+#pragma mark - Property Overrides
+- (void)setHideHeaders:(BOOL)flag {
+	hideHeaders = flag;
+	[self.tableView reloadData];
+}
 
 #pragma mark - View Lifecycle
 - (void)viewDidLoad {
@@ -132,14 +139,36 @@ NSString * const SearchResultsViewControllerScrolledNotificationName = @"SearchR
 	[selectedBackgroundView setBackgroundColor:[UIColor pm_darkColor]];
 	[cell setSelectedBackgroundView:selectedBackgroundView];
 	[selectedBackgroundView release];
-
+	
 	return cell;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 	
 	MusicContainer * container = [self containerForIndexPath:indexPath];
-	if (container.type == MusicContainerTypeSong){
+	if (container.type == MusicContainerTypeArtist || container.type == MusicContainerTypeAlbum){
+		
+		SearchResultsViewController * viewController = [[SearchResultsViewController alloc] init];
+		[viewController setHideHeaders:YES];
+		SearchResultsViewControllerContainer * containerController = [[SearchResultsViewControllerContainer alloc] initWithSearchResultsViewController:viewController];
+		[viewController release];
+		
+		[self.navigationController pushViewController:containerController animated:YES];
+		[containerController release];
+		
+		if (container.type == MusicContainerTypeArtist){
+			[container.device sendAlbumsForArtistRequest:container.identifier callback:^(NSDictionary *results) {
+				[viewController setArtists:nil albums:[results objectForKey:kDeviceSearchAlbumsKeyName] songs:nil youTubes:nil soundClouds:nil];
+			}];
+		}
+		else
+		{
+			[container.device sendSongsForAlbumRequest:container.identifier callback:^(NSDictionary *results) {
+				[viewController setArtists:nil albums:nil songs:[results objectForKey:kDeviceSearchSongsKeyName] youTubes:nil soundClouds:nil];;
+			}];
+		}
+	}
+	else if (container.type == MusicContainerTypeSong){
 		
 		MusicQueueItem * item = [[MusicQueueItem alloc] init];
 		[item setSongIdentifier:container.identifier];
@@ -155,16 +184,22 @@ NSString * const SearchResultsViewControllerScrolledNotificationName = @"SearchR
 }
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
+	
 	NSString * title = [self tableView:tableView titleForHeaderInSection:section];
 	return title ? [SearchResultsHeaderView headerViewWithTitle:title] : nil;
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-	if (section == 0) return (artists.count ? Localized(@"Artists") : nil);
-	else if (section == 1) return (albums.count ? Localized(@"Albums") : nil);
-	else if (section == 2) return (songs.count ? Localized(@"Songs") : nil);
-	else if (section == 3) return (youTubes.count ? @"YouTube" : nil);
-	else return (soundClouds.count ? @"SoundCloud" : nil);
+	
+	if (!hideHeaders){
+		if (section == 0) return (artists.count ? Localized(@"Artists") : nil);
+		else if (section == 1) return (albums.count ? Localized(@"Albums") : nil);
+		else if (section == 2) return (songs.count ? Localized(@"Songs") : nil);
+		else if (section == 3) return (youTubes.count ? @"YouTube" : nil);
+		else return (soundClouds.count ? @"SoundCloud" : nil);
+	}
+	
+	return nil;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
@@ -179,6 +214,41 @@ NSString * const SearchResultsViewControllerScrolledNotificationName = @"SearchR
 	[soundClouds release];
 	[youTubes release];
 	[super dealloc];
+}
+
+@end
+
+@implementation SearchResultsViewControllerContainer
+
+- (id)initWithSearchResultsViewController:(SearchResultsViewController *)viewController {
+	
+	if ((self = [super init])){
+		searchResultsViewController = viewController;
+		[self addChildViewController:searchResultsViewController];
+		[self.view addSubview:searchResultsViewController.view];
+		
+		navigationBar = [[UIView alloc] init];
+		[navigationBar setBackgroundColor:[UIColor pm_darkColor]];
+		[self.view addSubview:navigationBar];
+		[navigationBar release];
+		
+		UITapGestureRecognizer * tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(navigationBarWasTapped:)];
+		[navigationBar addGestureRecognizer:tapRecognizer];
+		[tapRecognizer release];
+	}
+	
+	return self;
+}
+
+- (void)viewDidResizeToNewOrientation {
+	
+	[navigationBar setFrame:CGRectMake(0, 0, self.view.bounds.size.width, 22)];
+	[searchResultsViewController.view setFrame:CGRectMake(0, CGRectGetHeight(navigationBar.frame), CGRectGetWidth(navigationBar.frame),
+														  CGRectGetHeight(self.view.bounds) - CGRectGetHeight(navigationBar.frame))];
+}
+
+- (void)navigationBarWasTapped:(UITapGestureRecognizer *)sender {
+	[self.navigationController popViewControllerAnimated:YES];
 }
 
 @end

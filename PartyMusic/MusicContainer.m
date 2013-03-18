@@ -15,6 +15,12 @@ NSString * const kDictionaryIdentifierKey = @"DictionaryIdentifierKey";
 NSString * const kDictionaryTitleKey = @"DictionaryTitleKey";
 NSString * const kDictionarySubtitleKey = @"DictionarySubtitleKey";
 
+@interface MusicContainer (Private)
++ (NSArray *)artistsWithFilterPredicates:(NSSet *)filterPredicates dictionary:(BOOL)dictionary;
++ (NSArray *)albumsWithFilterPredicates:(NSSet *)filterPredicates dictionary:(BOOL)dictionary;
++ (NSArray *)songsWithFilterPredicates:(NSSet *)filterPredicates dictionary:(BOOL)dictionary;
+@end
+
 @implementation MusicContainer
 @synthesize type;
 @synthesize songType;
@@ -23,6 +29,7 @@ NSString * const kDictionarySubtitleKey = @"DictionarySubtitleKey";
 @synthesize subtitle;
 @synthesize device;
 
+#pragma mark - Instance Methods
 - (id)initWithJSONDictionary:(NSDictionary *)dictionary {
 	
 	if ((self = [super init])){
@@ -44,26 +51,78 @@ NSString * const kDictionarySubtitleKey = @"DictionarySubtitleKey";
 			kDictionarySubtitleKey : (subtitle ?: @"")});
 }
 
-+ (NSArray *)artistsContainingSubstring:(NSString *)substring dictionary:(BOOL)dictionary {
+#pragma mark - General Queries
++ (NSArray *)artistsWithFilterPredicates:(NSSet *)filterPredicates dictionary:(BOOL)dictionary {
 	
-	if (substring){
-		MPMediaQuery * artistsQuery = [MPMediaQuery artistsQuery];
-		[artistsQuery addFilterPredicate:[MPMediaPropertyPredicate predicateWithValue:substring forProperty:MPMediaItemPropertyArtist
-																	   comparisonType:MPMediaPredicateComparisonContains]];
+	MPMediaQuery * artistsQuery = [MPMediaQuery artistsQuery];
+	[artistsQuery setFilterPredicates:filterPredicates];
+	
+	NSMutableArray * containers = [[NSMutableArray alloc] init];
+	[artistsQuery.collections enumerateObjectsUsingBlock:^(MPMediaItemCollection * collection, NSUInteger idx, BOOL *stop) {
 		
-		NSMutableArray * containers = [[NSMutableArray alloc] init];
-		[artistsQuery.collections enumerateObjectsUsingBlock:^(MPMediaItemCollection * collection, NSUInteger idx, BOOL *stop) {
+		MusicContainer * container = [[MusicContainer alloc] init];
+		[container setIdentifier:[collection.representativeItem valueForProperty:MPMediaItemPropertyArtistPersistentID]];
+		[container setTitle:[collection.representativeItem valueForProperty:MPMediaItemPropertyArtist]];
+		[container setType:MusicContainerTypeArtist];
+		[container setDevice:[[DevicesManager sharedManager] ownDevice]];
+		[containers addObject:(dictionary ? container.JSONDictionary : container)];
+		[container release];
+	}];
+	
+	return [containers autorelease];
+}
+
++ (NSArray *)albumsWithFilterPredicates:(NSSet *)filterPredicates dictionary:(BOOL)dictionary {
+	
+	MPMediaQuery * albumsQuery = [MPMediaQuery albumsQuery];
+	[albumsQuery setFilterPredicates:filterPredicates];
+	
+	NSMutableArray * containers = [[NSMutableArray alloc] init];
+	[albumsQuery.collections enumerateObjectsUsingBlock:^(MPMediaItemCollection * collection, NSUInteger idx, BOOL *stop) {
+		
+		MusicContainer * container = [[MusicContainer alloc] init];
+		[container setIdentifier:[collection.representativeItem valueForProperty:MPMediaItemPropertyAlbumPersistentID]];
+		[container setTitle:[collection.representativeItem valueForProperty:MPMediaItemPropertyAlbumTitle]];
+		[container setType:MusicContainerTypeAlbum];
+		[container setDevice:[[DevicesManager sharedManager] ownDevice]];
+		[containers addObject:(dictionary ? container.JSONDictionary : container)];
+		[container release];
+	}];
+	
+	return [containers autorelease];
+}
+
++ (NSArray *)songsWithFilterPredicates:(NSSet *)filterPredicates dictionary:(BOOL)dictionary {
+	
+	MPMediaQuery * songsQuery = [MPMediaQuery songsQuery];
+	[songsQuery setFilterPredicates:filterPredicates];
+	
+	NSMutableArray * containers = [[NSMutableArray alloc] init];
+	[songsQuery.items enumerateObjectsUsingBlock:^(MPMediaItem * item, NSUInteger idx, BOOL *stop) {
+		
+		if ([item valueForProperty:MPMediaItemPropertyAssetURL]){
 			
 			MusicContainer * container = [[MusicContainer alloc] init];
-			[container setIdentifier:[collection.representativeItem valueForProperty:MPMediaItemPropertyArtistPersistentID]];
-			[container setTitle:[collection.representativeItem valueForProperty:MPMediaItemPropertyArtist]];
-			[container setType:MusicContainerTypeArtist];
+			[container setIdentifier:[item valueForProperty:MPMediaItemPropertyPersistentID]];
+			[container setTitle:[item valueForProperty:MPMediaItemPropertyTitle]];
+			[container setSubtitle:[item valueForProperty:MPMediaItemPropertyAlbumArtist]];
+			[container setType:MusicContainerTypeSong];
 			[container setDevice:[[DevicesManager sharedManager] ownDevice]];
 			[containers addObject:(dictionary ? container.JSONDictionary : container)];
 			[container release];
-		}];
-		
-		return [containers autorelease];
+		}
+	}];
+	
+	return [containers autorelease];
+}
+
+#pragma mark - Search helpers
++ (NSArray *)artistsContainingSubstring:(NSString *)substring dictionary:(BOOL)dictionary {
+	
+	if (substring){
+		MPMediaPropertyPredicate * predicate = [MPMediaPropertyPredicate predicateWithValue:substring forProperty:MPMediaItemPropertyArtist
+																			 comparisonType:MPMediaPredicateComparisonContains];
+		return [self artistsWithFilterPredicates:[NSSet setWithObject:predicate] dictionary:dictionary];
 	}
 	
 	return [NSArray array];
@@ -72,23 +131,9 @@ NSString * const kDictionarySubtitleKey = @"DictionarySubtitleKey";
 + (NSArray *)albumsContainingSubstring:(NSString *)substring dictionary:(BOOL)dictionary {
 	
 	if (substring){
-		
-		MPMediaQuery * albumsQuery = [MPMediaQuery albumsQuery];
-		[albumsQuery addFilterPredicate:[MPMediaPropertyPredicate predicateWithValue:substring forProperty:MPMediaItemPropertyAlbumTitle
-																	  comparisonType:MPMediaPredicateComparisonContains]];
-		NSMutableArray * containers = [[NSMutableArray alloc] init];
-		[albumsQuery.collections enumerateObjectsUsingBlock:^(MPMediaItemCollection * collection, NSUInteger idx, BOOL *stop) {
-			
-			MusicContainer * container = [[MusicContainer alloc] init];
-			[container setIdentifier:[collection.representativeItem valueForProperty:MPMediaItemPropertyAlbumPersistentID]];
-			[container setTitle:[collection.representativeItem valueForProperty:MPMediaItemPropertyAlbumTitle]];
-			[container setType:MusicContainerTypeAlbum];
-			[container setDevice:[[DevicesManager sharedManager] ownDevice]];
-			[containers addObject:(dictionary ? container.JSONDictionary : container)];
-			[container release];
-		}];
-		
-		return [containers autorelease];
+		MPMediaPropertyPredicate * predicate = [MPMediaPropertyPredicate predicateWithValue:substring forProperty:MPMediaItemPropertyAlbumTitle
+																			 comparisonType:MPMediaPredicateComparisonContains];
+		return [self albumsWithFilterPredicates:[NSSet setWithObject:predicate] dictionary:dictionary];
 	}
 	
 	return [NSArray array];
@@ -97,32 +142,38 @@ NSString * const kDictionarySubtitleKey = @"DictionarySubtitleKey";
 + (NSArray *)songsContainingSubstring:(NSString *)substring dictionary:(BOOL)dictionary {
 	
 	if (substring){
-		
-		MPMediaQuery * songsQuery = [MPMediaQuery songsQuery];
-		[songsQuery addFilterPredicate:[MPMediaPropertyPredicate predicateWithValue:substring forProperty:MPMediaItemPropertyTitle
-																	 comparisonType:MPMediaPredicateComparisonContains]];
-		NSMutableArray * containers = [[NSMutableArray alloc] init];
-		[songsQuery.items enumerateObjectsUsingBlock:^(MPMediaItem * item, NSUInteger idx, BOOL *stop) {
-			
-			if ([item valueForProperty:MPMediaItemPropertyAssetURL]){
-				
-				MusicContainer * container = [[MusicContainer alloc] init];
-				[container setIdentifier:[item valueForProperty:MPMediaItemPropertyPersistentID]];
-				[container setTitle:[item valueForProperty:MPMediaItemPropertyTitle]];
-				[container setSubtitle:[item valueForProperty:MPMediaItemPropertyAlbumArtist]];
-				[container setType:MusicContainerTypeSong];
-				[container setDevice:[[DevicesManager sharedManager] ownDevice]];
-				[containers addObject:(dictionary ? container.JSONDictionary : container)];
-				[container release];
-			}
-		}];
-		
-		return [containers autorelease];
+		MPMediaPropertyPredicate * predicate = [MPMediaPropertyPredicate predicateWithValue:substring forProperty:MPMediaItemPropertyTitle
+																			 comparisonType:MPMediaPredicateComparisonContains];
+		return [self songsWithFilterPredicates:[NSSet setWithObject:predicate] dictionary:dictionary];
 	}
 	
 	return [NSArray array];
 }
 
+#pragma mark - Specifics
++ (NSArray *)albumsForArtistPersistentID:(NSNumber *)persistentID dictionary:(BOOL)dictionary {
+	
+	if (persistentID){
+		MPMediaPropertyPredicate * predicate = [MPMediaPropertyPredicate predicateWithValue:persistentID.stringValue.unsignedLongLongValue
+																				forProperty:MPMediaItemPropertyArtistPersistentID];
+		return [self albumsWithFilterPredicates:[NSSet setWithObject:predicate] dictionary:dictionary];
+	}
+	
+	return [NSArray array];
+}
+
++ (NSArray *)songsForAlbumPersistentID:(NSNumber *)persistentID dictionary:(BOOL)dictionary {
+	
+	if (persistentID){
+		MPMediaPropertyPredicate * predicate = [MPMediaPropertyPredicate predicateWithValue:persistentID.stringValue.unsignedLongLongValue
+																				forProperty:MPMediaItemPropertyAlbumPersistentID];
+		return [self songsWithFilterPredicates:[NSSet setWithObject:predicate] dictionary:dictionary];
+	}
+	
+	return [NSArray array];
+}
+
+#pragma mark - Conversion
 + (NSArray *)containersFromJSONDictionaries:(NSArray *)jsonDictionaries device:(Device *)device {
 	
 	NSMutableArray * containers = [[NSMutableArray alloc] init];
@@ -136,6 +187,12 @@ NSString * const kDictionarySubtitleKey = @"DictionarySubtitleKey";
 	return [containers autorelease];
 }
 
+#pragma mark - Description
+- (NSString *)description {
+	return [NSString stringWithFormat:@"<MusicContainer %p; title = \"%@\"; identifier = \"%@\">", self, title, identifier];
+}
+
+#pragma mark - Memory Management
 - (void)dealloc {
 	[identifier release];
 	[title release];

@@ -33,6 +33,10 @@
 																				kCFStringEncodingUTF8) autorelease];
 }
 
+- (NSNumber *)unsignedLongLongValue {
+	return [NSNumber numberWithUnsignedLongLong:strtoull(self.UTF8String, NULL, 0)];
+}
+
 + (NSString *)UT8StringWithBytes:(const char *)bytes length:(NSUInteger)length {
 	return bytes ? [[[NSString alloc] initWithBytes:bytes length:length encoding:NSUTF8StringEncoding] autorelease] : nil;
 }

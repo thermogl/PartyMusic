@@ -13,6 +13,7 @@
 @property (nonatomic, readonly) NSString * encodedURLString;
 @property (nonatomic, readonly) NSString * encodedURLParameterString;
 @property (nonatomic, readonly) NSString * decodedURLString;
+@property (nonatomic, readonly) NSNumber * unsignedLongLongValue;
 
 - (BOOL)contains:(NSString *)string;
 
