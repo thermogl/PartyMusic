@@ -46,20 +46,22 @@
 		[self addSubview:outputView];
 		[outputView release];
 		
-		UILongPressGestureRecognizer * longPressRecongizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(viewWasLongPressed:)];
-		[self addGestureRecognizer:longPressRecongizer];
-		[longPressRecongizer release];
-		
-		UITapGestureRecognizer * tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewWasTapped:)];
-		[self addGestureRecognizer:tapRecognizer];
-		[tapRecognizer release];
-		
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceDidReceiveShake:)
-													 name:DevicesManagerDidReceiveShakeEventNotificationName object:device];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceDidReceiveOrientationChange:)
-													 name:DevicesManagerDidReceiveOrientationChangeNotificationName object:device];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceDidReceiveOutputChange:)
-													 name:DevicesManagerDidReceiveOutputChangeNotificationName object:device];
+		if (device){
+			UILongPressGestureRecognizer * longPressRecongizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(viewWasLongPressed:)];
+			[self addGestureRecognizer:longPressRecongizer];
+			[longPressRecongizer release];
+			
+			UITapGestureRecognizer * tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewWasTapped:)];
+			[self addGestureRecognizer:tapRecognizer];
+			[tapRecognizer release];
+			
+			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceDidReceiveShake:)
+														 name:DevicesManagerDidReceiveShakeEventNotificationName object:device];
+			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceDidReceiveOrientationChange:)
+														 name:DevicesManagerDidReceiveOrientationChangeNotificationName object:device];
+			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceDidReceiveOutputChange:)
+														 name:DevicesManagerDidReceiveOutputChangeNotificationName object:device];
+		}
 	}
 	
 	return self;
@@ -112,14 +114,22 @@
 	[self layoutSubviews];
 }
 
+- (UIColor *)screenColor {
+	return screenView.backgroundColor;
+}
+
+- (void)setScreenColor:(UIColor *)screenColor {
+	[screenView setBackgroundColor:screenColor];
+}
+
 #pragma mark - Gesture Handlers
 - (void)viewWasTapped:(UITapGestureRecognizer *)sender {
 	
 	/*
-	[self shake];
-	
-	if (device.isOwnDevice) [[DevicesManager sharedManager] broadcastAction:DeviceActionShake];
-	else [device sendAction:DeviceActionShake];
+	 [self shake];
+	 
+	 if (device.isOwnDevice) [[DevicesManager sharedManager] broadcastAction:DeviceActionShake];
+	 else [device sendAction:DeviceActionShake];
 	 */
 }
 

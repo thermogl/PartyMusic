@@ -10,7 +10,7 @@
 #import "DeviceView.h"
 #import "Device.h"
 
-@interface DevicesView (Private)
+@interface DevicesView (Private) <AVAudioPlayerDelegate>
 - (void)calculateDeviceViewCentersWithCallback:(void (^)(DeviceView * deviceView, CGPoint center, CGFloat scale))callback;
 @end
 
@@ -80,30 +80,12 @@
 - (void)layoutSubviews {
 	
 	[self calculateDeviceViewCentersWithCallback:^(DeviceView *deviceView, CGPoint center, CGFloat scale) {
-		[deviceView setRestCenter:center];
-		[deviceView setTransform:CGAffineTransformMakeRotation(deviceView.rotation)];
+		if (deviceView.device){
+			[deviceView setRestCenter:center];
+			[deviceView setTransform:CGAffineTransformMakeRotation(deviceView.rotation)];
+		}
 	}];
 }
-
-/*
-- (void)drawRect:(CGRect)rect {
-	
-	CGContextRef context = UIGraphicsGetCurrentContext();
-	CGContextSetStrokeColorWithColor(context, [[UIColor pm_darkerLightColor] CGColor]);
-	CGContextSetLineDash(context, 1, (CGFloat[2]){5, 5}, 2);
-	
-	[self calculateDeviceViewCentersWithCallback:^(DeviceView *deviceView, CGPoint center, CGFloat scale) {
-		
-		CGSize rotatedSize = deviceView.deviceSize;
-		if (deviceView.rotation != M_PI && deviceView.rotation != 0) rotatedSize = CGSizeMake(rotatedSize.height, rotatedSize.width);
-		
-		CGRect deviceRect = (CGRect){{center.x - deviceView.deviceSize.width / 2, center.y - deviceView.deviceSize.height / 2}, deviceView.deviceSize};
-		
-		CGContextAddPath(context, [[UIBezierPath bezierPathWithRoundedRect:deviceRect cornerRadius:5] CGPath]);
-		CGContextStrokePath(context);
-	}];
-}
- */
 
 - (void)dealloc {
 	[displayLink invalidate];

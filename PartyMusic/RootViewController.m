@@ -15,7 +15,7 @@
 #import "SearchViewController.h"
 #import "QueueControlView.h"
 #import "QueueViewController.h"
-#import "VLMHarlemShake.h"
+#import "DevicesView+HarlemShake.h"
 
 CGFloat const kSearchBarHeight = 44;
 CGFloat const kQueueControlViewHeight = 56;
@@ -151,11 +151,7 @@ CGFloat const kQueueControlViewHeight = 56;
 }
 
 - (void)deviceDidReceiveHarlem:(NSNotification *)notification {
-	
-	__block VLMHarlemShake * harlemShake = [[VLMHarlemShake alloc] initWithLonerView:devicesView.ownDeviceView];
-	[harlemShake shakeWithCompletion:^{
-		[harlemShake release];
-	} audio:YES];
+	[devicesView harlemShakeWithAudio:NO];
 }
 
 @end
