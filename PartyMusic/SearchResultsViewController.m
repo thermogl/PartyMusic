@@ -156,12 +156,13 @@ NSString * const SearchResultsViewControllerScrolledNotificationName = @"SearchR
 		[self.navigationController pushViewController:containerController animated:YES];
 		[containerController release];
 		
+		__block Device * weakDevice = container.device;
 		if (container.type == MusicContainerTypeArtist){
 			[container.device sendAlbumsForArtistRequest:container.identifier callback:^(NSDictionary *results) {
 				
 				NSArray * testAlbums = [results objectForKey:kDeviceSearchAlbumsKeyName];
 				if ([testAlbums.lastObject isKindOfClass:[NSDictionary class]])
-					testAlbums = [MusicContainer containersFromJSONDictionaries:testAlbums device:container.device];
+					testAlbums = [MusicContainer containersFromJSONDictionaries:testAlbums device:weakDevice];
 				
 				[viewController setArtists:nil albums:testAlbums songs:nil youTubes:nil soundClouds:nil];
 			}];
@@ -172,7 +173,7 @@ NSString * const SearchResultsViewControllerScrolledNotificationName = @"SearchR
 				
 				NSArray * testSongs = [results objectForKey:kDeviceSearchSongsKeyName];
 				if ([testSongs.lastObject isKindOfClass:[NSDictionary class]])
-					testSongs = [MusicContainer containersFromJSONDictionaries:testSongs device:container.device];
+					testSongs = [MusicContainer containersFromJSONDictionaries:testSongs device:weakDevice];
 				
 				[viewController setArtists:nil albums:nil songs:testSongs youTubes:nil soundClouds:nil];;
 			}];

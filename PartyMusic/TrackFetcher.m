@@ -36,6 +36,8 @@
 				
 				AVAssetTrack * songTrack = [songAsset.tracks objectAtIndex:0];
 				AVAssetReaderTrackOutput * output = [[AVAssetReaderTrackOutput alloc] initWithTrack:songTrack outputSettings:nil];
+				[output setAlwaysCopiesSampleData:NO];
+				
 				[reader addOutput:output];
 				[output release];
 				
@@ -44,17 +46,15 @@
 					
 					if (!cancelled){
 						
-						AVAssetReaderTrackOutput * trackOutput = (AVAssetReaderTrackOutput *)[reader.outputs objectAtIndex:0];
-						CMSampleBufferRef sampleBufferRef = [trackOutput copyNextSampleBuffer];
+						CMSampleBufferRef sampleBufferRef = [output copyNextSampleBuffer];
 						if (sampleBufferRef){
 							
 							CMBlockBufferRef blockBufferRef = CMSampleBufferGetDataBuffer(sampleBufferRef);
 							size_t length = CMBlockBufferGetDataLength(blockBufferRef);
 							if (length > 0){
 								
-								NSMutableData * buffer = [[NSMutableData alloc] initWithCapacity:length];
-								OSStatus result = CMBlockBufferCopyDataBytes(blockBufferRef, 0, length, buffer.mutableBytes);
-								NSLog(@"%ld - %d", result, buffer.length);
+								NSMutableData * buffer = [[NSMutableData alloc] initWithLength:length];
+								CMBlockBufferCopyDataBytes(blockBufferRef, 0, length, buffer.mutableBytes);
 								dispatch_async(dispatch_get_main_queue(), ^{callback(buffer, YES);});
 								[buffer release];
 							}

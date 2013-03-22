@@ -290,7 +290,6 @@ NSString * const kUserInterfaceIdiomTXTRecordKeyName = @"UserInterfaceIdiomTXTRe
 	__block TrackFetcher * trackFetcher = [[TrackFetcher alloc] init];
 	[trackFetcher setCompletionHandler:^{[songRequestDictionary removeObjectForKey:persistentID];}];
 	[trackFetcher getTrackDataForPersistentID:persistentID callback:^(NSData *chunk, BOOL moreComing) {
-		NSLog(@"%d", chunk.length);
 		[aDevice sendSongResult:chunk identifier:identifier moreComing:moreComing];
 	}];
 	[songRequestDictionary setObject:trackFetcher forKey:persistentID];

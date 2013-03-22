@@ -178,7 +178,7 @@ NSString * const kDictionarySubtitleKey = @"DictionarySubtitleKey";
 
 #pragma mark - Conversion
 + (NSArray *)containersFromJSONDictionaries:(NSArray *)jsonDictionaries device:(Device *)device {
-	
+		
 	NSMutableArray * containers = [[NSMutableArray alloc] init];
 	[jsonDictionaries enumerateObjectsUsingBlock:^(NSDictionary * dict, NSUInteger idx, BOOL *stop) {
 		MusicContainer * container = [[MusicContainer alloc] initWithJSONDictionary:dict];
