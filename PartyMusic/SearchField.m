@@ -38,6 +38,9 @@
 		[self.layer setMasksToBounds:NO];
 		
 		[self setBackgroundColor:[UIColor pm_darkLightColor]];
+		[self setTextColor:[UIColor pm_darkColor]];
+		[self setPlaceholder:Localized(@"Artists, Albums, Songs...")];
+		[self setContentVerticalAlignment:UIControlContentVerticalAlignmentCenter];
 	}
 	
 	return self;

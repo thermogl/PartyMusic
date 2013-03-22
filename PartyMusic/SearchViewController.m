@@ -153,8 +153,8 @@
 	dispatch_queue_t searchQueue = dispatch_queue_create("com.partymusic.searchqueue", NULL);
 	dispatch_async(searchQueue, ^{
 		
-		NSArray * artists = /*nil;/*/ [MusicContainer artistsContainingSubstring:substring dictionary:NO];
-		NSArray * albums = /*nil;/*/ [MusicContainer albumsContainingSubstring:substring dictionary:NO];
+		NSArray * artists = [MusicContainer artistsContainingSubstring:substring dictionary:NO];
+		NSArray * albums = [MusicContainer albumsContainingSubstring:substring dictionary:NO];
 		NSArray * songs = [MusicContainer songsContainingSubstring:substring dictionary:NO];
 		dispatch_async(dispatch_get_main_queue(), ^{[self updateArtists:artists albums:albums songs:songs youTubes:nil soundClouds:nil searchString:substring];});
 	});
@@ -168,8 +168,8 @@
 		dispatch_queue_t processQueue = dispatch_queue_create("com.partymusic.searchqueue", NULL);
 		dispatch_async(processQueue, ^{
 			
-			NSArray * artists = nil;// [MusicContainer containersFromJSONDictionaries:[results objectForKey:kDeviceSearchArtistsKeyName] device:device];
-			NSArray * albums = nil;// [MusicContainer containersFromJSONDictionaries:[results objectForKey:kDeviceSearchAlbumsKeyName] device:device];
+			NSArray * artists = [MusicContainer containersFromJSONDictionaries:[results objectForKey:kDeviceSearchArtistsKeyName] device:device];
+			NSArray * albums = [MusicContainer containersFromJSONDictionaries:[results objectForKey:kDeviceSearchAlbumsKeyName] device:device];
 			NSArray * songs = [MusicContainer containersFromJSONDictionaries:[results objectForKey:kDeviceSearchSongsKeyName] device:device];
 			dispatch_async(dispatch_get_main_queue(), ^{[self updateArtists:artists albums:albums songs:songs youTubes:nil soundClouds:nil searchString:substring];});
 		});

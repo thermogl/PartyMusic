@@ -8,10 +8,10 @@
 
 #import "OrientationAwareViewController.h"
 
-@class DevicesView, SearchField, SearchViewController, QueueControlView, QueueViewController;
+@class DevicesView, SearchField, SearchViewController, QueueControlView, QueueViewController, RootScrollView;
 @interface RootViewController : OrientationAwareViewController {
 	
-	UIScrollView * scrollView;
+	RootScrollView * scrollView;
 	
 	SearchViewController * searchViewController;
 	SearchField * searchField;

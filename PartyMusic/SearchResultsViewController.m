@@ -158,13 +158,23 @@ NSString * const SearchResultsViewControllerScrolledNotificationName = @"SearchR
 		
 		if (container.type == MusicContainerTypeArtist){
 			[container.device sendAlbumsForArtistRequest:container.identifier callback:^(NSDictionary *results) {
-				[viewController setArtists:nil albums:[results objectForKey:kDeviceSearchAlbumsKeyName] songs:nil youTubes:nil soundClouds:nil];
+				
+				NSArray * testAlbums = [results objectForKey:kDeviceSearchAlbumsKeyName];
+				if ([testAlbums.lastObject isKindOfClass:[NSDictionary class]])
+					testAlbums = [MusicContainer containersFromJSONDictionaries:testAlbums device:container.device];
+				
+				[viewController setArtists:nil albums:testAlbums songs:nil youTubes:nil soundClouds:nil];
 			}];
 		}
 		else
 		{
 			[container.device sendSongsForAlbumRequest:container.identifier callback:^(NSDictionary *results) {
-				[viewController setArtists:nil albums:nil songs:[results objectForKey:kDeviceSearchSongsKeyName] youTubes:nil soundClouds:nil];;
+				
+				NSArray * testSongs = [results objectForKey:kDeviceSearchSongsKeyName];
+				if ([testSongs.lastObject isKindOfClass:[NSDictionary class]])
+					testSongs = [MusicContainer containersFromJSONDictionaries:testSongs device:container.device];
+				
+				[viewController setArtists:nil albums:nil songs:testSongs youTubes:nil soundClouds:nil];;
 			}];
 		}
 	}

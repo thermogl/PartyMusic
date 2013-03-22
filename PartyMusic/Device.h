@@ -21,17 +21,19 @@ extern NSString * const kDeviceSongIdentifierKeyName;
 typedef NS_ENUM(NSInteger, DevicePayloadType){
 	DevicePayloadTypeDeviceStatus = 0,
 	DevicePayloadTypeAction = 1,
-	DevicePayloadTypeSearchRequest = 2,
-	DevicePayloadTypeSearchResults = 3,
-	DevicePayloadTypeSongRequest = 4,
-	DevicePayloadTypeSongCancel = 5,
-	DevicePayloadTypeSongResult = 6,
-	DevicePayloadTypeQueueChange = 7,
-	DevicePayloadTypeQueueStatus = 8,
-	DevicePayloadTypeAlbumsRequest = 9,
-	DevicePayloadTypeAlbumsResults = 10,
-	DevicePayloadTypeSongsRequest = 11,
-	DevicePayloadTypeSongsResults = 12,
+	DevicePayloadTypeBrowseRequest = 2,
+	DevicePayloadTypeBrowseResults = 3,
+	DevicePayloadTypeSearchRequest = 4,
+	DevicePayloadTypeSearchResults = 5,
+	DevicePayloadTypeSongRequest = 6,
+	DevicePayloadTypeSongCancel = 7,
+	DevicePayloadTypeSongResult = 8,
+	DevicePayloadTypeQueueChange = 9,
+	DevicePayloadTypeQueueStatus = 10,
+	DevicePayloadTypeAlbumsRequest = 11,
+	DevicePayloadTypeAlbumsResults = 12,
+	DevicePayloadTypeSongsRequest = 13,
+	DevicePayloadTypeSongsResults = 14,
 };
 
 typedef NS_ENUM(NSInteger, DeviceSearchType){
@@ -96,10 +98,12 @@ typedef void (^DeviceSongCallback)(NSData * songData, BOOL moreComing);
 - (void)sendAction:(DeviceAction)action;
 
 - (void)sendSearchRequest:(NSString *)searchString callback:(DeviceSearchCallback)callback;
+- (void)sendBrowseLibraryRequestWithCallback:(DeviceSearchCallback)callback;
 - (void)sendAlbumsForArtistRequest:(NSNumber *)persistentID callback:(DeviceSearchCallback)callback;
 - (void)sendSongsForAlbumRequest:(NSNumber *)persistentID callback:(DeviceSearchCallback)callback;
 
 - (void)sendSearchResults:(NSDictionary *)results identifier:(NSString *)identifier;
+- (void)sendBrowseLibraryResults:(NSDictionary *)results identifier:(NSString *)identifier;
 - (void)sendAlbumsForArtistResults:(NSArray *)results identifier:(NSString *)identifier;
 - (void)sendSongsForAlbumResults:(NSArray *)results identifier:(NSString *)identifier;
 
@@ -123,8 +127,8 @@ typedef void (^DeviceSongCallback)(NSData * songData, BOOL moreComing);
 - (void)device:(Device *)device didChangeOutputStatus:(BOOL)isOutput;
 - (void)device:(Device *)device didChangeInterfaceOrienation:(UIInterfaceOrientation)interfaceOrientation;
 - (void)device:(Device *)device didReceiveAction:(DeviceAction)action;
+- (NSDictionary *)device:(Device *)device didReceiveBrowseRequestWithIdentifier:(NSString *)identifier;
 - (NSDictionary *)device:(Device *)device didReceiveSearchRequest:(NSString *)searchString identifier:(NSString *)identifier;
-- (NSArray *)device:(Device *)device didReceiveArtistsRequestWithIdentifier:(NSString *)identifier;
 - (NSArray *)device:(Device *)device didReceiveAlbumsForArtistRequest:(NSNumber *)persistentID identifier:(NSString *)identifier;
 - (NSArray *)device:(Device *)device didReceiveSongsForAlbumRequest:(NSNumber *)persistentID identifier:(NSString *)identifier;
 - (void)device:(Device *)device didReceiveSongRequest:(NSNumber *)persistentID identifier:(NSString *)identifier;
@@ -140,6 +144,9 @@ typedef struct {
 	BOOL moreComing;
 } DevicePacketHeader;
 #pragma pack(pop)
+
+DevicePacketHeader DevicePacketHeaderMake(DevicePayloadType type, NSUInteger payloadLength, NSString * identifier, BOOL moreComing);
+NSData * DevicePacketHeaderToData(DevicePacketHeader header, NSData * payloadData);
 
 @interface DevicePacket : NSObject {
 	DevicePayloadType payloadType;

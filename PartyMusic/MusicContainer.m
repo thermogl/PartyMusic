@@ -119,35 +119,38 @@ NSString * const kDictionarySubtitleKey = @"DictionarySubtitleKey";
 #pragma mark - Search helpers
 + (NSArray *)artistsContainingSubstring:(NSString *)substring dictionary:(BOOL)dictionary {
 	
+	NSSet * set = nil;
 	if (substring){
 		MPMediaPropertyPredicate * predicate = [MPMediaPropertyPredicate predicateWithValue:substring forProperty:MPMediaItemPropertyArtist
 																			 comparisonType:MPMediaPredicateComparisonContains];
-		return [self artistsWithFilterPredicates:[NSSet setWithObject:predicate] dictionary:dictionary];
+		set = [NSSet setWithObject:predicate];
 	}
 	
-	return [NSArray array];
+	return [self artistsWithFilterPredicates:set dictionary:dictionary];
 }
 
 + (NSArray *)albumsContainingSubstring:(NSString *)substring dictionary:(BOOL)dictionary {
 	
+	NSSet * set = nil;
 	if (substring){
 		MPMediaPropertyPredicate * predicate = [MPMediaPropertyPredicate predicateWithValue:substring forProperty:MPMediaItemPropertyAlbumTitle
 																			 comparisonType:MPMediaPredicateComparisonContains];
-		return [self albumsWithFilterPredicates:[NSSet setWithObject:predicate] dictionary:dictionary];
+		set = [NSSet setWithObject:predicate];
 	}
 	
-	return [NSArray array];
+	return [self albumsWithFilterPredicates:set dictionary:dictionary];
 }
 
 + (NSArray *)songsContainingSubstring:(NSString *)substring dictionary:(BOOL)dictionary {
 	
+	NSSet * set = nil;
 	if (substring){
 		MPMediaPropertyPredicate * predicate = [MPMediaPropertyPredicate predicateWithValue:substring forProperty:MPMediaItemPropertyTitle
 																			 comparisonType:MPMediaPredicateComparisonContains];
-		return [self songsWithFilterPredicates:[NSSet setWithObject:predicate] dictionary:dictionary];
+		set = [NSSet setWithObject:predicate];
 	}
 	
-	return [NSArray array];
+	return [self songsWithFilterPredicates:set dictionary:dictionary];
 }
 
 #pragma mark - Specifics

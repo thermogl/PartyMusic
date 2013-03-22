@@ -57,6 +57,7 @@
 		E2A8570C16CE734B00C96030 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E2A8570B16CE734B00C96030 /* MediaPlayer.framework */; };
 		E2ADB5AB16CE86DB00C8BF4B /* MusicContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = E2ADB5AA16CE86DB00C8BF4B /* MusicContainer.m */; };
 		E2AE3EE816F7A0F4009CE9DF /* DevicesView+HarlemShake.m in Sources */ = {isa = PBXBuildFile; fileRef = E2AE3EE716F7A0F4009CE9DF /* DevicesView+HarlemShake.m */; };
+		E2AE3EF016FC8285009CE9DF /* RootScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = E2AE3EEF16FC8285009CE9DF /* RootScrollView.m */; };
 		E2B9657A16DBE153006FA800 /* Queue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E2B9657916DBE153006FA800 /* Queue@2x.png */; };
 		E2B9657D16DBE1B7006FA800 /* QueueControlView.m in Sources */ = {isa = PBXBuildFile; fileRef = E2B9657C16DBE1B7006FA800 /* QueueControlView.m */; };
 		E2E1449E16DEEE01005F73B9 /* TrackFetcher.m in Sources */ = {isa = PBXBuildFile; fileRef = E2E1449D16DEEE01005F73B9 /* TrackFetcher.m */; };
@@ -97,8 +98,8 @@
 		E230198916C9F606001685F6 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		E230199016C9F652001685F6 /* RootViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RootViewController.h; sourceTree = "<group>"; };
 		E230199116C9F652001685F6 /* RootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RootViewController.m; sourceTree = "<group>"; };
-		E230199316C9F8D8001685F6 /* TISpringLoadedView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TISpringLoadedView.h; path = "../../../Documents/Custom Classes/TISpringLoadedViews/TISpringLoadedView.h"; sourceTree = "<group>"; };
-		E230199416C9F8D8001685F6 /* TISpringLoadedView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TISpringLoadedView.m; path = "../../../Documents/Custom Classes/TISpringLoadedViews/TISpringLoadedView.m"; sourceTree = "<group>"; };
+		E230199316C9F8D8001685F6 /* TISpringLoadedView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TISpringLoadedView.h; path = "../../Custom Classes/TISpringLoadedViews/TISpringLoadedView.h"; sourceTree = "<group>"; };
+		E230199416C9F8D8001685F6 /* TISpringLoadedView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TISpringLoadedView.m; path = "../../Custom Classes/TISpringLoadedViews/TISpringLoadedView.m"; sourceTree = "<group>"; };
 		E230199616C9FA37001685F6 /* DevicesView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DevicesView.h; sourceTree = "<group>"; };
 		E230199716C9FA37001685F6 /* DevicesView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DevicesView.m; sourceTree = "<group>"; };
 		E230199916C9FC56001685F6 /* DeviceView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceView.h; sourceTree = "<group>"; };
@@ -148,6 +149,8 @@
 		E2ADB5AA16CE86DB00C8BF4B /* MusicContainer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MusicContainer.m; sourceTree = "<group>"; };
 		E2AE3EE616F7A0F4009CE9DF /* DevicesView+HarlemShake.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "DevicesView+HarlemShake.h"; sourceTree = "<group>"; };
 		E2AE3EE716F7A0F4009CE9DF /* DevicesView+HarlemShake.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "DevicesView+HarlemShake.m"; sourceTree = "<group>"; };
+		E2AE3EEE16FC8285009CE9DF /* RootScrollView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RootScrollView.h; sourceTree = "<group>"; };
+		E2AE3EEF16FC8285009CE9DF /* RootScrollView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RootScrollView.m; sourceTree = "<group>"; };
 		E2B9657916DBE153006FA800 /* Queue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Queue@2x.png"; sourceTree = "<group>"; };
 		E2B9657B16DBE1B7006FA800 /* QueueControlView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QueueControlView.h; sourceTree = "<group>"; };
 		E2B9657C16DBE1B7006FA800 /* QueueControlView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QueueControlView.m; sourceTree = "<group>"; };
@@ -246,11 +249,12 @@
 				E230198316C9F606001685F6 /* AppDelegate.m */,
 				E230199016C9F652001685F6 /* RootViewController.h */,
 				E230199116C9F652001685F6 /* RootViewController.m */,
+				E2AE3EEE16FC8285009CE9DF /* RootScrollView.h */,
+				E2AE3EEF16FC8285009CE9DF /* RootScrollView.m */,
 				E219FDBB16CF337500E2B1AA /* Search */,
 				E24CC0B116CC918B0061555A /* Devices */,
 				E2ADB5AC16CE86E100C8BF4B /* Music */,
 				E24CC0B216CC919C0061555A /* Additions */,
-				E234DC4C16EADFA100A8D2DA /* Harlem Shake */,
 				E230197A16C9F606001685F6 /* Supporting Files */,
 			);
 			path = PartyMusic;
@@ -298,15 +302,9 @@
 			isa = PBXGroup;
 			children = (
 				E24CC0BC16CC9A100061555A /* Additions.h */,
+				E234DC4C16EADFA100A8D2DA /* Harlem Shake */,
 				E24CC0B316CC91A10061555A /* Categories */,
-				E2FC82E716CABECE002EDCEA /* GCDAsyncSocket.h */,
-				E2FC82E816CABECE002EDCEA /* GCDAsyncSocket.m */,
-				E230199316C9F8D8001685F6 /* TISpringLoadedView.h */,
-				E230199416C9F8D8001685F6 /* TISpringLoadedView.m */,
-				E24CC0B616CC99B70061555A /* OrientationAwareViewController.h */,
-				E24CC0B716CC99B70061555A /* OrientationAwareViewController.m */,
-				E219FDB816CED76900E2B1AA /* ShakeDetectingWindow.h */,
-				E219FDB916CED76900E2B1AA /* ShakeDetectingWindow.m */,
+				E2AE3EF116FC84A9009CE9DF /* Misc */,
 			);
 			name = Additions;
 			sourceTree = "<group>";
@@ -389,6 +387,21 @@
 				E2A7619016DC0F1900FD8547 /* External Source Helpers */,
 			);
 			name = Music;
+			sourceTree = "<group>";
+		};
+		E2AE3EF116FC84A9009CE9DF /* Misc */ = {
+			isa = PBXGroup;
+			children = (
+				E2FC82E716CABECE002EDCEA /* GCDAsyncSocket.h */,
+				E2FC82E816CABECE002EDCEA /* GCDAsyncSocket.m */,
+				E230199316C9F8D8001685F6 /* TISpringLoadedView.h */,
+				E230199416C9F8D8001685F6 /* TISpringLoadedView.m */,
+				E24CC0B616CC99B70061555A /* OrientationAwareViewController.h */,
+				E24CC0B716CC99B70061555A /* OrientationAwareViewController.m */,
+				E219FDB816CED76900E2B1AA /* ShakeDetectingWindow.h */,
+				E219FDB916CED76900E2B1AA /* ShakeDetectingWindow.m */,
+			);
+			name = Misc;
 			sourceTree = "<group>";
 		};
 		E2FC82E616CAB8C2002EDCEA /* Images */ = {
@@ -516,6 +529,7 @@
 				E2A7619516DEACC600FD8547 /* UIColor+Theming.m in Sources */,
 				E2E1449E16DEEE01005F73B9 /* TrackFetcher.m in Sources */,
 				E2AE3EE816F7A0F4009CE9DF /* DevicesView+HarlemShake.m in Sources */,
+				E2AE3EF016FC8285009CE9DF /* RootScrollView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

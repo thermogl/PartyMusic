@@ -22,6 +22,8 @@
 		
 		displayLink = [[CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkTick:)] retain];
 		[displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:(id)kCFRunLoopCommonModes];
+		
+		[self setBackgroundColor:[UIColor pm_lightColor]];
 	}
 	
 	return self;

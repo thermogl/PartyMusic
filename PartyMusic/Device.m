@@ -21,6 +21,7 @@ NSString * const kDeviceSearchArtistsKeyName = @"DeviceSearchArtistsKeyName";
 NSString * const kDeviceSearchAlbumsKeyName = @"DeviceSearchResultAlbumsKeyName";
 NSString * const kDeviceSearchSongsKeyName = @"DeviceSearchSongsKeyName";
 NSString * const kDeviceSongIdentifierKeyName = @"DeviceSongIdentifierKeyName";
+NSString * const kDeviceBrowseLibrarySearchName = @"kDeviceBrowseLibrarySearchName";
 
 NSInteger const kSocketReadTagHead = 0;
 NSInteger const kSocketReadTagBody = 1;
@@ -94,25 +95,9 @@ NSInteger const kSocketReadTagBody = 1;
 
 - (void)sendDictionary:(NSDictionary *)dictionary payloadType:(DevicePayloadType)payloadType identifier:(NSString *)identifier {
 	
-	NSData * dictionaryData = [NSJSONSerialization dataWithJSONObject:dictionary options:0 error:NULL];
-	
-	DevicePacketHeader packetHeader;
-	packetHeader.payloadType = payloadType;
-	packetHeader.payloadLength = dictionaryData.length;
-	packetHeader.moreComing = NO;
-	
-	if (identifier){
-		NSUInteger numberOfBytes = [identifier lengthOfBytesUsingEncoding:NSUnicodeStringEncoding];
-		NSRange range = NSMakeRange(0, identifier.length);
-		[identifier getBytes:&packetHeader.identifier maxLength:numberOfBytes usedLength:NULL
-					encoding:NSUTF8StringEncoding options:0 range:range remainingRange:NULL];
-	}
-	
-	NSMutableData * data = [[NSMutableData alloc] initWithCapacity:(sizeof(packetHeader) + packetHeader.payloadLength)];
-	[data appendBytes:&packetHeader length:sizeof(packetHeader)];
-	[data appendData:dictionaryData];
-	[self sendData:data];
-	[data release];
+	NSData * dictionaryData = (dictionary ? [NSJSONSerialization dataWithJSONObject:dictionary options:0 error:NULL] : nil);
+	DevicePacketHeader packetHeader = DevicePacketHeaderMake(payloadType, dictionaryData.length, identifier, NO);
+	[self sendData:DevicePacketHeaderToData(packetHeader, dictionaryData)];
 }
 
 - (void)sendAction:(DeviceAction)action {
@@ -126,22 +111,33 @@ NSInteger const kSocketReadTagBody = 1;
 	[self sendDictionary:@{kDeviceSearchIdentifierKeyName : searchString} payloadType:DevicePayloadTypeSearchRequest identifier:identifier];
 }
 
+- (void)sendBrowseLibraryRequestWithCallback:(DeviceSearchCallback)callback {
+	
+	NSString * identifier = [NSString UUID];
+	[callbacks setObject:[[callback copy] autorelease] forKey:identifier];
+	[self sendDictionary:nil payloadType:DevicePayloadTypeBrowseRequest identifier:identifier];
+}
+
 - (void)sendAlbumsForArtistRequest:(NSNumber *)persistentID callback:(DeviceSearchCallback)callback {
 	
 	NSString * identifier = [NSString UUID];
-	[callbacks setObject:[[callbacks copy] autorelease] forKey:identifier];
+	[callbacks setObject:[[callback copy] autorelease] forKey:identifier];
 	[self sendDictionary:@{kDeviceSearchIdentifierKeyName : persistentID} payloadType:DevicePayloadTypeAlbumsRequest identifier:identifier];
 }
 
 - (void)sendSongsForAlbumRequest:(NSNumber *)persistentID callback:(DeviceSearchCallback)callback {
 	
 	NSString * identifier = [NSString UUID];
-	[callbacks setObject:[[callbacks copy] autorelease] forKey:identifier];
+	[callbacks setObject:[[callback copy] autorelease] forKey:identifier];
 	[self sendDictionary:@{kDeviceSearchIdentifierKeyName : persistentID} payloadType:DevicePayloadTypeSongsRequest identifier:identifier];
 }
 
 - (void)sendSearchResults:(NSDictionary *)results identifier:(NSString *)identifier {
 	[self sendDictionary:results payloadType:DevicePayloadTypeSearchResults identifier:identifier];
+}
+
+- (void)sendBrowseLibraryResults:(NSDictionary *)results identifier:(NSString *)identifier {
+	[self sendDictionary:results payloadType:DevicePayloadTypeBrowseResults identifier:identifier];
 }
 
 - (void)sendAlbumsForArtistResults:(NSArray *)results identifier:(NSString *)identifier {
@@ -165,23 +161,8 @@ NSInteger const kSocketReadTagBody = 1;
 
 - (void)sendSongResult:(NSData *)song identifier:(NSString *)identifier moreComing:(BOOL)moreComing {
 	
-	DevicePacketHeader packetHeader;
-	packetHeader.payloadType = DevicePayloadTypeSongResult;
-	packetHeader.payloadLength = song.length;
-	packetHeader.moreComing = moreComing;
-	
-	if (identifier){
-		NSUInteger numberOfBytes = [identifier lengthOfBytesUsingEncoding:NSUnicodeStringEncoding];
-		NSRange range = NSMakeRange(0, identifier.length);
-		[identifier getBytes:&packetHeader.identifier maxLength:numberOfBytes usedLength:NULL
-					encoding:NSUTF8StringEncoding options:0 range:range remainingRange:NULL];
-	}
-	
-	NSMutableData * data = [[NSMutableData alloc] initWithCapacity:(sizeof(packetHeader) + packetHeader.payloadLength)];
-	[data appendBytes:&packetHeader	length:sizeof(packetHeader)];
-	[data appendData:song];
-	[self sendData:data];
-	[data release];
+	DevicePacketHeader packetHeader = DevicePacketHeaderMake(DevicePayloadTypeSongResult, song.length, identifier, moreComing);
+	[self sendData:DevicePacketHeaderToData(packetHeader, song)];
 }
 
 - (void)sendQueueStatus:(NSDictionary *)queueStatus {
@@ -250,6 +231,21 @@ NSInteger const kSocketReadTagBody = 1;
 			});
 		}
 	}
+	else if (type == DevicePayloadTypeBrowseRequest){
+		
+		NSDictionary * results = nil;
+		if ([delegate respondsToSelector:@selector(device:didReceiveBrowseRequestWithIdentifier:)]){
+			results = [delegate device:self didReceiveBrowseRequestWithIdentifier:packet.identifier];
+		}
+		
+		if (results) [self sendBrowseLibraryResults:results identifier:packet.identifier];
+	}
+	else if (type == DevicePayloadTypeBrowseResults || type == DevicePayloadTypeSearchResults || type == DevicePayloadTypeAlbumsResults || type == DevicePayloadTypeSongsResults){
+		
+		DeviceSearchCallback callback = [callbacks objectForKey:packet.identifier];
+		if (callback) callback(payload);
+		if (packet.identifier) [callbacks removeObjectForKey:packet.identifier];
+	}
 	else if (type == DevicePayloadTypeSearchRequest){
 		
 		NSDictionary * results = nil;
@@ -258,12 +254,6 @@ NSInteger const kSocketReadTagBody = 1;
 		}
 		
 		if (results) [self sendSearchResults:results identifier:packet.identifier];
-	}
-	else if (type == DevicePayloadTypeSearchResults || type == DevicePayloadTypeAlbumsResults || type == DevicePayloadTypeSongsResults){
-		
-		DeviceSearchCallback callback = [callbacks objectForKey:packet.identifier];
-		if (callback) callback(payload);
-		if (packet.identifier) [callbacks removeObjectForKey:packet.identifier];
 	}
 	else if (type == DevicePayloadTypeSongRequest){
 		
@@ -438,6 +428,7 @@ NSInteger const kSocketReadTagBody = 1;
 		NSArray * albums = [MusicContainer albumsForArtistPersistentID:persistentID dictionary:NO];
 		dispatch_async(dispatch_get_main_queue(), ^{callback(@{kDeviceSearchAlbumsKeyName : albums});});
 	});
+	dispatch_release(searchQueue);
 }
 
 - (void)sendSongsForAlbumRequest:(NSNumber *)persistentID callback:(DeviceSearchCallback)callback {
@@ -448,6 +439,7 @@ NSInteger const kSocketReadTagBody = 1;
 		NSArray * songs = [MusicContainer songsForAlbumPersistentID:persistentID dictionary:NO];
 		dispatch_async(dispatch_get_main_queue(), ^{callback(@{kDeviceSearchSongsKeyName : songs});});
 	});
+	dispatch_release(searchQueue);
 }
 
 #pragma mark - OwnDevice Instance Methods
@@ -478,6 +470,31 @@ NSInteger const kSocketReadTagBody = 1;
 
 @end
 #pragma mark - DevicePacket Implementation -
+DevicePacketHeader DevicePacketHeaderMake(DevicePayloadType type, NSUInteger payloadLength, NSString * identifier, BOOL moreComing){
+	
+	DevicePacketHeader header;
+	header.payloadType = type;
+	header.payloadLength = payloadLength;
+	header.moreComing = moreComing;
+	
+	if (identifier){
+		NSUInteger numberOfBytes = [identifier lengthOfBytesUsingEncoding:NSUnicodeStringEncoding];
+		NSRange range = NSMakeRange(0, identifier.length);
+		[identifier getBytes:&header.identifier maxLength:numberOfBytes usedLength:NULL
+					encoding:NSUTF8StringEncoding options:0 range:range remainingRange:NULL];
+	}
+	
+	return header;
+}
+
+NSData * DevicePacketHeaderToData(DevicePacketHeader header, NSData * payloadData){
+	
+	NSMutableData * data = [[NSMutableData alloc] initWithCapacity:(sizeof(header) + header.payloadLength)];
+	[data appendBytes:&header length:sizeof(header)];
+	if (payloadData) [data appendData:payloadData];
+	return [data autorelease];
+}
+
 @implementation DevicePacket
 @synthesize payloadType;
 @synthesize identifier;

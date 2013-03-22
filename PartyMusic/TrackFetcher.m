@@ -46,17 +46,17 @@
 						
 						AVAssetReaderTrackOutput * trackOutput = (AVAssetReaderTrackOutput *)[reader.outputs objectAtIndex:0];
 						CMSampleBufferRef sampleBufferRef = [trackOutput copyNextSampleBuffer];
-						
 						if (sampleBufferRef){
 							
 							CMBlockBufferRef blockBufferRef = CMSampleBufferGetDataBuffer(sampleBufferRef);
 							size_t length = CMBlockBufferGetDataLength(blockBufferRef);
 							if (length > 0){
 								
-								NSMutableData * data = [[NSMutableData alloc] initWithCapacity:length];
-								CMBlockBufferCopyDataBytes(blockBufferRef, 0, length, data.mutableBytes);
-								dispatch_async(dispatch_get_main_queue(), ^{callback(data, YES);});
-								[data release];
+								NSMutableData * buffer = [[NSMutableData alloc] initWithCapacity:length];
+								OSStatus result = CMBlockBufferCopyDataBytes(blockBufferRef, 0, length, buffer.mutableBytes);
+								NSLog(@"%ld - %d", result, buffer.length);
+								dispatch_async(dispatch_get_main_queue(), ^{callback(buffer, YES);});
+								[buffer release];
 							}
 							
 							CMSampleBufferInvalidate(sampleBufferRef);

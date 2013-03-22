@@ -16,6 +16,7 @@
 #import "QueueControlView.h"
 #import "QueueViewController.h"
 #import "DevicesView+HarlemShake.h"
+#import "RootScrollView.h"
 
 CGFloat const kSearchBarHeight = 44;
 CGFloat const kQueueControlViewHeight = 56;
@@ -24,24 +25,15 @@ CGFloat const kQueueControlViewHeight = 56;
 
 - (void)viewDidLoad {
 	
-	scrollView = [[UIScrollView alloc] initWithFrame:self.view.bounds];
-	[scrollView setBackgroundColor:[UIColor pm_lightColor]];
-	[scrollView setDelaysContentTouches:NO];
-	[scrollView setPagingEnabled:YES];
-	[scrollView setScrollEnabled:NO];
-	[scrollView setShowsVerticalScrollIndicator:NO];
+	scrollView = [[RootScrollView alloc] initWithFrame:self.view.bounds];
 	[self.view addSubview:scrollView];
 	[scrollView release];
 	
 	devicesView = [[DevicesView alloc] initWithFrame:self.view.bounds];
-	[devicesView setBackgroundColor:[UIColor pm_lightColor]];
 	[scrollView addSubview:devicesView];
 	[devicesView release];
 	
 	searchField = [[SearchField alloc] initWithFrame:CGRectZero];
-	[searchField setTextColor:[UIColor pm_darkColor]];
-	[searchField setPlaceholder:Localized(@"Artists, Albums, Songs...")];
-	[searchField setContentVerticalAlignment:UIControlContentVerticalAlignmentCenter];
 	[searchField addTarget:self action:@selector(searchFieldDidBeginEditing:) forControlEvents:UIControlEventEditingDidBegin];
 	[scrollView addSubview:searchField];
 	[searchField release];

@@ -258,6 +258,10 @@ NSString * const kUserInterfaceIdiomTXTRecordKeyName = @"UserInterfaceIdiomTXTRe
 	else if (action == DeviceActionHarlemShake) [[NSNotificationCenter defaultCenter] postNotificationName:DevicesManagerDidReceiveHarlemNotificationName object:nil];
 }
 
+- (NSDictionary *)device:(Device *)device didReceiveBrowseRequestWithIdentifier:(NSString *)identifier {
+	return [self device:device didReceiveSearchRequest:nil identifier:identifier];
+}
+
 - (NSDictionary *)device:(Device *)device didReceiveSearchRequest:(NSString *)searchString identifier:(NSString *)identifier {
 #if !TARGET_IPHONE_SIMULATOR
 	return (@{kDeviceSearchArtistsKeyName: [MusicContainer artistsContainingSubstring:searchString dictionary:YES],
@@ -265,10 +269,6 @@ NSString * const kUserInterfaceIdiomTXTRecordKeyName = @"UserInterfaceIdiomTXTRe
 			kDeviceSearchSongsKeyName: [MusicContainer songsContainingSubstring:searchString dictionary:YES]});
 #endif
 	return [NSDictionary dictionary];
-}
-
-- (NSArray *)device:(Device *)device didReceiveArtistsRequestWithIdentifier:(NSString *)identifier {
-	return [NSArray array];
 }
 
 - (NSArray *)device:(Device *)device didReceiveAlbumsForArtistRequest:(NSNumber *)persistentID identifier:(NSString *)identifier {
@@ -290,6 +290,7 @@ NSString * const kUserInterfaceIdiomTXTRecordKeyName = @"UserInterfaceIdiomTXTRe
 	__block TrackFetcher * trackFetcher = [[TrackFetcher alloc] init];
 	[trackFetcher setCompletionHandler:^{[songRequestDictionary removeObjectForKey:persistentID];}];
 	[trackFetcher getTrackDataForPersistentID:persistentID callback:^(NSData *chunk, BOOL moreComing) {
+		NSLog(@"%d", chunk.length);
 		[aDevice sendSongResult:chunk identifier:identifier moreComing:moreComing];
 	}];
 	[songRequestDictionary setObject:trackFetcher forKey:persistentID];
