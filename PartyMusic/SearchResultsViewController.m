@@ -187,7 +187,9 @@ NSString * const SearchResultsViewControllerScrolledNotificationName = @"SearchR
 		[item setDeviceUUID:container.device.UUID];
 		[item setTitle:container.title];
 		[item setSubtitle:container.subtitle];
-		[[[DevicesManager sharedManager] outputDevice] queueItem:item];
+		[[[DevicesManager sharedManager] outputDevice] queueItem:item callback:^(BOOL successful) {
+			if (!successful) NSLog(@"unable to queue item");
+		}];
 		[item release];
 	}
 	

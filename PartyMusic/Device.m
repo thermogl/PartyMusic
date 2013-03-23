@@ -21,7 +21,7 @@ NSString * const kDeviceSearchArtistsKeyName = @"DeviceSearchArtistsKeyName";
 NSString * const kDeviceSearchAlbumsKeyName = @"DeviceSearchResultAlbumsKeyName";
 NSString * const kDeviceSearchSongsKeyName = @"DeviceSearchSongsKeyName";
 NSString * const kDeviceSongIdentifierKeyName = @"DeviceSongIdentifierKeyName";
-NSString * const kDeviceBrowseLibrarySearchName = @"kDeviceBrowseLibrarySearchName";
+NSString * const kDeviceQueueChangeResultKeyName = @"DeviceQueueChangeResultKeyName";
 
 NSInteger const kSocketReadTagHead = 0;
 NSInteger const kSocketReadTagBody = 1;
@@ -90,7 +90,7 @@ NSInteger const kSocketReadTagBody = 1;
 
 #pragma mark - Convenient Senders
 - (void)sendData:(NSData *)data {
-	[outgoingSocket writeData:data withTimeout:-1 tag:0];
+	[outgoingSocket writeData:data withTimeout:10 tag:0];
 }
 
 - (void)sendDictionary:(NSDictionary *)dictionary payloadType:(DevicePayloadType)payloadType identifier:(NSString *)identifier {
@@ -169,14 +169,35 @@ NSInteger const kSocketReadTagBody = 1;
 	[self sendDictionary:queueStatus payloadType:DevicePayloadTypeQueueStatus identifier:nil];
 }
 
-- (void)queueItem:(MusicQueueItem *)item {
-	[self sendDictionary:item.JSONDictionary payloadType:DevicePayloadTypeQueueChange identifier:nil];
+- (void)queueItem:(MusicQueueItem *)item callback:(DeviceQueueCallback)callback {
+	
+	NSString * identifier = [NSString UUID];
+	[callbacks setObject:[[callback copy] autorelease] forKey:identifier];
+	[self sendDictionary:item.JSONDictionary payloadType:DevicePayloadTypeQueueChange identifier:identifier];
 }
 
 #pragma mark - Socket Delegate
 - (void)socket:(GCDAsyncSocket *)sock didConnectToHost:(NSString *)host port:(uint16_t)port {
 	if (sock == outgoingSocket)
 		[self sendDictionary:[[[DevicesManager sharedManager] ownDevice] deviceStatusDictionary] payloadType:DevicePayloadTypeDeviceStatus identifier:nil];
+}
+
+- (NSTimeInterval)socket:(GCDAsyncSocket *)sock shouldTimeoutWriteWithTag:(long)tag elapsed:(NSTimeInterval)elapsed bytesDone:(NSUInteger)length {
+	NSLog(@"will timeout write after %f", elapsed);
+	return 0;
+}
+
+- (NSTimeInterval)socket:(GCDAsyncSocket *)sock shouldTimeoutReadWithTag:(long)tag elapsed:(NSTimeInterval)elapsed bytesDone:(NSUInteger)length {
+	NSLog(@"will timeout read after %f", elapsed);
+	return 0;
+}
+
+- (void)socketDidCloseReadStream:(GCDAsyncSocket *)sock {
+	NSLog(@"socket did close read stream");
+}
+
+- (void)socketDidDisconnect:(GCDAsyncSocket *)sock withError:(NSError *)err {
+	NSLog(@"%@ disconnect with error %@", sock, err);
 }
 
 - (void)socket:(GCDAsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag {
@@ -276,8 +297,17 @@ NSInteger const kSocketReadTagBody = 1;
 	else if (type == DevicePayloadTypeQueueChange){
 		
 		MusicQueueItem * item = [[MusicQueueItem alloc] initWithJSONDictionary:payload];
-		[[MusicQueueController sharedController] queueItem:item];
+		BOOL successful = [[MusicQueueController sharedController] queueItem:item];
 		[item release];
+		
+		[self sendDictionary:@{kDeviceQueueChangeResultKeyName : [NSNumber numberWithBool:successful]}
+				 payloadType:DevicePayloadTypeQueueChangeResult identifier:packet.identifier];
+	}
+	else if (type == DevicePayloadTypeQueueChangeResult){
+	
+		DeviceQueueCallback callback = [callbacks objectForKey:packet.identifier];
+		if (callback) callback([[payload objectForKey:kDeviceQueueChangeResultKeyName] boolValue]);
+		if (packet.identifier) [callbacks removeObjectForKey:packet.identifier];
 	}
 	else if (type == DevicePayloadTypeQueueStatus){
 		
@@ -416,8 +446,8 @@ NSInteger const kSocketReadTagBody = 1;
 }
 
 #pragma mark - Instance Overrides
-- (void)queueItem:(MusicQueueItem *)item {
-	[[MusicQueueController sharedController] queueItem:item];
+- (void)queueItem:(MusicQueueItem *)item callback:(DeviceQueueCallback)callback {
+	if (callback) callback([[MusicQueueController sharedController] queueItem:item]);
 }
 
 - (void)sendAlbumsForArtistRequest:(NSNumber *)persistentID callback:(DeviceSearchCallback)callback {

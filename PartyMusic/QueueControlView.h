@@ -15,6 +15,7 @@
 	UIButton * queueButton;
 	UIButton * settingsButton;
 	
+	UIActivityIndicatorView * spinner;
 	UIButton * playPauseButton;
 	UIButton * skipBackwardButton;
 	UIButton * skipForwardButton;

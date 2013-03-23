@@ -16,7 +16,6 @@
 	if ((self =	[super initWithFrame:frame])){
 		
 		[self setBackgroundColor:[UIColor pm_lightColor]];
-		[self setDelaysContentTouches:NO];
 		[self setPagingEnabled:YES];
 		[self setShowsVerticalScrollIndicator:NO];
 	}

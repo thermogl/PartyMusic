@@ -52,7 +52,7 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 
 #pragma mark - Property Overrides
 - (AVPlayerPlayStatus)playStatus {
-	return (player.rate ? AVPlayerPlayStatusPlaying : AVPlayerPlayStatusPaused);
+	return (player.rate ? AVPlayerPlayStatusPlaying : (fetchItem ? AVPlayerPlayStatusLoading : AVPlayerPlayStatusPaused));
 }
 
 - (BOOL)canSkipForward {
@@ -136,6 +136,13 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 	return [dictionary autorelease];
 }
 
+- (void)setFetchItem:(MusicQueueItem *)item {
+	[item retain];
+	[fetchItem release];
+	fetchItem = item;
+	[[NSNotificationCenter defaultCenter] postNotificationName:kMusicQueuePlayerDidChangeStateNotificationName object:self];
+}
+
 #pragma mark - KVO
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
 	if ([keyPath isEqualToString:@"rate"]) [[NSNotificationCenter defaultCenter] postNotificationName:kMusicQueuePlayerDidChangeStateNotificationName object:self];
@@ -147,12 +154,14 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 }
 
 #pragma mark - Queuing Methods
-- (void)queueItem:(MusicQueueItem *)item {
+- (BOOL)queueItem:(MusicQueueItem *)item {
 	
 	[nextSongQueue addObject:item];
 	
 	if (currentSong) [self notifyQueueChange];
 	else [self skipForward];
+	
+	return YES;
 }
 
 - (void)playQueueItem:(MusicQueueItem *)item {
@@ -184,8 +193,6 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 }
 
 - (void)playContentAtURL:(NSURL *)URL identifier:(id)identifier {
-	
-	NSLog(@"%@, %@", identifier, currentSong.songIdentifier);
 	
 	if ([currentSong.songIdentifier isEqual:identifier]){
 		[player replaceCurrentItemWithPlayerItem:[AVPlayerItem playerItemWithURL:URL]];
@@ -219,7 +226,10 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 			[fileHandle synchronizeFile];
 			[fileHandle closeFile];
 			
-			dispatch_async(dispatch_get_main_queue(), ^{[self playContentAtURL:[NSURL fileURLWithPath:filePath] identifier:identifier];});
+			dispatch_async(dispatch_get_main_queue(), ^{
+				[self setFetchItem:nil];
+				[self playContentAtURL:[NSURL fileURLWithPath:filePath] identifier:identifier];
+			});
 		}
 	}];
 }

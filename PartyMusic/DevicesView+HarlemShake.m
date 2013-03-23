@@ -78,7 +78,7 @@ typedef enum {
 		
 		[self shakeView:self.ownDeviceView withShakeStyle:VLMShakeStyleThree randomSeed:(arc4random() / (CGFloat)RAND_MAX)];
 		
-		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^(void){
+		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (15.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 			
 			NSMutableArray * views = [[NSMutableArray alloc] init];
 			[self setHarlemViews:views];
@@ -112,8 +112,6 @@ typedef enum {
 	
     if (flag) {
 		
-		[self.ownDeviceView.layer removeAllAnimations];
-		
 		NSMutableArray * views = self.harlemViews;
 		[views enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(DeviceView * deviceView, NSUInteger idx, BOOL *stop) {
 			[deviceView removeFromSuperview];
@@ -123,6 +121,8 @@ typedef enum {
 		[self setHarlemShaking:NO];
 		[self setHarlemPlayer:nil];
 		[self setHarlemViews:nil];
+		
+		[self.ownDeviceView.layer removeAllAnimations];
     }
 }
 

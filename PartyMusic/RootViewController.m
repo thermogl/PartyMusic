@@ -142,7 +142,7 @@ CGFloat const kQueueControlViewHeight = 56;
 }
 
 - (void)deviceDidReceiveHarlem:(NSNotification *)notification {
-	[devicesView harlemShakeWithAudio:NO];
+	[devicesView harlemShakeWithAudio:YES];
 }
 
 @end

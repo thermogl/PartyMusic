@@ -17,6 +17,7 @@ extern NSString * const kDeviceSearchArtistsKeyName;
 extern NSString * const kDeviceSearchAlbumsKeyName;
 extern NSString * const kDeviceSearchSongsKeyName;
 extern NSString * const kDeviceSongIdentifierKeyName;
+extern NSString * const kDeviceQueueChangeResultKeyName;
 
 typedef NS_ENUM(NSInteger, DevicePayloadType){
 	DevicePayloadTypeDeviceStatus = 0,
@@ -29,11 +30,12 @@ typedef NS_ENUM(NSInteger, DevicePayloadType){
 	DevicePayloadTypeSongCancel = 7,
 	DevicePayloadTypeSongResult = 8,
 	DevicePayloadTypeQueueChange = 9,
-	DevicePayloadTypeQueueStatus = 10,
-	DevicePayloadTypeAlbumsRequest = 11,
-	DevicePayloadTypeAlbumsResults = 12,
-	DevicePayloadTypeSongsRequest = 13,
-	DevicePayloadTypeSongsResults = 14,
+	DevicePayloadTypeQueueChangeResult = 10,
+	DevicePayloadTypeQueueStatus = 11,
+	DevicePayloadTypeAlbumsRequest = 12,
+	DevicePayloadTypeAlbumsResults = 13,
+	DevicePayloadTypeSongsRequest = 14,
+	DevicePayloadTypeSongsResults = 15,
 };
 
 typedef NS_ENUM(NSInteger, DeviceSearchType){
@@ -57,6 +59,7 @@ typedef NS_ENUM(NSInteger, DeviceAction){
 
 typedef void (^DeviceSearchCallback)(NSDictionary * results);
 typedef void (^DeviceSongCallback)(NSData * songData, BOOL moreComing);
+typedef void (^DeviceQueueCallback)(BOOL successful);
 
 @protocol DeviceDelegate;
 @class GCDAsyncSocket, DevicePacket, MusicQueueItem;
@@ -112,7 +115,7 @@ typedef void (^DeviceSongCallback)(NSData * songData, BOOL moreComing);
 - (void)sendSongResult:(NSData *)song identifier:(NSString *)identifier moreComing:(BOOL)moreComing;
 
 - (void)sendQueueStatus:(NSDictionary *)queueStatus;
-- (void)queueItem:(MusicQueueItem *)item;
+- (void)queueItem:(MusicQueueItem *)item callback:(DeviceQueueCallback)callback;
 
 @end
 

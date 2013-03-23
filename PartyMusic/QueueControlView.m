@@ -34,6 +34,12 @@
 		[self setQueueButtonColor:[UIColor pm_darkColor]];
 		[self addSubview:queueButton];
 		
+		spinner = [[UIActivityIndicatorView alloc] init];
+		[spinner setColor:[UIColor pm_darkColor]];
+		[spinner setHidesWhenStopped:YES];
+		[self addSubview:spinner];
+		[spinner release];
+		
 		playPauseButton = [UIButton buttonWithType:UIButtonTypeCustom];
 		[playPauseButton setHidden:YES];
 		[playPauseButton setEnabled:NO];
@@ -76,6 +82,7 @@
 	
 	[playPauseButton setFrame:buttonRect];
 	[playPauseButton setCenter:(CGPoint){CGRectGetMidX(self.bounds), buttonCenterY}];
+	[spinner setFrame:playPauseButton.frame];
 	
 	[skipBackwardButton setFrame:buttonRect];
 	[skipBackwardButton setCenter:(CGPoint){(queueButton.center.x + playPauseButton.center.x) / 2, buttonCenterY}];
@@ -95,6 +102,8 @@
 	[playPauseButton setHidden:flag];
 	[skipBackwardButton setHidden:flag];
 	[skipForwardButton setHidden:flag];
+	
+	if (flag) [spinner stopAnimating];
 }
 
 - (void)setShadowHidden:(BOOL)flag {
@@ -122,7 +131,16 @@
 #pragma mark - Notification Handlers
 - (void)musicQueueDidChange:(NSNotification *)notification {
 	
-	NSString * imageName = ([[MusicQueueController sharedController] playStatus] == AVPlayerPlayStatusPlaying ? @"Pause" : @"Play");
+	AVPlayerPlayStatus playStatus = [[MusicQueueController sharedController] playStatus];
+	
+	if (!playerControlsHidden){
+		if (playStatus == AVPlayerPlayStatusLoading) [spinner startAnimating];
+		else [spinner stopAnimating];
+		
+		[playPauseButton setHidden:(playStatus == AVPlayerPlayStatusLoading)];
+	}
+	
+	NSString * imageName = (playStatus == AVPlayerPlayStatusPlaying ? @"Pause" : @"Play");
 	[playPauseButton setImage:[[UIImage imageNamed:imageName] imageWithColorOverlay:[UIColor pm_darkColor]] forState:UIControlStateNormal];
 	
 	[skipBackwardButton setEnabled:[[MusicQueueController sharedController] canSkipBackward]];

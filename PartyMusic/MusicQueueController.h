@@ -18,6 +18,7 @@ typedef NS_ENUM(NSInteger, AVPlayerPlayStatus){
 	AVPlayerPlayStatusUnknown = 0,
 	AVPlayerPlayStatusPlaying = 1,
 	AVPlayerPlayStatusPaused = 2,
+	AVPlayerPlayStatusLoading = 3,
 };
 
 @class MusicQueueItem;
@@ -39,7 +40,7 @@ typedef NS_ENUM(NSInteger, AVPlayerPlayStatus){
 @property (nonatomic, readonly) NSArray * queue;
 @property (nonatomic, assign) NSDictionary * JSONQueue;
 
-- (void)queueItem:(MusicQueueItem *)item;
+- (BOOL)queueItem:(MusicQueueItem *)item;
 
 - (void)play;
 - (void)pause;
