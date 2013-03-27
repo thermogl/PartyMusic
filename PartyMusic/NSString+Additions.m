@@ -33,7 +33,7 @@
 																				kCFStringEncodingUTF8) autorelease];
 }
 
-- (NSNumber *)unsignedLongLongValue {
+- (NSNumber *)unsignedLongLongNumber {
 	return [NSNumber numberWithUnsignedLongLong:strtoull(self.UTF8String, NULL, 0)];
 }
 

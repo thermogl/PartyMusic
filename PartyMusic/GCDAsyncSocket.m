@@ -5255,7 +5255,6 @@ enum GCDAsyncSocketConfig
 	LogTrace();
 	NSAssert(dispatch_get_specific(IsOnSocketQueueOrTargetQueueKey), @"Must be dispatched on socketQueue");
 	
-	
 	// If we're not currently processing a write AND we have an available write stream
 	if ((currentWrite == nil) && (flags & kConnected))
 	{

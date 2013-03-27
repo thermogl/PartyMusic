@@ -52,8 +52,9 @@ NSInteger const kSocketReadTagBody = 1;
 	if ((self = [super init])){
 		
 		netService = [service retain];
-		socketQueue = dispatch_queue_create("com.partymusic.device.socketqueue", NULL);
-		outgoingSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:socketQueue];
+		incomingQueue = nil;
+		outgoingQueue = dispatch_queue_create("com.partymusic.device.outgoingsocketqueue", NULL);
+		outgoingSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:outgoingQueue];
 		interfaceIdiom = [[netService.TXTRecordDictionary objectForKey:kUserInterfaceIdiomTXTRecordKeyName] integerValue];
 		isOutput = NO;
 		callbacks = [[NSMutableDictionary alloc] init];
@@ -71,11 +72,13 @@ NSInteger const kSocketReadTagBody = 1;
 
 - (void)setIncomingSocket:(GCDAsyncSocket *)socket {
 	
+	if (!incomingQueue) incomingQueue = dispatch_queue_create("com.partymusic.device.incomingsocketqueue", NULL);
+	
 	[socket retain];
 	[incomingSocket release];
 	incomingSocket = socket;
 	
-	[incomingSocket setDelegate:self delegateQueue:socketQueue];
+	[incomingSocket setDelegate:self delegateQueue:incomingQueue];
 	[incomingSocket readDataToLength:sizeof(DevicePacketHeader) withTimeout:-1 tag:kSocketReadTagHead];
 }
 
@@ -180,24 +183,6 @@ NSInteger const kSocketReadTagBody = 1;
 - (void)socket:(GCDAsyncSocket *)sock didConnectToHost:(NSString *)host port:(uint16_t)port {
 	if (sock == outgoingSocket)
 		[self sendDictionary:[[[DevicesManager sharedManager] ownDevice] deviceStatusDictionary] payloadType:DevicePayloadTypeDeviceStatus identifier:nil];
-}
-
-- (NSTimeInterval)socket:(GCDAsyncSocket *)sock shouldTimeoutWriteWithTag:(long)tag elapsed:(NSTimeInterval)elapsed bytesDone:(NSUInteger)length {
-	NSLog(@"will timeout write after %f", elapsed);
-	return 0;
-}
-
-- (NSTimeInterval)socket:(GCDAsyncSocket *)sock shouldTimeoutReadWithTag:(long)tag elapsed:(NSTimeInterval)elapsed bytesDone:(NSUInteger)length {
-	NSLog(@"will timeout read after %f", elapsed);
-	return 0;
-}
-
-- (void)socketDidCloseReadStream:(GCDAsyncSocket *)sock {
-	NSLog(@"socket did close read stream");
-}
-
-- (void)socketDidDisconnect:(GCDAsyncSocket *)sock withError:(NSError *)err {
-	NSLog(@"%@ disconnect with error %@", sock, err);
 }
 
 - (void)socket:(GCDAsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag {
@@ -375,7 +360,8 @@ NSInteger const kSocketReadTagBody = 1;
 	[incomingSocket release];
 	[UUID release];
 	[callbacks release];
-	dispatch_release(socketQueue);
+	dispatch_release(incomingQueue);
+	dispatch_release(outgoingQueue);
 	[incomingPacket release];
 	[super dealloc];
 }
@@ -519,9 +505,15 @@ DevicePacketHeader DevicePacketHeaderMake(DevicePayloadType type, NSUInteger pay
 
 NSData * DevicePacketHeaderToData(DevicePacketHeader header, NSData * payloadData){
 	
+	// Sending a zero byte payload results in nonsense of the utmost order.
+	if (!payloadData){
+		payloadData = [GCDAsyncSocket CRLFData];
+		header.payloadLength = payloadData.length;
+	}
+	
 	NSMutableData * data = [[NSMutableData alloc] initWithCapacity:(sizeof(header) + header.payloadLength)];
 	[data appendBytes:&header length:sizeof(header)];
-	if (payloadData) [data appendData:payloadData];
+	[data appendData:payloadData];
 	return [data autorelease];
 }
 

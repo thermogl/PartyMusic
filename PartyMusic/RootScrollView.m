@@ -15,16 +15,19 @@
 	
 	if ((self =	[super initWithFrame:frame])){
 		
+		[self setScrollEnabled:NO];
+		[self setDelaysContentTouches:NO];
 		[self setBackgroundColor:[UIColor pm_lightColor]];
 		[self setPagingEnabled:YES];
 		[self setShowsVerticalScrollIndicator:NO];
+		[self setScrollsToTop:NO];
 	}
 	
 	return self;
 }
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch {
-	return [touch.view isKindOfClass:[QueueControlView class]] || [touch.view isKindOfClass:[UIButton class]];
+	return [touch.view isKindOfClass:[QueueControlView class]] || [touch.view.superview isKindOfClass:[QueueControlView class]];
 }
 
 @end

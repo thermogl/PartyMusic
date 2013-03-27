@@ -19,7 +19,7 @@
 		dispatch_queue_t fetchQueue = dispatch_queue_create("com.partymusic.fetchtrackdata", NULL);
 		dispatch_async(fetchQueue, ^{
 			
-			MPMediaPropertyPredicate * predicate = [MPMediaPropertyPredicate predicateWithValue:persistentID.stringValue.unsignedLongLongValue
+			MPMediaPropertyPredicate * predicate = [MPMediaPropertyPredicate predicateWithValue:persistentID.stringValue.unsignedLongLongNumber
 																					forProperty:MPMediaItemPropertyPersistentID];
 			
 			MPMediaQuery * songsQuery = [[MPMediaQuery alloc] init];

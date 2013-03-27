@@ -8,9 +8,17 @@
 
 #import "OrientationAwareViewController.h"
 
+typedef NS_OPTIONS(NSUInteger, SearchSources){
+	SearchSourceLocalLibrary = 1 << 0,
+	SearchSourceRemoteLibraries = 1 << 1,
+	SearchSourceYouTube = 1 << 2,
+	SearchSourceSoundCloud = 1 << 3,
+};
+
 @class SearchResultsViewController, SearchField;
 @interface SearchViewController : OrientationAwareViewController <UITextFieldDelegate> {
 	
+	SearchSources searchSources;
 	SearchField * searchField;
 	UINavigationController * navigationController;
 	
@@ -23,6 +31,7 @@
 	BOOL shouldResign;
 }
 
+@property (nonatomic, assign) SearchSources searchSources;
 @property (nonatomic, assign) SearchField * searchField;
 
 @end

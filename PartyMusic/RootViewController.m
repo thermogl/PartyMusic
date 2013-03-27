@@ -17,6 +17,8 @@
 #import "QueueViewController.h"
 #import "DevicesView+HarlemShake.h"
 #import "RootScrollView.h"
+#import "SearchSourcesViewController.h"
+#import "MusicQueueController.h"
 
 CGFloat const kSearchBarHeight = 44;
 CGFloat const kQueueControlViewHeight = 56;
@@ -29,7 +31,7 @@ CGFloat const kQueueControlViewHeight = 56;
 	[self.view addSubview:scrollView];
 	[scrollView release];
 	
-	devicesView = [[DevicesView alloc] initWithFrame:self.view.bounds];
+	devicesView = [[DevicesView alloc] initWithFrame:scrollView.bounds];
 	[scrollView addSubview:devicesView];
 	[devicesView release];
 	
@@ -37,6 +39,10 @@ CGFloat const kQueueControlViewHeight = 56;
 	[searchField addTarget:self action:@selector(searchFieldDidBeginEditing:) forControlEvents:UIControlEventEditingDidBegin];
 	[scrollView addSubview:searchField];
 	[searchField release];
+	
+	UILongPressGestureRecognizer * longPressRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(searchButtonWasLongPressed:)];
+	[searchField.searchButton addGestureRecognizer:longPressRecognizer];
+	[longPressRecognizer release];
 	
 	searchViewController = [[SearchViewController alloc] init];
 	[searchViewController setSearchField:searchField];
@@ -96,6 +102,19 @@ CGFloat const kQueueControlViewHeight = 56;
 	[self viewDidResizeToNewOrientation];
 }
 
+- (void)searchButtonWasLongPressed:(UILongPressGestureRecognizer *)sender {
+	
+	SearchSourcesViewController * viewController = [[SearchSourcesViewController alloc] init];
+	[viewController setSearchSources:searchViewController.searchSources];
+	ViewControllerContainer * container = [[ViewControllerContainer alloc] initWithViewController:viewController dismissHandler:^{
+		[searchViewController setSearchSources:viewController.searchSources];
+	}];
+	[viewController release];
+	
+	[self presentViewController:container animated:YES completion:nil];
+	[container release];
+}
+
 - (void)queueButtonWasTapped:(UIButton *)sender {
 	if (scrollView.contentOffset.y == 0) [scrollView setContentOffset:CGPointMake(0, CGRectGetMinY(queueControlView.frame)) animated:YES];
 	else [scrollView setContentOffset:CGPointMake(0, 0) animated:YES];
@@ -142,7 +161,12 @@ CGFloat const kQueueControlViewHeight = 56;
 }
 
 - (void)deviceDidReceiveHarlem:(NSNotification *)notification {
-	[devicesView harlemShakeWithAudio:YES];
+	
+	BOOL playing = [[MusicQueueController sharedController] playStatus] == AVPlayerPlayStatusPlaying;
+	if (playing) [[MusicQueueController sharedController] pause];
+	[devicesView harlemShakeWithAudio:YES completion:^{
+		if (playing) [[MusicQueueController sharedController] play];
+	}];
 }
 
 @end

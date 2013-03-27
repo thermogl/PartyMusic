@@ -40,6 +40,8 @@
 		E24CC0C416CD6E2A0061555A /* UIAlertView+Additions.m in Sources */ = {isa = PBXBuildFile; fileRef = E24CC0C316CD6E2A0061555A /* UIAlertView+Additions.m */; };
 		E27612C316D28D6C00C88FC8 /* MusicQueueItem.m in Sources */ = {isa = PBXBuildFile; fileRef = E27612C216D28D6C00C88FC8 /* MusicQueueItem.m */; };
 		E27612C516D3DE7E00C88FC8 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E27612C416D3DE7E00C88FC8 /* CoreMedia.framework */; };
+		E29BAB1016FE45FC007471BC /* SearchSourcesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E29BAB0F16FE45FC007471BC /* SearchSourcesViewController.m */; };
+		E29BAB1316FE4A9D007471BC /* ViewControllerContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = E29BAB1216FE4A9C007471BC /* ViewControllerContainer.m */; };
 		E2A7618316DBEDC700FD8547 /* Play@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E2A7618216DBEDC700FD8547 /* Play@2x.png */; };
 		E2A7618516DBEF0000FD8547 /* Pause@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E2A7618416DBEF0000FD8547 /* Pause@2x.png */; };
 		E2A7618816DBF0C100FD8547 /* SkipBackward@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E2A7618616DBF0C100FD8547 /* SkipBackward@2x.png */; };
@@ -123,6 +125,10 @@
 		E27612C116D28D6C00C88FC8 /* MusicQueueItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MusicQueueItem.h; sourceTree = "<group>"; };
 		E27612C216D28D6C00C88FC8 /* MusicQueueItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MusicQueueItem.m; sourceTree = "<group>"; };
 		E27612C416D3DE7E00C88FC8 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
+		E29BAB0E16FE45FC007471BC /* SearchSourcesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchSourcesViewController.h; sourceTree = "<group>"; };
+		E29BAB0F16FE45FC007471BC /* SearchSourcesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SearchSourcesViewController.m; sourceTree = "<group>"; };
+		E29BAB1116FE4A9C007471BC /* ViewControllerContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ViewControllerContainer.h; sourceTree = "<group>"; };
+		E29BAB1216FE4A9C007471BC /* ViewControllerContainer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ViewControllerContainer.m; sourceTree = "<group>"; };
 		E2A7618216DBEDC700FD8547 /* Play@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Play@2x.png"; sourceTree = "<group>"; };
 		E2A7618416DBEF0000FD8547 /* Pause@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Pause@2x.png"; sourceTree = "<group>"; };
 		E2A7618616DBF0C100FD8547 /* SkipBackward@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "SkipBackward@2x.png"; sourceTree = "<group>"; };
@@ -196,6 +202,8 @@
 				E2A8570616CE562E00C96030 /* SearchResultsViewController.m */,
 				E219FDBF16D086D400E2B1AA /* SearchResultsHeaderView.h */,
 				E219FDC016D086D400E2B1AA /* SearchResultsHeaderView.m */,
+				E29BAB0E16FE45FC007471BC /* SearchSourcesViewController.h */,
+				E29BAB0F16FE45FC007471BC /* SearchSourcesViewController.m */,
 			);
 			name = Search;
 			sourceTree = "<group>";
@@ -249,8 +257,6 @@
 				E230198316C9F606001685F6 /* AppDelegate.m */,
 				E230199016C9F652001685F6 /* RootViewController.h */,
 				E230199116C9F652001685F6 /* RootViewController.m */,
-				E2AE3EEE16FC8285009CE9DF /* RootScrollView.h */,
-				E2AE3EEF16FC8285009CE9DF /* RootScrollView.m */,
 				E219FDBB16CF337500E2B1AA /* Search */,
 				E24CC0B116CC918B0061555A /* Devices */,
 				E2ADB5AC16CE86E100C8BF4B /* Music */,
@@ -302,9 +308,11 @@
 			isa = PBXGroup;
 			children = (
 				E24CC0BC16CC9A100061555A /* Additions.h */,
+				E2FC82E716CABECE002EDCEA /* GCDAsyncSocket.h */,
+				E2FC82E816CABECE002EDCEA /* GCDAsyncSocket.m */,
 				E234DC4C16EADFA100A8D2DA /* Harlem Shake */,
 				E24CC0B316CC91A10061555A /* Categories */,
-				E2AE3EF116FC84A9009CE9DF /* Misc */,
+				E2AE3EF116FC84A9009CE9DF /* UI */,
 			);
 			name = Additions;
 			sourceTree = "<group>";
@@ -389,19 +397,21 @@
 			name = Music;
 			sourceTree = "<group>";
 		};
-		E2AE3EF116FC84A9009CE9DF /* Misc */ = {
+		E2AE3EF116FC84A9009CE9DF /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				E2FC82E716CABECE002EDCEA /* GCDAsyncSocket.h */,
-				E2FC82E816CABECE002EDCEA /* GCDAsyncSocket.m */,
 				E230199316C9F8D8001685F6 /* TISpringLoadedView.h */,
 				E230199416C9F8D8001685F6 /* TISpringLoadedView.m */,
 				E24CC0B616CC99B70061555A /* OrientationAwareViewController.h */,
 				E24CC0B716CC99B70061555A /* OrientationAwareViewController.m */,
 				E219FDB816CED76900E2B1AA /* ShakeDetectingWindow.h */,
 				E219FDB916CED76900E2B1AA /* ShakeDetectingWindow.m */,
+				E2AE3EEE16FC8285009CE9DF /* RootScrollView.h */,
+				E2AE3EEF16FC8285009CE9DF /* RootScrollView.m */,
+				E29BAB1116FE4A9C007471BC /* ViewControllerContainer.h */,
+				E29BAB1216FE4A9C007471BC /* ViewControllerContainer.m */,
 			);
-			name = Misc;
+			name = UI;
 			sourceTree = "<group>";
 		};
 		E2FC82E616CAB8C2002EDCEA /* Images */ = {
@@ -530,6 +540,8 @@
 				E2E1449E16DEEE01005F73B9 /* TrackFetcher.m in Sources */,
 				E2AE3EE816F7A0F4009CE9DF /* DevicesView+HarlemShake.m in Sources */,
 				E2AE3EF016FC8285009CE9DF /* RootScrollView.m in Sources */,
+				E29BAB1016FE45FC007471BC /* SearchSourcesViewController.m in Sources */,
+				E29BAB1316FE4A9D007471BC /* ViewControllerContainer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

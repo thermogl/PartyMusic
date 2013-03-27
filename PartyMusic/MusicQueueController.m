@@ -215,8 +215,8 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 	if (![[NSFileManager defaultManager] fileExistsAtPath:filePath]) [[NSFileManager defaultManager] createFileAtPath:filePath contents:nil attributes:nil];
 	
 	NSFileHandle * fileHandle = [NSFileHandle fileHandleForWritingAtPath:filePath];
-	[[[DevicesManager sharedManager] deviceWithUUID:item.deviceUUID] sendSongRequest:identifier callback:^(NSData * songData, BOOL moreComing) {
-		
+	Device * device = [[DevicesManager sharedManager] deviceWithUUID:item.deviceUUID];
+	[device sendSongRequest:identifier callback:^(NSData *songData, BOOL moreComing) {
 		if (moreComing){
 			[fileHandle seekToEndOfFile];
 			[fileHandle writeData:songData];
@@ -232,6 +232,11 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 			});
 		}
 	}];
+	
+	if (!device){
+		[self setFetchItem:nil];
+		[self skipForward];
+	}
 }
 
 - (void)cancelFetchQueueItem {

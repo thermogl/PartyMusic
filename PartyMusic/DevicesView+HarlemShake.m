@@ -13,6 +13,7 @@
 NSString * const HarlemPlayerKeyName = @"com.devicesview.harlemplayer";
 NSString * const HarlemViewsKeyName = @"com.devicesview.harlemviews";
 NSString * const HarlemShakingKeyName = @"com.devicesview.harlemshaking";
+NSString * const HarlemCompletionKeyName = @"com.devicesview.harlemcompletion";
 
 typedef enum {
     VLMShakeStyleOne = 0,
@@ -25,10 +26,12 @@ typedef enum {
 @property (nonatomic, retain) AVAudioPlayer * harlemPlayer;
 @property (nonatomic, retain) NSMutableArray * harlemViews;
 @property (nonatomic, assign) BOOL harlemShaking;
+@property (nonatomic, copy) void (^harlemCompletion)();
 @end
 
 @interface DevicesView (HarlemShakePrivate)
 - (void)shakeView:(UIView *)view withShakeStyle:(VLMShakeStyle)style randomSeed:(CGFloat)seed;
+- (void)randomlyShakeView:(UIView *)view;
 - (CAAnimation *)animationForStyleOneWithSeed:(CGFloat)seed;
 - (CAAnimation *)animationForStyleTwoWithSeed:(CGFloat)seed;
 - (CAAnimation *)animationForStyleThreeWithSeed:(CGFloat)seed;
@@ -61,10 +64,19 @@ typedef enum {
 	objc_setAssociatedObject(self, HarlemShakingKeyName, [NSNumber numberWithBool:flag], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (void)harlemShakeWithAudio:(BOOL)withAudio {
+- (void(^)(void))harlemCompletion {
+	return objc_getAssociatedObject(self, HarlemCompletionKeyName);
+}
+
+- (void)setHarlemCompletion:(void (^)())harlemCompletion {
+	objc_setAssociatedObject(self, HarlemCompletionKeyName, harlemCompletion, OBJC_ASSOCIATION_COPY_NONATOMIC);
+}
+
+- (void)harlemShakeWithAudio:(BOOL)withAudio completion:(void (^)(void))completionHandler {
 	
 	if (!self.harlemShaking){
 		[self setHarlemShaking:YES];
+		[self setHarlemCompletion:completionHandler];
 		
 		NSURL * audioURL = [[NSBundle mainBundle] URLForResource:@"HarlemShake" withExtension:@"mp3"];
 		AVAudioPlayer * player = [[AVAudioPlayer alloc] initWithContentsOfURL:audioURL error:NULL];
@@ -84,6 +96,11 @@ typedef enum {
 			[self setHarlemViews:views];
 			[views release];
 			
+			[self.subviews enumerateObjectsUsingBlock:^(DeviceView * deviceView, NSUInteger idx, BOOL *stop) {
+				[views addObject:deviceView];
+				[self randomlyShakeView:deviceView];
+			}];
+			
 			for (int i = 0; i < 20; i++){
 				
 				CGFloat red = (CGFloat)random() / (CGFloat)RAND_MAX;
@@ -101,8 +118,7 @@ typedef enum {
 				CGPoint randomCenter = CGPointMake(100 + (arc4random() % (int)self.bounds.size.width - 100), 100 + (arc4random() % (int)self.bounds.size.height - 100));
 				[deviceView setRestCenter:randomCenter];
 				
-				[self shakeView:deviceView withShakeStyle:(rand() % VLMShakeStyleEnd) randomSeed:(arc4random() / (CGFloat)RAND_MAX)];
-				[self shakeView:deviceView withShakeStyle:(rand() % VLMShakeStyleEnd) randomSeed:(arc4random() / (CGFloat)RAND_MAX)];
+				[self randomlyShakeView:deviceView];
 			}
 		});
 	}
@@ -114,7 +130,8 @@ typedef enum {
 		
 		NSMutableArray * views = self.harlemViews;
 		[views enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(DeviceView * deviceView, NSUInteger idx, BOOL *stop) {
-			[deviceView removeFromSuperview];
+			if (deviceView.device) [deviceView.layer removeAllAnimations];
+			else [deviceView removeFromSuperview];
 			[views removeObjectAtIndex:idx];
 		}];
 		
@@ -123,7 +140,15 @@ typedef enum {
 		[self setHarlemViews:nil];
 		
 		[self.ownDeviceView.layer removeAllAnimations];
+		
+		if (self.harlemCompletion) self.harlemCompletion();
     }
+}
+
+- (void)randomlyShakeView:(UIView *)view {
+	
+	[self shakeView:view withShakeStyle:(rand() % VLMShakeStyleEnd) randomSeed:(arc4random() / (CGFloat)RAND_MAX)];
+	[self shakeView:view withShakeStyle:(rand() % VLMShakeStyleEnd) randomSeed:(arc4random() / (CGFloat)RAND_MAX)];
 }
 
 - (void)shakeView:(UIView *)view withShakeStyle:(VLMShakeStyle)style randomSeed:(CGFloat)seed {

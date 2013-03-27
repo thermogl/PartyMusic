@@ -11,5 +11,5 @@
 #import "DevicesView.h"
 
 @interface DevicesView (HarlemShake)
-- (void)harlemShakeWithAudio:(BOOL)withAudio;
+- (void)harlemShakeWithAudio:(BOOL)withAudio completion:(void(^)(void))completionHandler;
 @end

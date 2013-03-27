@@ -69,7 +69,8 @@ typedef void (^DeviceQueueCallback)(BOOL successful);
 	
 	NSNetService * netService;
 	
-	dispatch_queue_t socketQueue;
+	dispatch_queue_t outgoingQueue;
+	dispatch_queue_t incomingQueue;
 	GCDAsyncSocket * outgoingSocket;
 	GCDAsyncSocket * incomingSocket;
 	

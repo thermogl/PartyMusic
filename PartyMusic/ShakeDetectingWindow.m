@@ -15,6 +15,7 @@ NSString * const UIWindowDidShakeNotificationName = @"UIWindowDidShakeNotificati
 
 - (void)motionBegan:(UIEventSubtype)motion withEvent:(UIEvent *)event {
 	if (motion == UIEventSubtypeMotionShake) [[NSNotificationCenter defaultCenter] postNotificationName:UIWindowDidShakeNotificationName object:self];
+	[super motionBegan:motion withEvent:event];
 }
 
 @end

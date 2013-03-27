@@ -157,7 +157,7 @@ NSString * const kDictionarySubtitleKey = @"DictionarySubtitleKey";
 + (NSArray *)albumsForArtistPersistentID:(NSNumber *)persistentID dictionary:(BOOL)dictionary {
 	
 	if (persistentID){
-		MPMediaPropertyPredicate * predicate = [MPMediaPropertyPredicate predicateWithValue:persistentID.stringValue.unsignedLongLongValue
+		MPMediaPropertyPredicate * predicate = [MPMediaPropertyPredicate predicateWithValue:persistentID.stringValue.unsignedLongLongNumber
 																				forProperty:MPMediaItemPropertyArtistPersistentID];
 		return [self albumsWithFilterPredicates:[NSSet setWithObject:predicate] dictionary:dictionary];
 	}
@@ -168,7 +168,7 @@ NSString * const kDictionarySubtitleKey = @"DictionarySubtitleKey";
 + (NSArray *)songsForAlbumPersistentID:(NSNumber *)persistentID dictionary:(BOOL)dictionary {
 	
 	if (persistentID){
-		MPMediaPropertyPredicate * predicate = [MPMediaPropertyPredicate predicateWithValue:persistentID.stringValue.unsignedLongLongValue
+		MPMediaPropertyPredicate * predicate = [MPMediaPropertyPredicate predicateWithValue:persistentID.stringValue.unsignedLongLongNumber
 																				forProperty:MPMediaItemPropertyAlbumPersistentID];
 		return [self songsWithFilterPredicates:[NSSet setWithObject:predicate] dictionary:dictionary];
 	}

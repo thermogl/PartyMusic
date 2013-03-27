@@ -29,8 +29,18 @@
 @end
 
 @implementation SearchViewController
+@synthesize searchSources;
 @synthesize searchField;
 @synthesize currentSearch;
+
+- (id)init {
+	
+	if ((self = [super init])){
+		searchSources = (SearchSourceLocalLibrary | SearchSourceRemoteLibraries | SearchSourceYouTube | SearchSourceSoundCloud);
+	}
+	
+	return self;
+}
 
 - (SearchResultsViewController *)rootResultsViewController {
 	return (SearchResultsViewController *)[navigationController.viewControllers objectAtIndex:0];
@@ -139,11 +149,11 @@
 	if (currentSearch.isNotEmpty){
 		[self.rootResultsViewController setArtists:nil albums:nil songs:nil youTubes:nil soundClouds:nil];
 #if !TARGET_IPHONE_SIMULATOR
-		[self showLocalMusicLibraryContentMatchingSubstring:currentSearch];
+		if (searchSources & SearchSourceLocalLibrary) [self showLocalMusicLibraryContentMatchingSubstring:currentSearch];
 #endif
-		[self showRemoveMusicLibraryContentMatchingSubstring:currentSearch];
-		[self showSoundCloudContentMatchingSubstring:currentSearch];
-		[self showYouTubeContentMatchingSubstring:currentSearch];
+		if (searchSources & SearchSourceRemoteLibraries) [self showRemoveMusicLibraryContentMatchingSubstring:currentSearch];
+		if (searchSources & SearchSourceYouTube) [self showYouTubeContentMatchingSubstring:currentSearch];
+		if (searchSources & SearchSourceSoundCloud) [self showSoundCloudContentMatchingSubstring:currentSearch];
 	}
 }
 
