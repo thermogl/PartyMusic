@@ -8,11 +8,6 @@
 
 #import "SearchViewController.h"
 
-@interface SearchSourcesViewController : UITableViewController {
-
-	SearchSources searchSources;
-}
-
+@interface SearchSourcesViewController : UITableViewController 
 @property (nonatomic, assign) SearchSources searchSources;
-
 @end

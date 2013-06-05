@@ -18,17 +18,7 @@ typedef NS_OPTIONS(NSUInteger, SearchSources){
 @class SearchResultsViewController, SearchField;
 @interface SearchViewController : OrientationAwareViewController <UITextFieldDelegate> {
 	
-	SearchSources searchSources;
-	SearchField * searchField;
-	UINavigationController * navigationController;
 	
-	NSString * currentSearch;
-	NSInteger spinnerCount;
-	
-	UIView * overlayView;
-	UIView * optionsView;
-	
-	BOOL shouldResign;
 }
 
 @property (nonatomic, assign) SearchSources searchSources;

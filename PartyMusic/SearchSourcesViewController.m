@@ -9,7 +9,7 @@
 #import "SearchSourcesViewController.h"
 
 @implementation SearchSourcesViewController
-@synthesize searchSources;
+@synthesize searchSources = _searchSources;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -55,19 +55,19 @@
 	
 	if (indexPath.row == 0){
 		[cell.textLabel setText:@"Local Library"];
-		[cell setAccessoryType:(searchSources & SearchSourceLocalLibrary ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone)];
+		[cell setAccessoryType:(_searchSources & SearchSourceLocalLibrary ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone)];
 	}
 	else if (indexPath.row == 1){
 		[cell.textLabel setText:@"Remote Libraries"];
-		[cell setAccessoryType:(searchSources & SearchSourceRemoteLibraries ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone)];
+		[cell setAccessoryType:(_searchSources & SearchSourceRemoteLibraries ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone)];
 	}
 	else if (indexPath.row == 2){
 		[cell.textLabel setText:@"YouTube"];
-		[cell setAccessoryType:(searchSources & SearchSourceYouTube ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone)];
+		[cell setAccessoryType:(_searchSources & SearchSourceYouTube ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone)];
 	}
 	else if (indexPath.row == 3){
 		[cell.textLabel setText:@"SoundCloud"];
-		[cell setAccessoryType:(searchSources & SearchSourceSoundCloud ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone)];
+		[cell setAccessoryType:(_searchSources & SearchSourceSoundCloud ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone)];
 	}
 	
 	return cell;
@@ -78,9 +78,9 @@
 	UITableViewCell * cell = [tableView cellForRowAtIndexPath:indexPath];
 	SearchSources searchSource = [self searchSourceForIndexPath:indexPath];
 	
-	if (searchSources & searchSource) searchSources = (searchSources & (~searchSource));
-	else searchSources = (searchSources | searchSource);
-	[cell setAccessoryType:(searchSources & searchSource ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone)];
+	if (_searchSources & searchSource) _searchSources = (_searchSources & (~searchSource));
+	else _searchSources = (_searchSources | searchSource);
+	[cell setAccessoryType:(_searchSources & searchSource ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone)];
 
 	[tableView deselectRowAtIndexPath:indexPath animated:YES];
 }

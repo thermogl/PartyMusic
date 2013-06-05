@@ -28,6 +28,7 @@ NSInteger const kSocketReadTagBody = 1;
 
 @interface Device () <GCDAsyncSocketDelegate>
 @property (nonatomic, retain) DevicePacket * incomingPacket;
+@property (nonatomic, assign) UIUserInterfaceIdiom interfaceIdiom;
 - (void)sendData:(NSData *)data;
 - (BOOL)connect:(NSError **)error;
 - (void)handlePacketReceived:(DevicePacket *)packet;
@@ -35,29 +36,38 @@ NSInteger const kSocketReadTagBody = 1;
 - (void)handleInterfaceOrientationChange:(NSDictionary *)payload;
 @end
 
-@implementation Device
-@synthesize delegate;
-@synthesize netService;
-@synthesize outgoingSocket;
-@synthesize incomingSocket;
-@synthesize UUID;
-@synthesize interfaceIdiom;
-@synthesize interfaceOrientation;
-@synthesize isOutput;
-@synthesize incomingPacket;
+@implementation Device {
+	
+	dispatch_queue_t _outgoingQueue;
+	dispatch_queue_t _incomingQueue;
+	
+	UIUserInterfaceIdiom _interfaceIdiom;
+	BOOL _isOutput;
+	
+	NSMutableDictionary * _callbacks;
+}
+@synthesize delegate = _delegate;
+@synthesize netService = _netService;
+@synthesize outgoingSocket = _outgoingSocket;
+@synthesize incomingSocket = _incomingSocket;
+@synthesize UUID = _UUID;
+@synthesize interfaceIdiom = _interfaceIdiom;
+@synthesize interfaceOrientation = _interfaceOrientation;
+@synthesize isOutput = _isOutput;
+@synthesize incomingPacket = _incomingPacket;
 
 #pragma mark - Init
 - (id)initWithNetService:(NSNetService *)service {
 	
 	if ((self = [super init])){
 		
-		netService = [service retain];
-		incomingQueue = nil;
-		outgoingQueue = dispatch_queue_create("com.partymusic.device.outgoingsocketqueue", NULL);
-		outgoingSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:outgoingQueue];
-		interfaceIdiom = [[netService.TXTRecordDictionary objectForKey:kUserInterfaceIdiomTXTRecordKeyName] integerValue];
-		isOutput = NO;
-		callbacks = [[NSMutableDictionary alloc] init];
+		_netService = [service retain];
+		_incomingQueue = nil;
+		_outgoingQueue = dispatch_queue_create("com.partymusic.device.outgoingsocketqueue", NULL);
+		_outgoingSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:_outgoingQueue];
+		_interfaceIdiom = [[_netService.TXTRecordDictionary objectForKey:kUserInterfaceIdiomTXTRecordKeyName] integerValue];
+		_isOutput = NO;
+		_callbacks = [[NSMutableDictionary alloc] init];
 		
 		[self connect:NULL];
 	}
@@ -72,28 +82,28 @@ NSInteger const kSocketReadTagBody = 1;
 
 - (void)setIncomingSocket:(GCDAsyncSocket *)socket {
 	
-	if (!incomingQueue) incomingQueue = dispatch_queue_create("com.partymusic.device.incomingsocketqueue", NULL);
+	if (!_incomingQueue) _incomingQueue = dispatch_queue_create("com.partymusic.device.incomingsocketqueue", NULL);
 	
 	[socket retain];
-	[incomingSocket release];
-	incomingSocket = socket;
+	[_incomingSocket release];
+	_incomingSocket = socket;
 	
-	[incomingSocket setDelegate:self delegateQueue:incomingQueue];
-	[incomingSocket readDataToLength:sizeof(DevicePacketHeader) withTimeout:-1 tag:kSocketReadTagHead];
+	[_incomingSocket setDelegate:self delegateQueue:_incomingQueue];
+	[_incomingSocket readDataToLength:sizeof(DevicePacketHeader) withTimeout:-1 tag:kSocketReadTagHead];
 }
 
 - (NSString *)name {
-	return netService.name;
+	return _netService.name;
 }
 
 #pragma mark - Instance Methods
 - (BOOL)connect:(NSError **)error {
-	return [outgoingSocket connectToAddress:[netService.addresses objectAtIndex:0] error:error];
+	return [_outgoingSocket connectToAddress:[_netService.addresses objectAtIndex:0] error:error];
 }
 
 #pragma mark - Convenient Senders
 - (void)sendData:(NSData *)data {
-	[outgoingSocket writeData:data withTimeout:10 tag:0];
+	[_outgoingSocket writeData:data withTimeout:10 tag:0];
 }
 
 - (void)sendDictionary:(NSDictionary *)dictionary payloadType:(DevicePayloadType)payloadType identifier:(NSString *)identifier {
@@ -110,28 +120,28 @@ NSInteger const kSocketReadTagBody = 1;
 - (void)sendSearchRequest:(NSString *)searchString callback:(DeviceSearchCallback)callback {
 	
 	NSString * identifier = [NSString UUID];
-	[callbacks setObject:[[callback copy] autorelease] forKey:identifier];
+	[_callbacks setObject:[[callback copy] autorelease] forKey:identifier];
 	[self sendDictionary:@{kDeviceSearchIdentifierKeyName : searchString} payloadType:DevicePayloadTypeSearchRequest identifier:identifier];
 }
 
 - (void)sendBrowseLibraryRequestWithCallback:(DeviceSearchCallback)callback {
 	
 	NSString * identifier = [NSString UUID];
-	[callbacks setObject:[[callback copy] autorelease] forKey:identifier];
+	[_callbacks setObject:[[callback copy] autorelease] forKey:identifier];
 	[self sendDictionary:nil payloadType:DevicePayloadTypeBrowseRequest identifier:identifier];
 }
 
 - (void)sendAlbumsForArtistRequest:(NSNumber *)persistentID callback:(DeviceSearchCallback)callback {
 	
 	NSString * identifier = [NSString UUID];
-	[callbacks setObject:[[callback copy] autorelease] forKey:identifier];
+	[_callbacks setObject:[[callback copy] autorelease] forKey:identifier];
 	[self sendDictionary:@{kDeviceSearchIdentifierKeyName : persistentID} payloadType:DevicePayloadTypeAlbumsRequest identifier:identifier];
 }
 
 - (void)sendSongsForAlbumRequest:(NSNumber *)persistentID callback:(DeviceSearchCallback)callback {
 	
 	NSString * identifier = [NSString UUID];
-	[callbacks setObject:[[callback copy] autorelease] forKey:identifier];
+	[_callbacks setObject:[[callback copy] autorelease] forKey:identifier];
 	[self sendDictionary:@{kDeviceSearchIdentifierKeyName : persistentID} payloadType:DevicePayloadTypeSongsRequest identifier:identifier];
 }
 
@@ -154,7 +164,7 @@ NSInteger const kSocketReadTagBody = 1;
 - (void)sendSongRequest:(NSNumber *)persistentID callback:(DeviceSongCallback)callback {
 	
 	NSString * identifier = [NSString UUID];
-	[callbacks setObject:[[callback copy] autorelease] forKey:identifier];
+	[_callbacks setObject:[[callback copy] autorelease] forKey:identifier];
 	[self sendDictionary:@{kDeviceSongIdentifierKeyName : persistentID} payloadType:DevicePayloadTypeSongRequest identifier:identifier];
 }
 
@@ -175,13 +185,13 @@ NSInteger const kSocketReadTagBody = 1;
 - (void)queueItem:(MusicQueueItem *)item callback:(DeviceQueueCallback)callback {
 	
 	NSString * identifier = [NSString UUID];
-	[callbacks setObject:[[callback copy] autorelease] forKey:identifier];
+	[_callbacks setObject:[[callback copy] autorelease] forKey:identifier];
 	[self sendDictionary:item.JSONDictionary payloadType:DevicePayloadTypeQueueChange identifier:identifier];
 }
 
 #pragma mark - Socket Delegate
 - (void)socket:(GCDAsyncSocket *)sock didConnectToHost:(NSString *)host port:(uint16_t)port {
-	if (sock == outgoingSocket)
+	if (sock == _outgoingSocket)
 		[self sendDictionary:[[[DevicesManager sharedManager] ownDevice] deviceStatusDictionary] payloadType:DevicePayloadTypeDeviceStatus identifier:nil];
 }
 
@@ -197,7 +207,7 @@ NSInteger const kSocketReadTagBody = 1;
 		[packet release];
 		
 		if (packetHeader.payloadLength){
-			[sock readDataToLength:incomingPacket.lengthRequired withTimeout:-1 tag:kSocketReadTagBody];
+			[sock readDataToLength:_incomingPacket.lengthRequired withTimeout:-1 tag:kSocketReadTagBody];
 		}
 		else
 		{
@@ -207,14 +217,14 @@ NSInteger const kSocketReadTagBody = 1;
 	}
 	else if (tag == kSocketReadTagBody){
 		
-		if ([incomingPacket appendData:data]){
-			[self handlePacketReceived:incomingPacket];
+		if ([_incomingPacket appendData:data]){
+			[self handlePacketReceived:_incomingPacket];
 			[self setIncomingPacket:nil];
 			[sock readDataToLength:sizeof(DevicePacketHeader) withTimeout:-1 tag:kSocketReadTagHead];
 		}
 		else
 		{
-			[sock readDataToLength:incomingPacket.lengthRequired withTimeout:-1 tag:kSocketReadTagBody];
+			[sock readDataToLength:_incomingPacket.lengthRequired withTimeout:-1 tag:kSocketReadTagBody];
 		}
 	}
 }
@@ -223,7 +233,7 @@ NSInteger const kSocketReadTagBody = 1;
 - (void)handlePacketReceived:(DevicePacket *)packet {
 	
 	DevicePayloadType type = packet.payloadType;
-	NSDictionary * payload = (incomingPacket.payloadType != DevicePayloadTypeSongResult ? incomingPacket.data.JSONValue : nil);
+	NSDictionary * payload = (_incomingPacket.payloadType != DevicePayloadTypeSongResult ? _incomingPacket.data.JSONValue : nil);
 	
 	if (type == DevicePayloadTypeDeviceStatus){
 		[self setUUID:[payload objectForKey:kDeviceUUIDKeyName]];
@@ -231,53 +241,53 @@ NSInteger const kSocketReadTagBody = 1;
 		[self handleOutputChange:payload];
 	}
 	else if (type == DevicePayloadTypeAction){
-		if ([delegate respondsToSelector:@selector(device:didReceiveAction:)]){
+		if ([_delegate respondsToSelector:@selector(device:didReceiveAction:)]){
 			dispatch_async(dispatch_get_main_queue(), ^{
-				[delegate device:self didReceiveAction:[[payload objectForKey:kDeviceActionKeyName] integerValue]];
+				[_delegate device:self didReceiveAction:[[payload objectForKey:kDeviceActionKeyName] integerValue]];
 			});
 		}
 	}
 	else if (type == DevicePayloadTypeBrowseRequest){
 		
 		NSDictionary * results = nil;
-		if ([delegate respondsToSelector:@selector(device:didReceiveBrowseRequestWithIdentifier:)]){
-			results = [delegate device:self didReceiveBrowseRequestWithIdentifier:packet.identifier];
+		if ([_delegate respondsToSelector:@selector(device:didReceiveBrowseRequestWithIdentifier:)]){
+			results = [_delegate device:self didReceiveBrowseRequestWithIdentifier:packet.identifier];
 		}
 		
 		if (results) [self sendBrowseLibraryResults:results identifier:packet.identifier];
 	}
 	else if (type == DevicePayloadTypeBrowseResults || type == DevicePayloadTypeSearchResults || type == DevicePayloadTypeAlbumsResults || type == DevicePayloadTypeSongsResults){
 		
-		DeviceSearchCallback callback = [callbacks objectForKey:packet.identifier];
+		DeviceSearchCallback callback = [_callbacks objectForKey:packet.identifier];
 		if (callback) callback(payload);
-		if (packet.identifier) [callbacks removeObjectForKey:packet.identifier];
+		if (packet.identifier) [_callbacks removeObjectForKey:packet.identifier];
 	}
 	else if (type == DevicePayloadTypeSearchRequest){
 		
 		NSDictionary * results = nil;
-		if ([delegate respondsToSelector:@selector(device:didReceiveSearchRequest:identifier:)]){
-			results = [delegate device:self didReceiveSearchRequest:[payload objectForKey:kDeviceSearchIdentifierKeyName] identifier:packet.identifier];
+		if ([_delegate respondsToSelector:@selector(device:didReceiveSearchRequest:identifier:)]){
+			results = [_delegate device:self didReceiveSearchRequest:[payload objectForKey:kDeviceSearchIdentifierKeyName] identifier:packet.identifier];
 		}
 		
 		if (results) [self sendSearchResults:results identifier:packet.identifier];
 	}
 	else if (type == DevicePayloadTypeSongRequest){
 		
-		if ([delegate respondsToSelector:@selector(device:didReceiveSongRequest:identifier:)]){
-			[delegate device:self didReceiveSongRequest:[payload objectForKey:kDeviceSongIdentifierKeyName] identifier:packet.identifier];
+		if ([_delegate respondsToSelector:@selector(device:didReceiveSongRequest:identifier:)]){
+			[_delegate device:self didReceiveSongRequest:[payload objectForKey:kDeviceSongIdentifierKeyName] identifier:packet.identifier];
 		}
 	}
 	else if (type == DevicePayloadTypeSongCancel){
 		
-		if ([delegate respondsToSelector:@selector(device:didReceiveSongCancel:)]){
-			[delegate device:self didReceiveSongCancel:[payload objectForKey:kDeviceSongIdentifierKeyName]];
+		if ([_delegate respondsToSelector:@selector(device:didReceiveSongCancel:)]){
+			[_delegate device:self didReceiveSongCancel:[payload objectForKey:kDeviceSongIdentifierKeyName]];
 		}
 	}
 	else if (type == DevicePayloadTypeSongResult){
 		
-		DeviceSongCallback callback = [callbacks objectForKey:packet.identifier];
+		DeviceSongCallback callback = [_callbacks objectForKey:packet.identifier];
 		if (callback) callback(packet.data, packet.moreComing);
-		if (packet.identifier && !packet.moreComing) [callbacks removeObjectForKey:packet.identifier];
+		if (packet.identifier && !packet.moreComing) [_callbacks removeObjectForKey:packet.identifier];
 	}
 	else if (type == DevicePayloadTypeQueueChange){
 		
@@ -290,21 +300,21 @@ NSInteger const kSocketReadTagBody = 1;
 	}
 	else if (type == DevicePayloadTypeQueueChangeResult){
 	
-		DeviceQueueCallback callback = [callbacks objectForKey:packet.identifier];
+		DeviceQueueCallback callback = [_callbacks objectForKey:packet.identifier];
 		if (callback) callback([[payload objectForKey:kDeviceQueueChangeResultKeyName] boolValue]);
-		if (packet.identifier) [callbacks removeObjectForKey:packet.identifier];
+		if (packet.identifier) [_callbacks removeObjectForKey:packet.identifier];
 	}
 	else if (type == DevicePayloadTypeQueueStatus){
 		
-		if ([delegate respondsToSelector:@selector(device:didReceiveQueue:)]){
-			dispatch_async(dispatch_get_main_queue(), ^{[delegate device:self didReceiveQueue:payload];});
+		if ([_delegate respondsToSelector:@selector(device:didReceiveQueue:)]){
+			dispatch_async(dispatch_get_main_queue(), ^{[_delegate device:self didReceiveQueue:payload];});
 		}
 	}
 	else if (type == DevicePayloadTypeAlbumsRequest){
 		
 		NSArray * results = nil;
-		if ([delegate respondsToSelector:@selector(device:didReceiveAlbumsForArtistRequest:identifier:)]){
-			results = [delegate device:self didReceiveAlbumsForArtistRequest:[payload objectForKey:kDeviceSearchIdentifierKeyName] identifier:packet.identifier];
+		if ([_delegate respondsToSelector:@selector(device:didReceiveAlbumsForArtistRequest:identifier:)]){
+			results = [_delegate device:self didReceiveAlbumsForArtistRequest:[payload objectForKey:kDeviceSearchIdentifierKeyName] identifier:packet.identifier];
 		}
 		
 		if (results) [self sendAlbumsForArtistResults:results identifier:packet.identifier];
@@ -312,8 +322,8 @@ NSInteger const kSocketReadTagBody = 1;
 	else if (type == DevicePayloadTypeSongsRequest){
 		
 		NSArray * results = nil;
-		if ([delegate respondsToSelector:@selector(device:didReceiveSongsForAlbumRequest:identifier:)]){
-			results = [delegate device:self didReceiveSongsForAlbumRequest:[payload objectForKey:kDeviceSearchIdentifierKeyName] identifier:packet.identifier];
+		if ([_delegate respondsToSelector:@selector(device:didReceiveSongsForAlbumRequest:identifier:)]){
+			results = [_delegate device:self didReceiveSongsForAlbumRequest:[payload objectForKey:kDeviceSearchIdentifierKeyName] identifier:packet.identifier];
 		}
 		
 		if (results) [self sendSongsForAlbumResults:results identifier:packet.identifier];
@@ -325,12 +335,12 @@ NSInteger const kSocketReadTagBody = 1;
 	BOOL newOutput = [[payload objectForKey:kDeviceIsOutputKeyName] boolValue];
 	Device * oldOutputDevice = (newOutput ? [[DevicesManager sharedManager] outputDevice] : nil);
 	
-	BOOL oldOutput = (isOutput ? YES : NO);
+	BOOL oldOutput = (_isOutput ? YES : NO);
 	[self setIsOutput:newOutput];
 	
 	if (oldOutput != newOutput){
-		if ([delegate respondsToSelector:@selector(device:didChangeOutputStatus:)]){
-			dispatch_async(dispatch_get_main_queue(), ^{[delegate device:self didChangeOutputStatus:newOutput];});
+		if ([_delegate respondsToSelector:@selector(device:didChangeOutputStatus:)]){
+			dispatch_async(dispatch_get_main_queue(), ^{[_delegate device:self didChangeOutputStatus:newOutput];});
 		}
 	}
 	
@@ -346,23 +356,23 @@ NSInteger const kSocketReadTagBody = 1;
 - (void)handleInterfaceOrientationChange:(NSDictionary *)payload {
 	
 	[self setInterfaceOrientation:[[payload objectForKey:kDeviceInterfaceOrientationKeyName] integerValue]];
-	if ([delegate respondsToSelector:@selector(device:didChangeInterfaceOrienation:)]){
+	if ([_delegate respondsToSelector:@selector(device:didChangeInterfaceOrienation:)]){
 		dispatch_async(dispatch_get_main_queue(), ^{
-			[delegate device:self didChangeInterfaceOrienation:interfaceOrientation];
+			[_delegate device:self didChangeInterfaceOrienation:_interfaceOrientation];
 		});
 	}
 }
 
 #pragma mark - Dealloc
 - (void)dealloc {
-	[netService release];
-	[outgoingSocket release];
-	[incomingSocket release];
-	[UUID release];
-	[callbacks release];
-	dispatch_release(incomingQueue);
-	dispatch_release(outgoingQueue);
-	[incomingPacket release];
+	[_netService release];
+	[_outgoingSocket release];
+	[_incomingSocket release];
+	[_UUID release];
+	[_callbacks release];
+	dispatch_release(_incomingQueue);
+	dispatch_release(_outgoingQueue);
+	[_incomingPacket release];
 	[super dealloc];
 }
 
@@ -374,9 +384,9 @@ NSInteger const kSocketReadTagBody = 1;
 - (id)init {
 	
 	if ((self = [super init])){
-		interfaceIdiom = UI_USER_INTERFACE_IDIOM();
-		interfaceOrientation = [[UIApplication sharedApplication] statusBarOrientation];
-		isOutput = NO;
+		[self setInterfaceIdiom:UI_USER_INTERFACE_IDIOM()];
+		[self setInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
+		[self setIsOutput:NO];
 	}
 	
 	return self;
@@ -399,7 +409,7 @@ NSInteger const kSocketReadTagBody = 1;
 	return (@{
 			kDeviceUUIDKeyName : self.UUID,
 			kDeviceInterfaceOrientationKeyName : [NSNumber numberWithInteger:[[UIApplication sharedApplication] statusBarOrientation]],
-			kDeviceIsOutputKeyName : [NSNumber numberWithBool:isOutput]
+			kDeviceIsOutputKeyName : [NSNumber numberWithBool:self.isOutput]
 			});
 }
 
@@ -412,9 +422,9 @@ NSInteger const kSocketReadTagBody = 1;
 }
 
 - (void)setIsOutput:(BOOL)flag {
+	[super setIsOutput:flag];
 	
-	isOutput = flag;
-	if (isOutput){
+	if (flag){
 		
 		[[[DevicesManager sharedManager] devices] enumerateObjectsUsingBlock:^(Device * device, NSUInteger idx, BOOL *stop) {
 			[device setIsOutput:NO];
@@ -426,8 +436,8 @@ NSInteger const kSocketReadTagBody = 1;
 		[self broadcastDeviceStatus];
 	}
 	
-	if ([delegate respondsToSelector:@selector(device:didChangeOutputStatus:)]){
-		dispatch_async(dispatch_get_main_queue(), ^{[delegate device:self didChangeOutputStatus:isOutput];});
+	if ([self.delegate respondsToSelector:@selector(device:didChangeOutputStatus:)]){
+		dispatch_async(dispatch_get_main_queue(), ^{[self.delegate device:self didChangeOutputStatus:self.isOutput];});
 	}
 }
 
@@ -517,40 +527,43 @@ NSData * DevicePacketHeaderToData(DevicePacketHeader header, NSData * payloadDat
 	return [data autorelease];
 }
 
-@implementation DevicePacket
-@synthesize payloadType;
-@synthesize identifier;
-@synthesize moreComing;
+@implementation DevicePacket {
+	NSUInteger _expectedLength;
+	NSMutableData * _incomingData;
+}
+@synthesize payloadType = _payloadType;
+@synthesize identifier = _identifier;
+@synthesize moreComing = _moreComing;
 
 - (id)initWithDevicePacketHeader:(DevicePacketHeader)header {
 	
 	if ((self = [super init])){
-		payloadType = header.payloadType;
-		expectedLength = header.payloadLength;
-		identifier = [[NSString UT8StringWithBytes:header.identifier length:36] retain];
-		incomingData = [[NSMutableData alloc] initWithCapacity:expectedLength];
-		moreComing = header.moreComing;
+		_payloadType = header.payloadType;
+		_expectedLength = header.payloadLength;
+		_identifier = [[NSString UT8StringWithBytes:header.identifier length:36] retain];
+		_incomingData = [[NSMutableData alloc] initWithCapacity:_expectedLength];
+		_moreComing = header.moreComing;
 	}
 	
 	return self;
 }
 
 - (NSUInteger)lengthRequired {
-	return expectedLength - incomingData.length;
+	return _expectedLength - _incomingData.length;
 }
 
 - (NSData *)data {
-	return incomingData;
+	return _incomingData;
 }
 
 - (BOOL)appendData:(NSData *)data {
-	[incomingData appendData:data];
-	return incomingData.length >= expectedLength;
+	[_incomingData appendData:data];
+	return _incomingData.length >= _expectedLength;
 }
 
 - (void)dealloc {
-	[identifier release];
-	[incomingData release];
+	[_identifier release];
+	[_incomingData release];
 	[super dealloc];
 }
 

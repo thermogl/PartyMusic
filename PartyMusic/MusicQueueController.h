@@ -21,18 +21,7 @@ typedef NS_ENUM(NSInteger, AVPlayerPlayStatus){
 	AVPlayerPlayStatusLoading = 3,
 };
 
-@class MusicQueueItem;
-@interface MusicQueueController : NSObject {
-	
-	AVPlayer * player;
-	
-	NSMutableArray * previousSongQueue;
-	MusicQueueItem * currentSong;
-	NSMutableArray * nextSongQueue;
-	
-	MusicQueueItem * fetchItem;
-}
-
+@interface MusicQueueController : NSObject
 @property (nonatomic, retain, readonly) MusicQueueItem * currentSong;
 @property (nonatomic, readonly) AVPlayerPlayStatus playStatus;
 @property (nonatomic, readonly) BOOL canSkipForward;

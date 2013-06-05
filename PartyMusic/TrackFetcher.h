@@ -10,11 +10,7 @@
 
 typedef void (^TrackFetcherCompletionHandler)();
 
-@interface TrackFetcher : NSObject {
-	TrackFetcherCompletionHandler completionHandler;
-	BOOL cancelled;
-}
-
+@interface TrackFetcher : NSObject
 @property (nonatomic, copy) TrackFetcherCompletionHandler completionHandler;
 @property (nonatomic, assign) BOOL cancelled;
 

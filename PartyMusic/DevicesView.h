@@ -9,12 +9,7 @@
 #import <UIKit/UIKit.h>
 
 @class DeviceView;
-
-@interface DevicesView : UIView {
-	
-	CADisplayLink * displayLink;
-}
-
+@interface DevicesView : UIView
 @property (nonatomic, readonly) DeviceView * ownDeviceView;
 
 - (void)addDeviceView:(DeviceView *)deviceView;

@@ -9,8 +9,8 @@
 #import "TrackFetcher.h"
 
 @implementation TrackFetcher
-@synthesize completionHandler;
-@synthesize cancelled;
+@synthesize completionHandler = _completionHandler;
+@synthesize cancelled = _cancelled;
 
 - (void)getTrackDataForPersistentID:(NSNumber *)persistentID callback:(void (^)(NSData *, BOOL))callback {
 	
@@ -44,7 +44,7 @@
 				[reader startReading];
 				while (reader.status == AVAssetReaderStatusReading){
 					
-					if (!cancelled){
+					if (!_cancelled){
 						
 						CMSampleBufferRef sampleBufferRef = [output copyNextSampleBuffer];
 						if (sampleBufferRef){
@@ -66,7 +66,7 @@
 					else [reader cancelReading];
 				}
 				
-				if (cancelled || reader.status == AVAssetReaderStatusCompleted) dispatch_async(dispatch_get_main_queue(), ^{callback(nil, NO);});
+				if (_cancelled || reader.status == AVAssetReaderStatusCompleted) dispatch_async(dispatch_get_main_queue(), ^{callback(nil, NO);});
 				else if (reader.status == AVAssetReaderStatusFailed || reader.status == AVAssetReaderStatusUnknown) NSLog(@"Track getting error: %@", error);
 				
 				[reader release];
@@ -75,7 +75,7 @@
 			
 			[songsQuery release];
 			
-			if (completionHandler) dispatch_async(dispatch_get_main_queue(), ^{completionHandler();});
+			if (_completionHandler) dispatch_async(dispatch_get_main_queue(), ^{_completionHandler();});
 		});
 		
 		dispatch_release(fetchQueue);
@@ -83,7 +83,7 @@
 }
 
 - (void)dealloc {
-	[completionHandler release];
+	[_completionHandler release];
 	[super dealloc];
 }
 

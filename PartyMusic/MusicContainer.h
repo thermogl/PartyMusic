@@ -16,16 +16,7 @@ typedef NS_ENUM(NSInteger, MusicContainerType) {
 	MusicContainerTypeSong = 2,
 };
 
-@interface MusicContainer : NSObject {
-	
-	MusicContainerType type;
-	DeviceSongType songType;
-	id identifier;
-	NSString * title;
-	NSString * subtitle;
-	Device * device;
-}
-
+@interface MusicContainer : NSObject
 @property (nonatomic, assign) MusicContainerType type;
 @property (nonatomic, assign) DeviceSongType songType;
 @property (nonatomic, copy) id identifier;

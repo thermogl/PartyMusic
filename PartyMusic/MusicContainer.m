@@ -22,33 +22,33 @@ NSString * const kDictionarySubtitleKey = @"DictionarySubtitleKey";
 @end
 
 @implementation MusicContainer
-@synthesize type;
-@synthesize songType;
-@synthesize identifier;
-@synthesize title;
-@synthesize subtitle;
-@synthesize device;
+@synthesize type = _type;
+@synthesize songType = _songType;
+@synthesize identifier = _identifier;
+@synthesize title = _title;
+@synthesize subtitle = _subtitle;
+@synthesize device = _device;
 
 #pragma mark - Instance Methods
 - (id)initWithJSONDictionary:(NSDictionary *)dictionary {
 	
 	if ((self = [super init])){
-		type = [[dictionary objectForKey:kDictionaryTypeKey] integerValue];
-		songType = [[dictionary objectForKey:kDictionarySongTypeKey] integerValue];
-		identifier = [[dictionary objectForKey:kDictionaryIdentifierKey] copy];
-		title = [[dictionary objectForKey:kDictionaryTitleKey] copy];
-		subtitle = [[dictionary objectForKey:kDictionarySubtitleKey] copy];
+		_type = [[dictionary objectForKey:kDictionaryTypeKey] integerValue];
+		_songType = [[dictionary objectForKey:kDictionarySongTypeKey] integerValue];
+		_identifier = [[dictionary objectForKey:kDictionaryIdentifierKey] copy];
+		_title = [[dictionary objectForKey:kDictionaryTitleKey] copy];
+		_subtitle = [[dictionary objectForKey:kDictionarySubtitleKey] copy];
 	}
 	
 	return self;
 }
 
 - (NSDictionary *)JSONDictionary {
-	return (@{kDictionaryTypeKey : [NSNumber numberWithInteger:type],
-			kDictionarySongTypeKey : [NSNumber numberWithInteger:songType],
-			kDictionaryIdentifierKey : identifier,
-			kDictionaryTitleKey : (title ?: @""),
-			kDictionarySubtitleKey : (subtitle ?: @"")});
+	return (@{kDictionaryTypeKey : [NSNumber numberWithInteger:_type],
+			kDictionarySongTypeKey : [NSNumber numberWithInteger:_songType],
+			kDictionaryIdentifierKey : _identifier,
+			kDictionaryTitleKey : (_title ?: @""),
+			kDictionarySubtitleKey : (_subtitle ?: @"")});
 }
 
 #pragma mark - General Queries
@@ -192,13 +192,13 @@ NSString * const kDictionarySubtitleKey = @"DictionarySubtitleKey";
 
 #pragma mark - Description
 - (NSString *)description {
-	return [NSString stringWithFormat:@"<MusicContainer %p; title = \"%@\"; identifier = \"%@\">", self, title, identifier];
+	return [NSString stringWithFormat:@"<MusicContainer %p; title = \"%@\"; identifier = \"%@\">", self, _title, _identifier];
 }
 
 #pragma mark - Memory Management
 - (void)dealloc {
-	[identifier release];
-	[title release];
+	[_identifier release];
+	[_title release];
 	[super dealloc];
 }
 

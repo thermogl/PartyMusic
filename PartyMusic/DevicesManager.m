@@ -27,29 +27,42 @@ NSString * const kUserInterfaceIdiomTXTRecordKeyName = @"UserInterfaceIdiomTXTRe
 @property (nonatomic, retain) NSNetService * ownService;
 @end
 
-@implementation DevicesManager
-@synthesize ownDevice;
-@synthesize ownService;
+@implementation DevicesManager {
+	
+	dispatch_queue_t _socketQueue;
+	GCDAsyncSocket * _incomingSocket;
+	
+	NSMutableArray * _devices;
+	NSMutableArray * _pendingConnections;
+	NSMutableArray * _services;
+	NSNetServiceBrowser * _serviceBrowser;
+	
+	NSMutableDictionary * _songRequestDictionary;
+	
+	BOOL _searching;
+}
+@synthesize ownDevice = _ownDevice;
+@synthesize ownService = _ownService;
 
 #pragma mark - Init
 - (id)init {
 	
 	if ((self = [super init])){
 		
-		ownDevice = [[OwnDevice alloc] init];
-		[ownDevice setDelegate:self];
+		_ownDevice = [[OwnDevice alloc] init];
+		[_ownDevice setDelegate:self];
 		
-		devices = [[NSMutableArray alloc] init];
-		services = [[NSMutableArray alloc] init];
-		pendingConnections = [[NSMutableArray alloc] init];
+		_devices = [[NSMutableArray alloc] init];
+		_services = [[NSMutableArray alloc] init];
+		_pendingConnections = [[NSMutableArray alloc] init];
 		
-		serviceBrowser = [[NSNetServiceBrowser alloc] init];
+		_serviceBrowser = [[NSNetServiceBrowser alloc] init];
 		
-		socketQueue = dispatch_queue_create("com.partymusic.devicescontroller.socketqueue", NULL);
-		incomingSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:socketQueue];
-		searching = NO;
+		_socketQueue = dispatch_queue_create("com.partymusic.devicescontroller.socketqueue", NULL);
+		_incomingSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:_socketQueue];
+		_searching = NO;
 		
-		songRequestDictionary = [[NSMutableDictionary alloc] init];
+		_songRequestDictionary = [[NSMutableDictionary alloc] init];
 	}
 	
 	return self;
@@ -59,43 +72,43 @@ NSString * const kUserInterfaceIdiomTXTRecordKeyName = @"UserInterfaceIdiomTXTRe
 - (Device *)outputDevice {
 	
 	__block Device * outputDevice = nil;
-	[devices enumerateObjectsUsingBlock:^(Device * device, NSUInteger idx, BOOL *stop) {
+	[_devices enumerateObjectsUsingBlock:^(Device * device, NSUInteger idx, BOOL *stop) {
 		if (device.isOutput){
 			outputDevice = device;
 			*stop = YES;
 		}
 	}];
 	
-	if (!outputDevice && ownDevice.isOutput)
-		outputDevice = ownDevice;
+	if (!outputDevice && _ownDevice.isOutput)
+		outputDevice = _ownDevice;
 	
 	return outputDevice;
 }
 
 - (NSArray *)devices {
-	return devices;
+	return _devices;
 }
 
 #pragma mark - Instance Methods
 - (void)startSearching {
 	
-	if (!searching){
+	if (!_searching){
 		
 		NSError * error = nil;
-		if ([incomingSocket acceptOnPort:0 error:&error]){
+		if ([_incomingSocket acceptOnPort:0 error:&error]){
 			
-			searching = YES;
+			_searching = YES;
 			
-			[ownService release];
-			ownService = [[NSNetService alloc] initWithDomain:@"local" type:kDeviceServiceType name:[[UIDevice currentDevice] name] port:incomingSocket.localPort];
+			[_ownService release];
+			_ownService = [[NSNetService alloc] initWithDomain:@"local" type:kDeviceServiceType name:[[UIDevice currentDevice] name] port:_incomingSocket.localPort];
 			
 			NSDictionary * TXTRecord = @{kUserInterfaceIdiomTXTRecordKeyName: [NSString stringWithFormat:@"%d", UI_USER_INTERFACE_IDIOM()]};
-			[ownService setTXTRecordDictionary:TXTRecord];
-			[ownService setDelegate:self];
-			[ownService publish];
+			[_ownService setTXTRecordDictionary:TXTRecord];
+			[_ownService setDelegate:self];
+			[_ownService publish];
 			
-			[serviceBrowser setDelegate:self];
-			[serviceBrowser searchForServicesOfType:kDeviceServiceType inDomain:@"local"];
+			[_serviceBrowser setDelegate:self];
+			[_serviceBrowser searchForServicesOfType:kDeviceServiceType inDomain:@"local"];
 		}
 		else
 		{
@@ -106,30 +119,30 @@ NSString * const kUserInterfaceIdiomTXTRecordKeyName = @"UserInterfaceIdiomTXTRe
 
 - (void)stopSearching {
 	
-	[serviceBrowser stop];
-	[ownService stop];
-	[services removeAllObjects];
-	[pendingConnections removeAllObjects];
-	[incomingSocket disconnect];
+	[_serviceBrowser stop];
+	[_ownService stop];
+	[_services removeAllObjects];
+	[_pendingConnections removeAllObjects];
+	[_incomingSocket disconnect];
 	
-	[devices enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(Device * device, NSUInteger idx, BOOL *stop) {
+	[_devices enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(Device * device, NSUInteger idx, BOOL *stop) {
 		[device retain];
-		[devices removeObjectAtIndex:idx];
+		[_devices removeObjectAtIndex:idx];
 		[[NSNotificationCenter defaultCenter] postNotificationName:DevicesManagerDidRemoveDeviceNotificationName object:device];
 		[device release];
 	}];
 	
-	searching = NO;
+	_searching = NO;
 }
 
 - (void)broadcastDictionary:(NSDictionary *)dictionary payloadType:(DevicePayloadType)payloadType {
-	[devices enumerateObjectsUsingBlock:^(Device * device, NSUInteger idx, BOOL *stop) {[device sendDictionary:dictionary payloadType:payloadType identifier:nil];}];
+	[_devices enumerateObjectsUsingBlock:^(Device * device, NSUInteger idx, BOOL *stop) {[device sendDictionary:dictionary payloadType:payloadType identifier:nil];}];
 }
 
 - (void)broadcastSearchRequest:(NSString *)searchString callback:(DevicesManagerSearchCallback)callback {
 	
 	if (callback){
-		[devices enumerateObjectsUsingBlock:^(Device * device, NSUInteger idx, BOOL *stop) {
+		[_devices enumerateObjectsUsingBlock:^(Device * device, NSUInteger idx, BOOL *stop) {
 			[device sendSearchRequest:searchString callback:^(NSDictionary * results){
 				callback(device, results);
 			}];
@@ -138,25 +151,25 @@ NSString * const kUserInterfaceIdiomTXTRecordKeyName = @"UserInterfaceIdiomTXTRe
 }
 
 - (void)broadcastQueueStatus:(NSDictionary *)queueStatus {
-	[devices enumerateObjectsUsingBlock:^(Device * device, NSUInteger idx, BOOL *stop) {[device sendQueueStatus:queueStatus];}];
+	[_devices enumerateObjectsUsingBlock:^(Device * device, NSUInteger idx, BOOL *stop) {[device sendQueueStatus:queueStatus];}];
 }
 
 - (void)broadcastAction:(DeviceAction)action {
-	[devices enumerateObjectsUsingBlock:^(Device * device, NSUInteger idx, BOOL *stop) {[device sendAction:action];}];
+	[_devices enumerateObjectsUsingBlock:^(Device * device, NSUInteger idx, BOOL *stop) {[device sendAction:action];}];
 }
 
 - (Device *)deviceWithUUID:(NSString *)UUID {
 	
 	__block Device * targetDevice = nil;
-	[devices enumerateObjectsUsingBlock:^(Device * device, NSUInteger idx, BOOL *stop) {
+	[_devices enumerateObjectsUsingBlock:^(Device * device, NSUInteger idx, BOOL *stop) {
 		if ([device.UUID isEqualToString:UUID]){
 			targetDevice = device;
 			*stop = YES;
 		}
 	}];
 	
-	if (!targetDevice && [ownDevice.UUID isEqualToString:UUID])
-		targetDevice = ownDevice;
+	if (!targetDevice && [_ownDevice.UUID isEqualToString:UUID])
+		targetDevice = _ownDevice;
 	
 	return targetDevice;
 }
@@ -165,7 +178,7 @@ NSString * const kUserInterfaceIdiomTXTRecordKeyName = @"UserInterfaceIdiomTXTRe
 - (void)socket:(GCDAsyncSocket *)sock didAcceptNewSocket:(GCDAsyncSocket *)newSocket {
 	
 	__block BOOL assignedSocket = NO;
-	[devices enumerateObjectsUsingBlock:^(Device * device, NSUInteger idx, BOOL *stop) {
+	[_devices enumerateObjectsUsingBlock:^(Device * device, NSUInteger idx, BOOL *stop) {
 		if ([device.netService hasSameHostAsSocket:newSocket]){
 			[device setIncomingSocket:newSocket];
 			assignedSocket = YES;
@@ -173,11 +186,11 @@ NSString * const kUserInterfaceIdiomTXTRecordKeyName = @"UserInterfaceIdiomTXTRe
 		}
 	}];
 	
-	if (!assignedSocket) [pendingConnections addObject:newSocket];
+	if (!assignedSocket) [_pendingConnections addObject:newSocket];
 }
 
 - (void)socketDidDisconnect:(GCDAsyncSocket *)sock withError:(NSError *)err {
-	[pendingConnections removeObject:sock];
+	[_pendingConnections removeObject:sock];
 }
 
 #pragma mark - Net Server Stuff
@@ -192,8 +205,8 @@ NSString * const kUserInterfaceIdiomTXTRecordKeyName = @"UserInterfaceIdiomTXTRe
 
 - (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didFindService:(NSNetService *)aNetService moreComing:(BOOL)moreComing {
 	
-	if (![aNetService isEqual:ownService]){
-		[services addObject:aNetService];
+	if (![aNetService isEqual:_ownService]){
+		[_services addObject:aNetService];
 		[aNetService setDelegate:self];
 		[aNetService resolveWithTimeout:0];
 	}
@@ -203,15 +216,15 @@ NSString * const kUserInterfaceIdiomTXTRecordKeyName = @"UserInterfaceIdiomTXTRe
 	[aNetService stop];
 	
 	__block Device * targetDevice = nil;
-	[devices enumerateObjectsUsingBlock:^(Device * device, NSUInteger idx, BOOL *stop) {
+	[_devices enumerateObjectsUsingBlock:^(Device * device, NSUInteger idx, BOOL *stop) {
 		if ([device.netService isEqual:aNetService]){
 			targetDevice = device;
 			*stop = YES;
 		}
 	}];
 	
-	[devices removeObject:targetDevice];
-	[services removeObject:aNetService];
+	[_devices removeObject:targetDevice];
+	[_services removeObject:aNetService];
 	
 	[[NSNotificationCenter defaultCenter] postNotificationName:DevicesManagerDidRemoveDeviceNotificationName object:targetDevice];
 }
@@ -220,24 +233,24 @@ NSString * const kUserInterfaceIdiomTXTRecordKeyName = @"UserInterfaceIdiomTXTRe
 	
 	Device * device = [[Device alloc] initWithNetService:service];
 	[device setDelegate:self];
-	[devices addObject:device];
+	[_devices addObject:device];
 	[device release];
 	
-	[pendingConnections enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(GCDAsyncSocket * connection, NSUInteger idx, BOOL *stop) {
+	[_pendingConnections enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(GCDAsyncSocket * connection, NSUInteger idx, BOOL *stop) {
 		if ([service hasSameHostAsSocket:connection]){
 			[device setIncomingSocket:connection];
-			[pendingConnections removeObject:connection];
+			[_pendingConnections removeObject:connection];
 			*stop = YES;
 		}
 	}];
 	
 	[[NSNotificationCenter defaultCenter] postNotificationName:DevicesManagerDidAddDeviceNotificationName object:device];
-	[services removeObject:service];
+	[_services removeObject:service];
 }
 
 - (void)netService:(NSNetService *)sender didNotResolve:(NSDictionary *)errorDict {
 	NSLog(@"Service failed to resolve with dict: \n%@\n", errorDict);
-	[services removeObject:sender];
+	[_services removeObject:sender];
 }
 
 #pragma mark - Device Delegate
@@ -288,16 +301,16 @@ NSString * const kUserInterfaceIdiomTXTRecordKeyName = @"UserInterfaceIdiomTXTRe
 - (void)device:(Device *)aDevice didReceiveSongRequest:(NSNumber *)persistentID identifier:(NSString *)identifier {
 	
 	__block TrackFetcher * trackFetcher = [[TrackFetcher alloc] init];
-	[trackFetcher setCompletionHandler:^{[songRequestDictionary removeObjectForKey:persistentID];}];
+	[trackFetcher setCompletionHandler:^{[_songRequestDictionary removeObjectForKey:persistentID];}];
 	[trackFetcher getTrackDataForPersistentID:persistentID callback:^(NSData *chunk, BOOL moreComing) {
 		[aDevice sendSongResult:chunk identifier:identifier moreComing:moreComing];
 	}];
-	[songRequestDictionary setObject:trackFetcher forKey:persistentID];
+	[_songRequestDictionary setObject:trackFetcher forKey:persistentID];
 	[trackFetcher release];
 }
 
 - (void)device:(Device *)device didReceiveSongCancel:(NSNumber *)persistentID {
-	[(TrackFetcher *)[songRequestDictionary objectForKey:persistentID] setCancelled:YES];
+	[(TrackFetcher *)[_songRequestDictionary objectForKey:persistentID] setCancelled:YES];
 }
 
 - (void)device:(Device *)device didReceiveQueue:(NSDictionary *)queue {
@@ -306,13 +319,13 @@ NSString * const kUserInterfaceIdiomTXTRecordKeyName = @"UserInterfaceIdiomTXTRe
 
 #pragma mark - Dealloc
 - (void)dealloc {
-	[ownDevice release];
-	[ownService release];
-	[devices release];
-	[services release];
-	[pendingConnections release];
-	dispatch_release(socketQueue);
-	[songRequestDictionary release];
+	[_ownDevice release];
+	[_ownService release];
+	[_devices release];
+	[_services release];
+	[_pendingConnections release];
+	dispatch_release(_socketQueue);
+	[_songRequestDictionary release];
 	[super dealloc];
 }
 

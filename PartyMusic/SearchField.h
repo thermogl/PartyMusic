@@ -8,18 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
-@interface SearchField : UITextField {
-	
-	UIButton * searchButton;
-	UIActivityIndicatorView * spinner;
-	NSInteger spinnerCount;
-	
-	BOOL shadowHidden;
-	BOOL spinnerVisible;
-}
-
+@interface SearchField : UITextField
 @property (nonatomic, readonly) UIButton * searchButton;
 @property (nonatomic, assign) BOOL shadowHidden;
 @property (nonatomic, assign) BOOL spinnerVisible;
-
 @end

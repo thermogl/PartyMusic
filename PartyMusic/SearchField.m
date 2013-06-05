@@ -8,21 +8,24 @@
 
 #import "SearchField.h"
 
-@implementation SearchField
-@synthesize searchButton;
-@synthesize shadowHidden;
-@synthesize spinnerVisible;
+@implementation SearchField {
+	UIActivityIndicatorView * _spinner;
+	NSInteger _spinnerCount;
+}
+@synthesize searchButton = _searchButton;
+@synthesize shadowHidden = _shadowHidden;
+@synthesize spinnerVisible = _spinnerVisible;
 
 #pragma mark - Instance Methods
 - (id)initWithFrame:(CGRect)frame {
 	
 	if ((self = [super initWithFrame:frame])){
 		
-		searchButton = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
-		[searchButton setImage:[[UIImage imageNamed:@"Search"] imageWithColorOverlay:[UIColor pm_darkColor]] forState:UIControlStateNormal];
+		_searchButton = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+		[_searchButton setImage:[[UIImage imageNamed:@"Search"] imageWithColorOverlay:[UIColor pm_darkColor]] forState:UIControlStateNormal];
 		
-		spinner = [[UIActivityIndicatorView alloc] initWithFrame:CGRectZero];
-		[spinner setColor:[UIColor pm_darkColor]];
+		_spinner = [[UIActivityIndicatorView alloc] initWithFrame:CGRectZero];
+		[_spinner setColor:[UIColor pm_darkColor]];
 		
 		[self setSpinnerVisible:NO];
 		
@@ -66,23 +69,23 @@
 
 #pragma mark - Property Overrides
 - (void)setShadowHidden:(BOOL)flag {
-	shadowHidden = flag;
+	_shadowHidden = flag;
 	[self.layer setShadowOpacity:(flag ? 0 : 1)];
 }
 
 - (void)setSpinnerVisible:(BOOL)flag {
 	
-	spinnerVisible = flag;
-	if (spinnerVisible) [spinner startAnimating];
-	else [spinner stopAnimating];
+	_spinnerVisible = flag;
+	if (_spinnerVisible) [_spinner startAnimating];
+	else [_spinner stopAnimating];
 	
-	[self setLeftView:(spinnerVisible ? spinner : searchButton)];
+	[self setLeftView:(_spinnerVisible ? _spinner : _searchButton)];
 }
 
 #pragma mark - Dealloc
 - (void)dealloc {
-	[searchButton release];
-	[spinner release];
+	[_searchButton release];
+	[_spinner release];
 	[super dealloc];
 }
 

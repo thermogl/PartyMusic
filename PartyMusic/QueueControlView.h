@@ -8,22 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface QueueControlView : UIView {
-	
-	UIView * timeView;
-	
-	UIButton * queueButton;
-	UIButton * settingsButton;
-	
-	UIActivityIndicatorView * spinner;
-	UIButton * playPauseButton;
-	UIButton * skipBackwardButton;
-	UIButton * skipForwardButton;
-	
-	BOOL playerControlsHidden;
-	BOOL shadowHidden;
-}
-
+@interface QueueControlView : UIView
 @property (nonatomic, assign) BOOL playerControlsHidden;
 @property (nonatomic, assign) BOOL shadowHidden;
 @property (nonatomic, readonly) UIButton * queueButton;

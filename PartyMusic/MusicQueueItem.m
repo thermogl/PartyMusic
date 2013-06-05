@@ -16,41 +16,41 @@ NSString * const kMusicQueueItemDeviceUUIDKey = @"MusicQueueItemDeviceUUIDKey";
 NSString * const kMusicQueueItemCurrentTimeKey = @"MusicQueueItemCurrentTimeKey";
 
 @implementation MusicQueueItem
-@synthesize title;
-@synthesize subtitle;
-@synthesize songIdentifier;
-@synthesize type;
-@synthesize deviceUUID;
-@synthesize currentTime;
+@synthesize title = _title;
+@synthesize subtitle = _subtitle;
+@synthesize songIdentifier = _songIdentifier;
+@synthesize type = _type;
+@synthesize deviceUUID = _deviceUUID;
+@synthesize currentTime = _currentTime;
 
 - (id)initWithJSONDictionary:(NSDictionary *)dictionary {
 	
 	if ((self = [super init])){
-		title = [[dictionary objectForKey:kMusicQueueItemTitleKey] copy];
-		subtitle = [[dictionary objectForKey:kMusicQueueItemSubtitleKey] copy];
-		songIdentifier = [[dictionary objectForKey:kMusicQueueItemSongIdentifierKey] copy];
-		type = [[dictionary objectForKey:kMusicQueueItemTypeKey] integerValue];
-		deviceUUID = [[dictionary objectForKey:kMusicQueueItemDeviceUUIDKey] copy];
+		_title = [[dictionary objectForKey:kMusicQueueItemTitleKey] copy];
+		_subtitle = [[dictionary objectForKey:kMusicQueueItemSubtitleKey] copy];
+		_songIdentifier = [[dictionary objectForKey:kMusicQueueItemSongIdentifierKey] copy];
+		_type = [[dictionary objectForKey:kMusicQueueItemTypeKey] integerValue];
+		_deviceUUID = [[dictionary objectForKey:kMusicQueueItemDeviceUUIDKey] copy];
 	}
 	
 	return self;
 }
 
 - (NSDictionary *)JSONDictionary {
-	return (@{kMusicQueueItemTitleKey : title ?: @"",
-			kMusicQueueItemSubtitleKey : subtitle ?: @"",
-			kMusicQueueItemSongIdentifierKey : songIdentifier,
-			kMusicQueueItemTypeKey : [NSNumber numberWithInteger:type],
-			kMusicQueueItemDeviceUUIDKey : deviceUUID ?: @""});
+	return (@{kMusicQueueItemTitleKey : _title ?: @"",
+			kMusicQueueItemSubtitleKey : _subtitle ?: @"",
+			kMusicQueueItemSongIdentifierKey : _songIdentifier,
+			kMusicQueueItemTypeKey : [NSNumber numberWithInteger:_type],
+			kMusicQueueItemDeviceUUIDKey : _deviceUUID ?: @""});
 }
 
 - (NSString *)description {
-	return [NSString stringWithFormat:@"<MusicQueueItem %p; title = \"%@\"; type = %d; identifier = \"%@\", deviceUUID = \"%@\">", self, title, type, songIdentifier, deviceUUID];
+	return [NSString stringWithFormat:@"<MusicQueueItem %p; title = \"%@\"; type = %d; identifier = \"%@\", deviceUUID = \"%@\">", self, _title, _type, _songIdentifier, _deviceUUID];
 }
 
 - (void)dealloc {
-	[songIdentifier release];
-	[deviceUUID release];
+	[_songIdentifier release];
+	[_deviceUUID release];
 	[super dealloc];
 }
 

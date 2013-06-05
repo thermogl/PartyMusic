@@ -14,14 +14,16 @@
 - (void)calculateDeviceViewCentersWithCallback:(void (^)(DeviceView * deviceView, CGPoint center, CGFloat scale))callback;
 @end
 
-@implementation DevicesView
+@implementation DevicesView {
+	CADisplayLink * _displayLink;
+}
 
 - (id)initWithFrame:(CGRect)frame {
 	
 	if ((self = [super initWithFrame:frame])){
 		
-		displayLink = [[CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkTick:)] retain];
-		[displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:(id)kCFRunLoopCommonModes];
+		_displayLink = [[CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkTick:)] retain];
+		[_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:(id)kCFRunLoopCommonModes];
 		
 		[self setBackgroundColor:[UIColor pm_lightColor]];
 	}
@@ -90,8 +92,8 @@
 }
 
 - (void)dealloc {
-	[displayLink invalidate];
-	[displayLink release];
+	[_displayLink invalidate];
+	[_displayLink release];
 	[super dealloc];
 }
 

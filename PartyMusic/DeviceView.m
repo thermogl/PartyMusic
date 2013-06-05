@@ -13,17 +13,20 @@
 #import "MusicContainer.h"
 #import "MusicQueueController.h"
 
-@implementation DeviceView
-@synthesize scale;
-@synthesize device;
+@implementation DeviceView {
+	UIImageView * _outputView;
+	UIView * _screenView;
+}
+@synthesize scale = _scale;
+@synthesize device = _device;
 
 - (id)initWithDevice:(Device *)aDevice {
 	
 	if ((self = [super init])){
 		
-		device = [aDevice retain];
+		_device = [aDevice retain];
+		_scale = [[UIDevice currentDevice] isPhone] ? 1 : 1.5;
 		
-		scale = [[UIDevice currentDevice] isPhone] ? 1 : 1.5;
 		[self setPanDragCoefficient:0.4];
 		[self setSpringConstant:550];
 		[self setDampingCoefficient:16];
@@ -33,20 +36,20 @@
 		[self setBackgroundColor:[UIColor pm_darkColor]];
 		[self.layer setCornerRadius:5];
 		
-		screenView = [[UIView alloc] initWithFrame:self.screenRect];
-		[screenView setBackgroundColor:(device.isOwnDevice ? [UIColor pm_blueColor] : [UIColor pm_redColor])];
-		[self addSubview:screenView];
-		[screenView release];
+		_screenView = [[UIView alloc] initWithFrame:self.screenRect];
+		[_screenView setBackgroundColor:(_device.isOwnDevice ? [UIColor pm_blueColor] : [UIColor pm_redColor])];
+		[self addSubview:_screenView];
+		[_screenView release];
 		
-		outputView = [[UIImageView alloc] initWithFrame:self.bounds];
-		[outputView setImage:[[UIImage imageNamed:@"Speaker"] imageWithColorOverlay:[UIColor pm_darkColor]]];
-		[outputView setBackgroundColor:[UIColor clearColor]];
-		[outputView setContentMode:UIViewContentModeCenter];
-		[outputView setHidden:!device.isOutput];
-		[self addSubview:outputView];
-		[outputView release];
+		_outputView = [[UIImageView alloc] initWithFrame:self.bounds];
+		[_outputView setImage:[[UIImage imageNamed:@"Speaker"] imageWithColorOverlay:[UIColor pm_darkColor]]];
+		[_outputView setBackgroundColor:[UIColor clearColor]];
+		[_outputView setContentMode:UIViewContentModeCenter];
+		[_outputView setHidden:!_device.isOutput];
+		[self addSubview:_outputView];
+		[_outputView release];
 		
-		if (device){
+		if (_device){
 			UILongPressGestureRecognizer * longPressRecongizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(viewWasLongPressed:)];
 			[self addGestureRecognizer:longPressRecongizer];
 			[longPressRecongizer release];
@@ -56,11 +59,11 @@
 			[tapRecognizer release];
 			
 			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceDidReceiveShake:)
-														 name:DevicesManagerDidReceiveShakeEventNotificationName object:device];
+														 name:DevicesManagerDidReceiveShakeEventNotificationName object:_device];
 			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceDidReceiveOrientationChange:)
-														 name:DevicesManagerDidReceiveOrientationChangeNotificationName object:device];
+														 name:DevicesManagerDidReceiveOrientationChangeNotificationName object:_device];
 			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceDidReceiveOutputChange:)
-														 name:DevicesManagerDidReceiveOutputChangeNotificationName object:device];
+														 name:DevicesManagerDidReceiveOutputChangeNotificationName object:_device];
 		}
 	}
 	
@@ -68,16 +71,16 @@
 }
 
 - (void)layoutSubviews {
-	[outputView setFrame:self.bounds];
-	[screenView setFrame:self.screenRect];
+	[_outputView setFrame:self.bounds];
+	[_screenView setFrame:self.screenRect];
 }
 
 - (CGFloat)rotation {
 	
 	CGFloat rotation = 0;
-	if (device.interfaceOrientation == UIInterfaceOrientationLandscapeLeft) rotation = M_PI / 2;
-	else if (device.interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown) rotation = M_PI;
-	else if (device.interfaceOrientation == UIInterfaceOrientationLandscapeRight) rotation = 3 * M_PI / 2;
+	if (_device.interfaceOrientation == UIInterfaceOrientationLandscapeLeft) rotation = M_PI / 2;
+	else if (_device.interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown) rotation = M_PI;
+	else if (_device.interfaceOrientation == UIInterfaceOrientationLandscapeRight) rotation = 3 * M_PI / 2;
 	return rotation;
 }
 
@@ -94,32 +97,32 @@
 }
 
 - (void)showOutputPrompt {
-	velocity = CGPointMake(0, -800);
+	[self setVelocity:CGPointMake(0, -800)];
 }
 
 #pragma mark - Property Overrides
 - (CGSize)deviceSize {
-	CGSize baseSize = device.interfaceIdiom == UIUserInterfaceIdiomPhone ? CGSizeMake(46, 90) : CGSizeMake(73, 95);
-	return CGSizeApplyAffineTransform(baseSize, CGAffineTransformMakeScale(scale, scale));
+	CGSize baseSize = _device.interfaceIdiom == UIUserInterfaceIdiomPhone ? CGSizeMake(46, 90) : CGSizeMake(73, 95);
+	return CGSizeApplyAffineTransform(baseSize, CGAffineTransformMakeScale(_scale, _scale));
 }
 
 - (CGRect)screenRect {
-	CGRect baseRect = device.interfaceIdiom == UIUserInterfaceIdiomPhone ? CGRectMake(2, 12, 42, 65) : CGRectMake(5, 9, 63, 78);
-	return CGRectApplyAffineTransform(baseRect, CGAffineTransformMakeScale(scale, scale));
+	CGRect baseRect = _device.interfaceIdiom == UIUserInterfaceIdiomPhone ? CGRectMake(2, 12, 42, 65) : CGRectMake(5, 9, 63, 78);
+	return CGRectApplyAffineTransform(baseRect, CGAffineTransformMakeScale(_scale, _scale));
 }
 
 - (void)setScale:(CGFloat)newScale {
-	scale = newScale;
+	_scale = newScale;
 	[self setBounds:(CGRect){.size = self.deviceSize}];
 	[self layoutSubviews];
 }
 
 - (UIColor *)screenColor {
-	return screenView.backgroundColor;
+	return _screenView.backgroundColor;
 }
 
 - (void)setScreenColor:(UIColor *)screenColor {
-	[screenView setBackgroundColor:screenColor];
+	[_screenView setBackgroundColor:screenColor];
 }
 
 #pragma mark - Gesture Handlers
@@ -131,8 +134,8 @@
 	[items addObject:browseItem];
 	[browseItem release];
 	
-	if (device.isOwnDevice){
-		if (!device.isOutput){
+	if (_device.isOwnDevice){
+		if (!_device.isOutput){
 			UIMenuItem * menuItem = [[UIMenuItem alloc] initWithTitle:@"Become Output" action:@selector(becomeOutputMenuItemWasTapped:)];
 			[items addObject:menuItem];
 			[menuItem release];
@@ -162,8 +165,8 @@
 		
 		[self shake];
 		
-		if (device.isOwnDevice) [[DevicesManager sharedManager] broadcastAction:DeviceActionShake];
-		else [device sendAction:DeviceActionShake];
+		if (_device.isOwnDevice) [[DevicesManager sharedManager] broadcastAction:DeviceActionShake];
+		else [_device sendAction:DeviceActionShake];
 	}
 }
 
@@ -178,7 +181,7 @@
 }
 
 - (void)vibrateDeviceMenuItemWasTapped:(id)sender {
-	[device sendAction:DeviceActionVibrate];
+	[_device sendAction:DeviceActionVibrate];
 }
 
 #pragma mark - Responder Chain
@@ -202,12 +205,12 @@
 }
 
 - (void)deviceDidReceiveOutputChange:(NSNotification *)notification {
-	[outputView setHidden:!device.isOutput];
+	[_outputView setHidden:!_device.isOutput];
 }
 
 #pragma mark - Dealloc
 - (void)dealloc {
-	[device release];
+	[_device release];
 	[super dealloc];
 }
 

@@ -8,17 +8,7 @@
 
 #import "Device.h"
 
-@interface MusicQueueItem : NSObject {
-	
-	NSString * title;
-	NSString * subtitle;
-	
-	id songIdentifier;
-	DeviceSongType type;
-	NSString * deviceUUID;
-	CMTime currentTime;
-}
-
+@interface MusicQueueItem : NSObject
 @property (nonatomic, copy) NSString * title;
 @property (nonatomic, copy) NSString * subtitle;
 @property (nonatomic, copy) id songIdentifier;

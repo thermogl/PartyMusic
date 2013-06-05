@@ -10,29 +10,11 @@
 
 extern NSString * const SearchResultsViewControllerScrolledNotificationName;
 
-@class SearchViewController;
-@interface SearchResultsViewController : OrientationAwareTableViewController {
-	
-	NSMutableArray * artists;
-	NSMutableArray * albums;
-	NSMutableArray * songs;
-	NSMutableArray * youTubes;
-	NSMutableArray * soundClouds;
-	BOOL hideHeaders;
-}
-
+@interface SearchResultsViewController : OrientationAwareTableViewController
 @property (nonatomic, assign) BOOL hideHeaders;
-
 - (void)setArtists:(NSArray *)artists albums:(NSArray *)albums songs:(NSArray *)songs youTubes:(NSArray *)youTubes soundClouds:(NSArray *)soundClouds;
-
 @end
 
-@interface SearchResultsViewControllerContainer : OrientationAwareViewController {
-	
-	UIView * navigationBar;
-	SearchResultsViewController * searchResultsViewController;
-}
-
+@interface SearchResultsViewControllerContainer : OrientationAwareViewController
 - (id)initWithSearchResultsViewController:(SearchResultsViewController *)searchViewController;
-
 @end

@@ -21,12 +21,18 @@ NSString * const SearchResultsViewControllerScrolledNotificationName = @"SearchR
 - (MusicContainer *)containerForIndexPath:(NSIndexPath *)indexPath;
 @end
 
-@implementation SearchResultsViewController
-@synthesize hideHeaders;
+@implementation SearchResultsViewController {
+	NSMutableArray * _artists;
+	NSMutableArray * _albums;
+	NSMutableArray * _songs;
+	NSMutableArray * _youTubes;
+	NSMutableArray * _soundClouds;
+}
+@synthesize hideHeaders = _hideHeaders;
 
 #pragma mark - Property Overrides
 - (void)setHideHeaders:(BOOL)flag {
-	hideHeaders = flag;
+	_hideHeaders = flag;
 	[self.tableView reloadData];
 }
 
@@ -37,11 +43,11 @@ NSString * const SearchResultsViewControllerScrolledNotificationName = @"SearchR
 	[self.tableView setBackgroundColor:[UIColor pm_lightColor]];
 	[self.tableView setSeparatorColor:[UIColor pm_darkLightColor]];
 	
-	artists = [[NSMutableArray alloc] init];
-	albums = [[NSMutableArray alloc] init];
-	songs = [[NSMutableArray alloc] init];
-	youTubes = [[NSMutableArray alloc] init];
-	soundClouds = [[NSMutableArray alloc] init];
+	_artists = [[NSMutableArray alloc] init];
+	_albums = [[NSMutableArray alloc] init];
+	_songs = [[NSMutableArray alloc] init];
+	_youTubes = [[NSMutableArray alloc] init];
+	_soundClouds = [[NSMutableArray alloc] init];
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceControllerDidRemoveDevice:) name:DevicesManagerDidRemoveDeviceNotificationName object:nil];
 }
@@ -53,16 +59,16 @@ NSString * const SearchResultsViewControllerScrolledNotificationName = @"SearchR
 - (void)deviceControllerDidRemoveDevice:(NSNotification *)notification {
 	
 	Device * removedDevice = [notification.object retain];
-	[artists enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(MusicContainer * container, NSUInteger idx, BOOL *stop) {
-		if ([container.device isEqual:removedDevice]) [artists removeObjectAtIndex:idx];
+	[_artists enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(MusicContainer * container, NSUInteger idx, BOOL *stop) {
+		if ([container.device isEqual:removedDevice]) [_artists removeObjectAtIndex:idx];
 	}];
 	
-	[albums enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(MusicContainer * container, NSUInteger idx, BOOL *stop) {
-		if ([container.device isEqual:removedDevice]) [albums removeObjectAtIndex:idx];
+	[_albums enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(MusicContainer * container, NSUInteger idx, BOOL *stop) {
+		if ([container.device isEqual:removedDevice]) [_albums removeObjectAtIndex:idx];
 	}];
 	
-	[songs enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(MusicContainer * container, NSUInteger idx, BOOL *stop) {
-		if ([container.device isEqual:removedDevice]) [songs removeObjectAtIndex:idx];
+	[_songs enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(MusicContainer * container, NSUInteger idx, BOOL *stop) {
+		if ([container.device isEqual:removedDevice]) [_songs removeObjectAtIndex:idx];
 	}];
 	
 	[removedDevice release];
@@ -72,34 +78,34 @@ NSString * const SearchResultsViewControllerScrolledNotificationName = @"SearchR
 - (MusicContainer *)containerForIndexPath:(NSIndexPath *)indexPath {
 	
 	MusicContainer * container = nil;
-	if (indexPath.section == 0) container = [artists objectAtIndex:indexPath.row];
-	else if (indexPath.section == 1) container = [albums objectAtIndex:indexPath.row];
-	else if (indexPath.section == 2) container = [songs objectAtIndex:indexPath.row];
-	else if (indexPath.section == 3) container = [youTubes objectAtIndex:indexPath.row];
-	else if (indexPath.section == 4) container = [soundClouds objectAtIndex:indexPath.row];
+	if (indexPath.section == 0) container = [_artists objectAtIndex:indexPath.row];
+	else if (indexPath.section == 1) container = [_albums objectAtIndex:indexPath.row];
+	else if (indexPath.section == 2) container = [_songs objectAtIndex:indexPath.row];
+	else if (indexPath.section == 3) container = [_youTubes objectAtIndex:indexPath.row];
+	else if (indexPath.section == 4) container = [_soundClouds objectAtIndex:indexPath.row];
 	return container;
 }
 
 #pragma mark - Property Overrides
 - (void)setArtists:(NSArray *)newArtists albums:(NSArray *)newAlbums songs:(NSArray *)newSongs youTubes:(NSArray *)newYouTubes soundClouds:(NSArray *)newSoundClouds {
 	
-	if (!newArtists) [artists removeAllObjects];
-	else [artists addObjectsFromArray:newArtists];
+	if (!newArtists) [_artists removeAllObjects];
+	else [_artists addObjectsFromArray:newArtists];
 	
-	if (!newAlbums) [albums removeAllObjects];
-	else [albums addObjectsFromArray:newAlbums];
+	if (!newAlbums) [_albums removeAllObjects];
+	else [_albums addObjectsFromArray:newAlbums];
 	
-	if (!newSongs) [songs removeAllObjects];
-	else [songs addObjectsFromArray:newSongs];
+	if (!newSongs) [_songs removeAllObjects];
+	else [_songs addObjectsFromArray:newSongs];
 	
 	if (newYouTubes){
-		[youTubes removeAllObjects];
-		[youTubes addObjectsFromArray:newYouTubes];
+		[_youTubes removeAllObjects];
+		[_youTubes addObjectsFromArray:newYouTubes];
 	}
 	
 	if (newSoundClouds){
-		[soundClouds removeAllObjects];
-		[soundClouds addObjectsFromArray:newSoundClouds];
+		[_soundClouds removeAllObjects];
+		[_soundClouds addObjectsFromArray:newSoundClouds];
 	}
 	
 	[self.tableView reloadData];
@@ -111,11 +117,11 @@ NSString * const SearchResultsViewControllerScrolledNotificationName = @"SearchR
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-	if (section == 0) return artists.count;
-	else if (section == 1) return albums.count;
-	else if (section == 2) return songs.count;
-	else if (section == 3) return youTubes.count;
-	else return soundClouds.count;
+	if (section == 0) return _artists.count;
+	else if (section == 1) return _albums.count;
+	else if (section == 2) return _songs.count;
+	else if (section == 3) return _youTubes.count;
+	else return _soundClouds.count;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -213,12 +219,12 @@ NSString * const SearchResultsViewControllerScrolledNotificationName = @"SearchR
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
 	
-	if (!hideHeaders){
-		if (section == 0) return (artists.count ? Localized(@"Artists") : nil);
-		else if (section == 1) return (albums.count ? Localized(@"Albums") : nil);
-		else if (section == 2) return (songs.count ? Localized(@"Songs") : nil);
-		else if (section == 3) return (youTubes.count ? @"YouTube" : nil);
-		else return (soundClouds.count ? @"SoundCloud" : nil);
+	if (!_hideHeaders){
+		if (section == 0) return (_artists.count ? Localized(@"Artists") : nil);
+		else if (section == 1) return (_albums.count ? Localized(@"Albums") : nil);
+		else if (section == 2) return (_songs.count ? Localized(@"Songs") : nil);
+		else if (section == 3) return (_youTubes.count ? @"YouTube" : nil);
+		else return (_soundClouds.count ? @"SoundCloud" : nil);
 	}
 	
 	return nil;
@@ -230,32 +236,35 @@ NSString * const SearchResultsViewControllerScrolledNotificationName = @"SearchR
 
 #pragma mark - Dealloc
 - (void)dealloc {
-	[artists release];
-	[albums release];
-	[songs release];
-	[soundClouds release];
-	[youTubes release];
+	[_artists release];
+	[_albums release];
+	[_songs release];
+	[_soundClouds release];
+	[_youTubes release];
 	[super dealloc];
 }
 
 @end
 
-@implementation SearchResultsViewControllerContainer
+@implementation SearchResultsViewControllerContainer {
+	UIView * _navigationBar;
+	SearchResultsViewController * _searchResultsViewController;
+}
 
 - (id)initWithSearchResultsViewController:(SearchResultsViewController *)viewController {
 	
 	if ((self = [super init])){
-		searchResultsViewController = viewController;
-		[self addChildViewController:searchResultsViewController];
-		[self.view addSubview:searchResultsViewController.view];
+		_searchResultsViewController = viewController;
+		[self addChildViewController:_searchResultsViewController];
+		[self.view addSubview:_searchResultsViewController.view];
 		
-		navigationBar = [[UIView alloc] init];
-		[navigationBar setBackgroundColor:[UIColor pm_darkColor]];
-		[self.view addSubview:navigationBar];
-		[navigationBar release];
+		_navigationBar = [[UIView alloc] init];
+		[_navigationBar setBackgroundColor:[UIColor pm_darkColor]];
+		[self.view addSubview:_navigationBar];
+		[_navigationBar release];
 		
 		UITapGestureRecognizer * tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(navigationBarWasTapped:)];
-		[navigationBar addGestureRecognizer:tapRecognizer];
+		[_navigationBar addGestureRecognizer:tapRecognizer];
 		[tapRecognizer release];
 	}
 	
@@ -264,9 +273,9 @@ NSString * const SearchResultsViewControllerScrolledNotificationName = @"SearchR
 
 - (void)viewDidResizeToNewOrientation {
 	
-	[navigationBar setFrame:CGRectMake(0, 0, self.view.bounds.size.width, 22)];
-	[searchResultsViewController.view setFrame:CGRectMake(0, CGRectGetHeight(navigationBar.frame), CGRectGetWidth(navigationBar.frame),
-														  CGRectGetHeight(self.view.bounds) - CGRectGetHeight(navigationBar.frame))];
+	[_navigationBar setFrame:CGRectMake(0, 0, self.view.bounds.size.width, 22)];
+	[_searchResultsViewController.view setFrame:CGRectMake(0, CGRectGetHeight(_navigationBar.frame), CGRectGetWidth(_navigationBar.frame),
+														  CGRectGetHeight(self.view.bounds) - CGRectGetHeight(_navigationBar.frame))];
 }
 
 - (void)navigationBarWasTapped:(UITapGestureRecognizer *)sender {

@@ -8,10 +8,5 @@
 
 #import <UIKit/UIKit.h>
 
-@class ShakeDetectingWindow;
-@interface AppDelegate : UIResponder <UIApplicationDelegate> {
-	ShakeDetectingWindow * window;
-	UIBackgroundTaskIdentifier backgroundTaskIdentifier;
-}
-
+@interface AppDelegate : UIResponder <UIApplicationDelegate>
 @end

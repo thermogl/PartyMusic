@@ -8,24 +8,28 @@
 
 #import "ViewControllerContainer.h"
 
-@implementation ViewControllerContainer
+@implementation ViewControllerContainer {
+	UIViewController * _viewController;
+	UIView * _navigationBar;
+	void (^_dismissHandler)();
+}
 
 - (id)initWithViewController:(UIViewController *)controller dismissHandler:(void (^)(void))handler {
 	
 	if ((self = [super init])){
-		viewController = controller;
+		_viewController = controller;
 		[self addChildViewController:controller];
 		[self.view addSubview:controller.view];
 		
-		dismissHandler = [handler copy];
+		_dismissHandler = [handler copy];
 		
-		navigationBar = [[UIView alloc] init];
-		[navigationBar setBackgroundColor:[UIColor pm_darkColor]];
-		[self.view addSubview:navigationBar];
-		[navigationBar release];
+		_navigationBar = [[UIView alloc] init];
+		[_navigationBar setBackgroundColor:[UIColor pm_darkColor]];
+		[self.view addSubview:_navigationBar];
+		[_navigationBar release];
 		
 		UITapGestureRecognizer * tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(navigationBarWasTapped:)];
-		[navigationBar addGestureRecognizer:tapRecognizer];
+		[_navigationBar addGestureRecognizer:tapRecognizer];
 		[tapRecognizer release];
 	}
 	
@@ -34,18 +38,18 @@
 
 - (void)viewDidResizeToNewOrientation {
 	
-	[navigationBar setFrame:CGRectMake(0, 0, self.view.bounds.size.width, 22)];
-	[viewController.view setFrame:CGRectMake(0, CGRectGetHeight(navigationBar.frame), CGRectGetWidth(navigationBar.frame),
-														  CGRectGetHeight(self.view.bounds) - CGRectGetHeight(navigationBar.frame))];
+	[_navigationBar setFrame:CGRectMake(0, 0, self.view.bounds.size.width, 22)];
+	[_viewController.view setFrame:CGRectMake(0, CGRectGetHeight(_navigationBar.frame), CGRectGetWidth(_navigationBar.frame),
+														  CGRectGetHeight(self.view.bounds) - CGRectGetHeight(_navigationBar.frame))];
 }
 
 - (void)navigationBarWasTapped:(UITapGestureRecognizer *)sender {
 	if (self.navigationController) [self.navigationController popToRootViewControllerAnimated:YES];
-	else [self dismissViewControllerAnimated:YES completion:dismissHandler];
+	else [self dismissViewControllerAnimated:YES completion:_dismissHandler];
 }
 
 - (void)dealloc {
-	[dismissHandler release];
+	[_dismissHandler release];
 	[super dealloc];
 }
 

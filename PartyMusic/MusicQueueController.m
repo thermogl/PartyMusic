@@ -25,21 +25,25 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 - (void)cancelFetchQueueItem;
 @end
 
-@implementation MusicQueueController
-@synthesize currentSong;
-@synthesize fetchItem;
+@implementation MusicQueueController {
+	AVPlayer * _player;
+	NSMutableArray * _previousSongQueue;
+	NSMutableArray * _nextSongQueue;
+}
+@synthesize currentSong = _currentSong;
+@synthesize fetchItem = _fetchItem;
 
 #pragma mark - Init
 - (id)init {
 	
 	if ((self = [super init])){
 		
-		player = [[AVPlayer alloc] initWithURL:nil];
-		[player addObserver:self forKeyPath:@"rate" options:0 context:nil];
+		_player = [[AVPlayer alloc] initWithURL:nil];
+		[_player addObserver:self forKeyPath:@"rate" options:0 context:nil];
 		
-		previousSongQueue = [[NSMutableArray alloc] init];
-		currentSong = nil;
-		nextSongQueue = [[NSMutableArray alloc] init];
+		_previousSongQueue = [[NSMutableArray alloc] init];
+		_currentSong = nil;
+		_nextSongQueue = [[NSMutableArray alloc] init];
 		
 		[[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:NULL];
 		[[AVAudioSession sharedInstance] setActive:YES error:NULL];
@@ -52,30 +56,30 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 
 #pragma mark - Property Overrides
 - (AVPlayerPlayStatus)playStatus {
-	return (player.rate ? AVPlayerPlayStatusPlaying : (fetchItem ? AVPlayerPlayStatusLoading : AVPlayerPlayStatusPaused));
+	return (_player.rate ? AVPlayerPlayStatusPlaying : (_fetchItem ? AVPlayerPlayStatusLoading : AVPlayerPlayStatusPaused));
 }
 
 - (BOOL)canSkipForward {
-	return (nextSongQueue.count > 0);
+	return (_nextSongQueue.count > 0);
 }
 
 - (BOOL)canSkipBackward {
-	return (previousSongQueue.count > 0);
+	return (_previousSongQueue.count > 0);
 }
 
 - (NSArray *)queue {
 	
 	NSMutableArray * queue = [[NSMutableArray alloc] init];
-	[queue addObjectsFromArray:previousSongQueue];
-	if (currentSong) [queue addObject:currentSong];
-	[queue addObjectsFromArray:nextSongQueue];
+	[queue addObjectsFromArray:_previousSongQueue];
+	if (_currentSong) [queue addObject:_currentSong];
+	[queue addObjectsFromArray:_nextSongQueue];
 	return [queue autorelease];
 }
 
 - (void)setJSONQueue:(NSDictionary *)JSONQueue {
 	
-	[previousSongQueue removeAllObjects];
-	[nextSongQueue removeAllObjects];
+	[_previousSongQueue removeAllObjects];
+	[_nextSongQueue removeAllObjects];
 	
 	if ([JSONQueue objectForKey:kMusicQueueControllerCurrentSongKey]){
 		MusicQueueItem * item = [[MusicQueueItem alloc] initWithJSONDictionary:[JSONQueue objectForKey:kMusicQueueControllerCurrentSongKey]];
@@ -87,7 +91,7 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 		
 		[(NSArray *)[JSONQueue objectForKey:kMusicQueueControllerPreviousSongsKey] enumerateObjectsUsingBlock:^(NSDictionary * itemDict, NSUInteger idx, BOOL *stop) {
 			MusicQueueItem * item = [[MusicQueueItem alloc] initWithJSONDictionary:itemDict];
-			[previousSongQueue addObject:item];
+			[_previousSongQueue addObject:item];
 			[item release];
 		}];
 	}
@@ -96,7 +100,7 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 		
 		[(NSArray *)[JSONQueue objectForKey:kMusicQueueControllerNextSongsKey] enumerateObjectsUsingBlock:^(NSDictionary * itemDict, NSUInteger idx, BOOL *stop) {
 			MusicQueueItem * item = [[MusicQueueItem alloc] initWithJSONDictionary:itemDict];
-			[nextSongQueue addObject:item];
+			[_nextSongQueue addObject:item];
 			[item release];
 		}];
 	}
@@ -108,15 +112,15 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 	
 	NSMutableDictionary * dictionary = [[NSMutableDictionary alloc] init];
 	
-	if (currentSong){
-		[currentSong setCurrentTime:player.currentItem.currentTime];
-		[dictionary setObject:currentSong.JSONDictionary forKey:kMusicQueueControllerCurrentSongKey];
+	if (_currentSong){
+		[_currentSong setCurrentTime:_player.currentItem.currentTime];
+		[dictionary setObject:_currentSong.JSONDictionary forKey:kMusicQueueControllerCurrentSongKey];
 	}
 	
 	if (self.canSkipBackward){
 		
-		NSMutableArray * previousSongsDicts = [[NSMutableArray alloc] initWithCapacity:previousSongQueue.count];
-		[previousSongQueue enumerateObjectsUsingBlock:^(MusicQueueItem * item, NSUInteger idx, BOOL *stop) {
+		NSMutableArray * previousSongsDicts = [[NSMutableArray alloc] initWithCapacity:_previousSongQueue.count];
+		[_previousSongQueue enumerateObjectsUsingBlock:^(MusicQueueItem * item, NSUInteger idx, BOOL *stop) {
 			[previousSongsDicts addObject:item.JSONDictionary];
 		}];
 		[dictionary setObject:previousSongsDicts forKey:kMusicQueueControllerPreviousSongsKey];
@@ -125,8 +129,8 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 	
 	if (self.canSkipForward){
 		
-		NSMutableArray * nextSongsDicts = [[NSMutableArray alloc] initWithCapacity:nextSongQueue.count];
-		[nextSongQueue enumerateObjectsUsingBlock:^(MusicQueueItem * item, NSUInteger idx, BOOL *stop) {
+		NSMutableArray * nextSongsDicts = [[NSMutableArray alloc] initWithCapacity:_nextSongQueue.count];
+		[_nextSongQueue enumerateObjectsUsingBlock:^(MusicQueueItem * item, NSUInteger idx, BOOL *stop) {
 			[nextSongsDicts addObject:item.JSONDictionary];
 		}];
 		[dictionary setObject:nextSongsDicts forKey:kMusicQueueControllerNextSongsKey];
@@ -138,8 +142,8 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 
 - (void)setFetchItem:(MusicQueueItem *)item {
 	[item retain];
-	[fetchItem release];
-	fetchItem = item;
+	[_fetchItem release];
+	_fetchItem = item;
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMusicQueuePlayerDidChangeStateNotificationName object:self];
 }
 
@@ -156,9 +160,9 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 #pragma mark - Queuing Methods
 - (BOOL)queueItem:(MusicQueueItem *)item {
 	
-	[nextSongQueue addObject:item];
+	[_nextSongQueue addObject:item];
 	
-	if (currentSong) [self notifyQueueChange];
+	if (_currentSong) [self notifyQueueChange];
 	else [self skipForward];
 	
 	return YES;
@@ -194,11 +198,11 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 
 - (void)playContentAtURL:(NSURL *)URL identifier:(id)identifier {
 	
-	if ([currentSong.songIdentifier isEqual:identifier]){
-		[player replaceCurrentItemWithPlayerItem:[AVPlayerItem playerItemWithURL:URL]];
-		[player play];
+	if ([_currentSong.songIdentifier isEqual:identifier]){
+		[_player replaceCurrentItemWithPlayerItem:[AVPlayerItem playerItemWithURL:URL]];
+		[_player play];
 		
-		[[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:@{MPMediaItemPropertyTitle : currentSong.title, MPMediaItemPropertyArtist : currentSong.subtitle}];
+		[[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:@{MPMediaItemPropertyTitle : _currentSong.title, MPMediaItemPropertyArtist : _currentSong.subtitle}];
 	}
 }
 
@@ -240,26 +244,26 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 }
 
 - (void)cancelFetchQueueItem {
-	[[[DevicesManager sharedManager] deviceWithUUID:fetchItem.deviceUUID] cancelSongRequest:fetchItem.songIdentifier];
+	[[[DevicesManager sharedManager] deviceWithUUID:_fetchItem.deviceUUID] cancelSongRequest:_fetchItem.songIdentifier];
 }
 
 #pragma mark - Song Playback
 - (void)play {
 	
-	if (player.currentItem) [player play];
-	else [self playQueueItem:currentSong];
+	if (_player.currentItem) [_player play];
+	else [self playQueueItem:_currentSong];
 }
 
 - (void)pause {
-	[player pause];
+	[_player pause];
 }
 
 - (void)stop {
 	
 	[self resignOutputControl];
 	[self setCurrentSong:nil];
-	[previousSongQueue removeAllObjects];
-	[nextSongQueue removeAllObjects];
+	[_previousSongQueue removeAllObjects];
+	[_nextSongQueue removeAllObjects];
 	
 	[self notifyQueueChange];
 }
@@ -274,11 +278,11 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 	
 	if (self.canSkipForward){
 		
-		if (currentSong) [previousSongQueue addObject:currentSong];
-		[self setCurrentSong:[nextSongQueue objectAtIndex:0]];
-		[nextSongQueue removeObjectAtIndex:0];
+		if (_currentSong) [_previousSongQueue addObject:_currentSong];
+		[self setCurrentSong:[_nextSongQueue objectAtIndex:0]];
+		[_nextSongQueue removeObjectAtIndex:0];
 		
-		[self playQueueItem:currentSong];
+		[self playQueueItem:_currentSong];
 		[self notifyQueueChange];
 	}
 }
@@ -287,27 +291,27 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 	
 	if (self.canSkipBackward){
 
-		if (currentSong) [nextSongQueue insertObject:currentSong atIndex:0];
-		[self setCurrentSong:[previousSongQueue lastObject]];
-		[previousSongQueue removeLastObject];
+		if (_currentSong) [_nextSongQueue insertObject:_currentSong atIndex:0];
+		[self setCurrentSong:[_previousSongQueue lastObject]];
+		[_previousSongQueue removeLastObject];
 		
-		[self playQueueItem:currentSong];
+		[self playQueueItem:_currentSong];
 		[self notifyQueueChange];
 	}
 }
 
 - (void)resignOutputControl {
-	[player pause];
-	[player replaceCurrentItemWithPlayerItem:nil];
+	[_player pause];
+	[_player replaceCurrentItemWithPlayerItem:nil];
 	[self notifyQueueChange];
 }
 
 #pragma mark - Dealloc
 - (void)dealloc {
-	[previousSongQueue release];
-	[currentSong release];
-	[nextSongQueue release];
-	[fetchItem release];
+	[_previousSongQueue release];
+	[_currentSong release];
+	[_nextSongQueue release];
+	[_fetchItem release];
 	[super dealloc];
 }
 

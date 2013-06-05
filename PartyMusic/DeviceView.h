@@ -10,14 +10,7 @@
 
 @class Device;
 
-@interface DeviceView : TISpringLoadedView {
-
-	Device * device;
-	UIImageView * outputView;
-	UIView * screenView;
-	CGFloat scale;
-}
-
+@interface DeviceView : TISpringLoadedView
 @property (nonatomic, assign) CGFloat scale;
 @property (nonatomic, readonly) Device * device;
 @property (nonatomic, readonly) CGFloat rotation;

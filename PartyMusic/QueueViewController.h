@@ -9,5 +9,4 @@
 #import "OrientationAwareViewController.h"
 
 @interface QueueViewController : OrientationAwareTableViewController
-
 @end

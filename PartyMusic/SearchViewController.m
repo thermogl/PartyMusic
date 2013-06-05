@@ -28,104 +28,113 @@
 		  soundClouds:(NSArray *)soundClouds searchString:(NSString *)searchString;
 @end
 
-@implementation SearchViewController
-@synthesize searchSources;
-@synthesize searchField;
-@synthesize currentSearch;
+@implementation SearchViewController {
+	
+	UINavigationController * _navigationController;
+	NSInteger _spinnerCount;
+	
+	UIView * _overlayView;
+	UIView * _optionsView;
+	
+	BOOL _shouldResign;
+}
+@synthesize searchSources = _searchSources;
+@synthesize searchField = _searchField;
+@synthesize currentSearch = _currentSearch;
 
 - (id)init {
 	
 	if ((self = [super init])){
-		searchSources = (SearchSourceLocalLibrary | SearchSourceRemoteLibraries | SearchSourceYouTube | SearchSourceSoundCloud);
+		_searchSources = (SearchSourceLocalLibrary | SearchSourceRemoteLibraries | SearchSourceYouTube | SearchSourceSoundCloud);
 	}
 	
 	return self;
 }
 
 - (SearchResultsViewController *)rootResultsViewController {
-	return (SearchResultsViewController *)[navigationController.viewControllers objectAtIndex:0];
+	return (SearchResultsViewController *)[_navigationController.viewControllers objectAtIndex:0];
 }
 
 - (void)viewDidLoad {
 	
 	[self.view setBackgroundColor:[UIColor clearColor]];
 	
-	overlayView = [[UIView alloc] initWithFrame:CGRectZero];
-	[overlayView setBackgroundColor:[UIColor blackColor]];
-	[overlayView setAlpha:0];
-	[self.view addSubview:overlayView];
-	[overlayView release];
+	_overlayView = [[UIView alloc] initWithFrame:CGRectZero];
+	[_overlayView setBackgroundColor:[UIColor blackColor]];
+	[_overlayView setAlpha:0];
+	[self.view addSubview:_overlayView];
+	[_overlayView release];
 	
-	optionsView = [[UIView alloc] initWithFrame:CGRectZero];
-	[optionsView setBackgroundColor:[UIColor pm_darkLightColor]];
-	[self.view addSubview:optionsView];
-	[optionsView release];
+	_optionsView = [[UIView alloc] initWithFrame:CGRectZero];
+	[_optionsView setBackgroundColor:[UIColor pm_darkLightColor]];
+	[self.view addSubview:_optionsView];
+	[_optionsView release];
 	
 	SearchResultsViewController * searchResultsViewController = [[SearchResultsViewController alloc] init];
-	navigationController = [[UINavigationController alloc] initWithRootViewController:searchResultsViewController];
+	_navigationController = [[UINavigationController alloc] initWithRootViewController:searchResultsViewController];
 	[searchResultsViewController release];
 	
-	[self addChildViewController:navigationController];
-	[navigationController release];
+	[self addChildViewController:_navigationController];
+	[_navigationController release];
 	
-	[navigationController setNavigationBarHidden:YES];
-	[self.view addSubview:navigationController.view];
-	[navigationController.view setHidden:YES];
+	[_navigationController setNavigationBarHidden:YES];
+	[self.view addSubview:_navigationController.view];
+	[_navigationController.view setHidden:YES];
 	
 	UITapGestureRecognizer * dismissRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewWasTapped:)];
-	[overlayView addGestureRecognizer:dismissRecognizer];
+	[_overlayView addGestureRecognizer:dismissRecognizer];
 	[dismissRecognizer release];
 	
-	[searchField setDelegate:self];
-	[searchField addTarget:self action:@selector(searchFieldTextDidChange:) forControlEvents:UIControlEventEditingChanged];
+	[_searchField setDelegate:self];
+	[_searchField addTarget:self action:@selector(searchFieldTextDidChange:) forControlEvents:UIControlEventEditingChanged];
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(resultsTableViewScrolled:) name:SearchResultsViewControllerScrolledNotificationName object:nil];
 	
-	shouldResign = NO;
+	_shouldResign = NO;
 }
 
 - (void)viewDidResizeToNewOrientation {
-	[overlayView setFrame:self.view.bounds];
-	[navigationController.view setFrame:self.view.bounds];
+	[_overlayView setFrame:self.view.bounds];
+	[_navigationController.view setFrame:self.view.bounds];
 	[self.rootResultsViewController viewDidResizeToNewOrientation];
 }
 
 - (void)viewWasTapped:(UITapGestureRecognizer *)sender {
-	shouldResign = YES;
-	[searchField resignFirstResponder];
+	_shouldResign = YES;
+	[_searchField resignFirstResponder];
 }
 
 - (void)keyboardWillShow:(NSNotification *)notification {
 	
 	[UIView animateWithDuration:[[notification.userInfo objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue] animations:^{
-		[searchField setShadowHidden:NO];
-		[overlayView setAlpha:0.5];
+		[_searchField setShadowHidden:NO];
+		[_overlayView setAlpha:0.5];
 	}];
 }
 
 - (void)keyboardWillHide:(NSNotification *)notification {
 	
 	[UIView animateWithDuration:[[notification.userInfo objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue] animations:^{
-		if (shouldResign) [searchField setShadowHidden:YES];
-		[overlayView setAlpha:0];
+		if (_shouldResign) [_searchField setShadowHidden:YES];
+		[_overlayView setAlpha:0];
 	} completion:^(BOOL finished) {
-		if (shouldResign){
-			shouldResign = NO;
+		if (_shouldResign){
+			_shouldResign = NO;
 			[self.view removeFromSuperview];
 		}
 	}];
 }
 
 - (void)resultsTableViewScrolled:(NSNotification *)notification {
-	[searchField resignFirstResponder];
+	[_searchField resignFirstResponder];
 }
 
 #pragma mark - SearchField Control Events
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
 	[self showContentMatchingSubstring:textField.text];
-	if (currentSearch.isNotEmpty) [textField resignFirstResponder];
+	if (_currentSearch.isNotEmpty) [textField resignFirstResponder];
 	return YES;
 }
 
@@ -135,31 +144,31 @@
 }
 
 - (void)searchFieldTextDidChange:(NSNotification *)notification {
-	if (searchField.text.length == 0) [self showContentMatchingSubstring:searchField.text];
+	if (_searchField.text.length == 0) [self showContentMatchingSubstring:_searchField.text];
 }
 
 #pragma mark - Search
 - (void)showContentMatchingSubstring:(NSString *)substring {
 	
 	[self setCurrentSearch:substring];
-	[searchField setSpinnerVisible:currentSearch.isNotEmpty];
-	[navigationController.view setHidden:!substring.isNotEmpty];
-	[navigationController popToRootViewControllerAnimated:NO];
+	[_searchField setSpinnerVisible:_currentSearch.isNotEmpty];
+	[_navigationController.view setHidden:!substring.isNotEmpty];
+	[_navigationController popToRootViewControllerAnimated:NO];
 	
-	if (currentSearch.isNotEmpty){
+	if (_currentSearch.isNotEmpty){
 		[self.rootResultsViewController setArtists:nil albums:nil songs:nil youTubes:nil soundClouds:nil];
 #if !TARGET_IPHONE_SIMULATOR
-		if (searchSources & SearchSourceLocalLibrary) [self showLocalMusicLibraryContentMatchingSubstring:currentSearch];
+		if (_searchSources & SearchSourceLocalLibrary) [self showLocalMusicLibraryContentMatchingSubstring:_currentSearch];
 #endif
-		if (searchSources & SearchSourceRemoteLibraries) [self showRemoveMusicLibraryContentMatchingSubstring:currentSearch];
-		if (searchSources & SearchSourceYouTube) [self showYouTubeContentMatchingSubstring:currentSearch];
-		if (searchSources & SearchSourceSoundCloud) [self showSoundCloudContentMatchingSubstring:currentSearch];
+		if (_searchSources & SearchSourceRemoteLibraries) [self showRemoveMusicLibraryContentMatchingSubstring:_currentSearch];
+		if (_searchSources & SearchSourceYouTube) [self showYouTubeContentMatchingSubstring:_currentSearch];
+		if (_searchSources & SearchSourceSoundCloud) [self showSoundCloudContentMatchingSubstring:_currentSearch];
 	}
 }
 
 - (void)showLocalMusicLibraryContentMatchingSubstring:(NSString *)substring {
 	
-	spinnerCount++;
+	_spinnerCount++;
 	dispatch_queue_t searchQueue = dispatch_queue_create("com.partymusic.searchqueue", NULL);
 	dispatch_async(searchQueue, ^{
 		
@@ -173,7 +182,7 @@
 
 - (void)showRemoveMusicLibraryContentMatchingSubstring:(NSString *)substring {
 	
-	spinnerCount += [[[DevicesManager sharedManager] devices] count];
+	_spinnerCount += [[[DevicesManager sharedManager] devices] count];
 	[[DevicesManager sharedManager] broadcastSearchRequest:substring callback:^(Device * device, NSDictionary * results){
 		dispatch_queue_t processQueue = dispatch_queue_create("com.partymusic.searchqueue", NULL);
 		dispatch_async(processQueue, ^{
@@ -189,7 +198,7 @@
 
 - (void)showYouTubeContentMatchingSubstring:(NSString *)substring {
 	
-	spinnerCount++;
+	_spinnerCount++;
 	[YouTube searchForTracksWithSubstring:substring callback:^(NSError *error, NSArray *tracks) {
 		[self updateArtists:[NSArray array] albums:[NSArray array] songs:[NSArray array] youTubes:tracks soundClouds:nil searchString:substring];
 	}];
@@ -197,7 +206,7 @@
 
 - (void)showSoundCloudContentMatchingSubstring:(NSString *)substring {
 	
-	spinnerCount++;
+	_spinnerCount++;
 	[SoundCloud searchForTracksWithSubstring:substring callback:^(NSError *error, NSArray *tracks) {
 		[self updateArtists:[NSArray array] albums:[NSArray array] songs:[NSArray array] youTubes:nil soundClouds:tracks searchString:substring];
 	}];
@@ -206,38 +215,38 @@
 - (void)updateArtists:(NSArray *)artists albums:(NSArray *)albums songs:(NSArray *)songs youTubes:(NSArray *)youTubes
 		  soundClouds:(NSArray *)soundClouds searchString:(NSString *)searchString {
 	
-	spinnerCount--;
-	if (spinnerCount <= 0)
-		[searchField setSpinnerVisible:NO];
+	_spinnerCount--;
+	if (_spinnerCount <= 0)
+		[_searchField setSpinnerVisible:NO];
 	
-	if ([searchString isEqualToString:currentSearch])
+	if ([searchString isEqualToString:_currentSearch])
 		[self.rootResultsViewController setArtists:artists albums:albums songs:songs youTubes:youTubes soundClouds:soundClouds];
 }
 
 #pragma mark - Presentation
 - (void)presentAnimatedWithDuration:(NSTimeInterval)duration animations:(void (^)(void))animations completion:(void (^)(BOOL))completion {
 	
-	[overlayView setAlpha:0];
+	[_overlayView setAlpha:0];
 	[UIView animateWithDuration:duration animations:^{
 		if (animations) animations();
-		[searchField setShadowHidden:NO];
-		[overlayView setAlpha:0.5];
+		[_searchField setShadowHidden:NO];
+		[_overlayView setAlpha:0.5];
 	} completion:completion];
 }
 
 - (void)dismissAnimatedWithDuration:(NSTimeInterval)duration animations:(void (^)(void))animations completion:(void (^)(BOOL))completion {
 	
-	[navigationController.view setHidden:YES];
+	[_navigationController.view setHidden:YES];
 	
 	[UIView animateWithDuration:duration animations:^{
 		if (animations) animations();
-		[searchField setShadowHidden:YES];
-		[overlayView setAlpha:0];
+		[_searchField setShadowHidden:YES];
+		[_overlayView setAlpha:0];
 	} completion:completion];
 }
 
 - (void)dealloc {
-	[currentSearch release];
+	[_currentSearch release];
 	[super dealloc];
 }
 

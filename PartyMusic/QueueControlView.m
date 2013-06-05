@@ -10,10 +10,17 @@
 #import "DevicesManager.h"
 #import "MusicQueueController.h"
 
-@implementation QueueControlView
-@synthesize playerControlsHidden;
-@synthesize shadowHidden;
-@synthesize queueButton;
+@implementation QueueControlView {
+	UIView * _timeView;
+	UIButton * _settingsButton;
+	UIActivityIndicatorView * _spinner;
+	UIButton * _playPauseButton;
+	UIButton * _skipBackwardButton;
+	UIButton * _skipForwardButton;
+}
+@synthesize playerControlsHidden = _playerControlsHidden;
+@synthesize shadowHidden = _shadowHidden;
+@synthesize queueButton = _queueButton;
 
 - (id)initWithFrame:(CGRect)frame {
 	
@@ -25,41 +32,41 @@
 		[self.layer setShadowRadius:5];
 		[self.layer setMasksToBounds:NO];
 		
-		timeView = [[UIView alloc] init];
-		[timeView setBackgroundColor:[UIColor colorWithRed:0.716 green:0.712 blue:0.708 alpha:0.9]];
-		[self addSubview:timeView];
-		[timeView release];
+		_timeView = [[UIView alloc] init];
+		[_timeView setBackgroundColor:[UIColor colorWithRed:0.716 green:0.712 blue:0.708 alpha:0.9]];
+		[self addSubview:_timeView];
+		[_timeView release];
 		
-		queueButton = [UIButton buttonWithType:UIButtonTypeCustom];
+		_queueButton = [UIButton buttonWithType:UIButtonTypeCustom];
 		[self setQueueButtonColor:[UIColor pm_darkColor]];
-		[self addSubview:queueButton];
+		[self addSubview:_queueButton];
 		
-		spinner = [[UIActivityIndicatorView alloc] init];
-		[spinner setColor:[UIColor pm_darkColor]];
-		[spinner setHidesWhenStopped:YES];
-		[self addSubview:spinner];
-		[spinner release];
+		_spinner = [[UIActivityIndicatorView alloc] init];
+		[_spinner setColor:[UIColor pm_darkColor]];
+		[_spinner setHidesWhenStopped:YES];
+		[self addSubview:_spinner];
+		[_spinner release];
 		
-		playPauseButton = [UIButton buttonWithType:UIButtonTypeCustom];
-		[playPauseButton setHidden:YES];
-		[playPauseButton setEnabled:NO];
-		[playPauseButton setImage:[[UIImage imageNamed:@"Play"] imageWithColorOverlay:[UIColor pm_darkColor]] forState:UIControlStateNormal];
-		[playPauseButton addTarget:self action:@selector(playPauseButtonWasTapped:) forControlEvents:UIControlEventTouchUpInside];
-		[self addSubview:playPauseButton];
+		_playPauseButton = [UIButton buttonWithType:UIButtonTypeCustom];
+		[_playPauseButton setHidden:YES];
+		[_playPauseButton setEnabled:NO];
+		[_playPauseButton setImage:[[UIImage imageNamed:@"Play"] imageWithColorOverlay:[UIColor pm_darkColor]] forState:UIControlStateNormal];
+		[_playPauseButton addTarget:self action:@selector(playPauseButtonWasTapped:) forControlEvents:UIControlEventTouchUpInside];
+		[self addSubview:_playPauseButton];
 		
-		skipBackwardButton = [UIButton buttonWithType:UIButtonTypeCustom];
-		[skipBackwardButton setHidden:YES];
-		[skipBackwardButton setEnabled:NO];
-		[skipBackwardButton setImage:[[UIImage imageNamed:@"SkipBackward"] imageWithColorOverlay:[UIColor pm_darkColor]] forState:UIControlStateNormal];
-		[skipBackwardButton addTarget:self action:@selector(skipBackwardButtonWasTapped:) forControlEvents:UIControlEventTouchUpInside];
-		[self addSubview:skipBackwardButton];
+		_skipBackwardButton = [UIButton buttonWithType:UIButtonTypeCustom];
+		[_skipBackwardButton setHidden:YES];
+		[_skipBackwardButton setEnabled:NO];
+		[_skipBackwardButton setImage:[[UIImage imageNamed:@"SkipBackward"] imageWithColorOverlay:[UIColor pm_darkColor]] forState:UIControlStateNormal];
+		[_skipBackwardButton addTarget:self action:@selector(skipBackwardButtonWasTapped:) forControlEvents:UIControlEventTouchUpInside];
+		[self addSubview:_skipBackwardButton];
 		
-		skipForwardButton = [UIButton buttonWithType:UIButtonTypeCustom];
-		[skipForwardButton setHidden:YES];
-		[skipForwardButton setEnabled:NO];
-		[skipForwardButton setImage:[[UIImage imageNamed:@"SkipForward"] imageWithColorOverlay:[UIColor pm_darkColor]] forState:UIControlStateNormal];
-		[skipForwardButton addTarget:self action:@selector(skipForwardButtonWasTapped:) forControlEvents:UIControlEventTouchUpInside];
-		[self addSubview:skipForwardButton];
+		_skipForwardButton = [UIButton buttonWithType:UIButtonTypeCustom];
+		[_skipForwardButton setHidden:YES];
+		[_skipForwardButton setEnabled:NO];
+		[_skipForwardButton setImage:[[UIImage imageNamed:@"SkipForward"] imageWithColorOverlay:[UIColor pm_darkColor]] forState:UIControlStateNormal];
+		[_skipForwardButton addTarget:self action:@selector(skipForwardButtonWasTapped:) forControlEvents:UIControlEventTouchUpInside];
+		[self addSubview:_skipForwardButton];
 		
 		[self setNeedsLayout];
 		
@@ -72,23 +79,23 @@
 
 - (void)layoutSubviews {
 	
-	[timeView setFrame:CGRectMake(0, self.bounds.size.height - 12, self.bounds.size.width, 12)];
+	[_timeView setFrame:CGRectMake(0, self.bounds.size.height - 12, self.bounds.size.width, 12)];
 	
 	CGRect buttonRect = (CGRect){.size = {44, 44}};
-	CGFloat buttonCenterY = (self.bounds.size.height - timeView.bounds.size.height) / 2;
+	CGFloat buttonCenterY = (self.bounds.size.height - _timeView.bounds.size.height) / 2;
 	
-	[queueButton setFrame:buttonRect];
-	[queueButton setCenter:(CGPoint){19, buttonCenterY}];
+	[_queueButton setFrame:buttonRect];
+	[_queueButton setCenter:(CGPoint){19, buttonCenterY}];
 	
-	[playPauseButton setFrame:buttonRect];
-	[playPauseButton setCenter:(CGPoint){CGRectGetMidX(self.bounds), buttonCenterY}];
-	[spinner setFrame:playPauseButton.frame];
+	[_playPauseButton setFrame:buttonRect];
+	[_playPauseButton setCenter:(CGPoint){CGRectGetMidX(self.bounds), buttonCenterY}];
+	[_spinner setFrame:_playPauseButton.frame];
 	
-	[skipBackwardButton setFrame:buttonRect];
-	[skipBackwardButton setCenter:(CGPoint){(queueButton.center.x + playPauseButton.center.x) / 2, buttonCenterY}];
+	[_skipBackwardButton setFrame:buttonRect];
+	[_skipBackwardButton setCenter:(CGPoint){(_queueButton.center.x + _playPauseButton.center.x) / 2, buttonCenterY}];
 	
-	[skipForwardButton setFrame:buttonRect];
-	[skipForwardButton setCenter:(CGPoint){self.bounds.size.width - skipBackwardButton.center.x, buttonCenterY}];
+	[_skipForwardButton setFrame:buttonRect];
+	[_skipForwardButton setCenter:(CGPoint){self.bounds.size.width - _skipBackwardButton.center.x, buttonCenterY}];
 }
 
 #pragma mark - Property Overrides
@@ -98,21 +105,21 @@
 }
 
 - (void)setPlayerControlsHidden:(BOOL)flag {
-	playerControlsHidden = flag;
-	[playPauseButton setHidden:flag];
-	[skipBackwardButton setHidden:flag];
-	[skipForwardButton setHidden:flag];
+	_playerControlsHidden = flag;
+	[_playPauseButton setHidden:flag];
+	[_skipBackwardButton setHidden:flag];
+	[_skipForwardButton setHidden:flag];
 	
-	if (flag) [spinner stopAnimating];
+	if (flag) [_spinner stopAnimating];
 }
 
 - (void)setShadowHidden:(BOOL)flag {
-	shadowHidden = flag;
+	_shadowHidden = flag;
 	[self.layer setShadowOpacity:(flag ? 0 : 1)];
 }
 
 - (void)setQueueButtonColor:(UIColor *)color {
-	[queueButton setImage:[[UIImage imageNamed:@"Queue"] imageWithColorOverlay:color] forState:UIControlStateNormal];
+	[_queueButton setImage:[[UIImage imageNamed:@"Queue"] imageWithColorOverlay:color] forState:UIControlStateNormal];
 }
 
 #pragma mark - Button Actions
@@ -133,21 +140,21 @@
 	
 	AVPlayerPlayStatus playStatus = [[MusicQueueController sharedController] playStatus];
 	
-	if (!playerControlsHidden){
-		if (playStatus == AVPlayerPlayStatusLoading) [spinner startAnimating];
-		else [spinner stopAnimating];
+	if (!_playerControlsHidden){
+		if (playStatus == AVPlayerPlayStatusLoading) [_spinner startAnimating];
+		else [_spinner stopAnimating];
 		
-		[playPauseButton setHidden:(playStatus == AVPlayerPlayStatusLoading)];
+		[_playPauseButton setHidden:(playStatus == AVPlayerPlayStatusLoading)];
 	}
 	
 	NSString * imageName = (playStatus == AVPlayerPlayStatusPlaying ? @"Pause" : @"Play");
-	[playPauseButton setImage:[[UIImage imageNamed:imageName] imageWithColorOverlay:[UIColor pm_darkColor]] forState:UIControlStateNormal];
+	[_playPauseButton setImage:[[UIImage imageNamed:imageName] imageWithColorOverlay:[UIColor pm_darkColor]] forState:UIControlStateNormal];
 	
-	[skipBackwardButton setEnabled:[[MusicQueueController sharedController] canSkipBackward]];
-	[skipForwardButton setEnabled:[[MusicQueueController sharedController] canSkipForward]];
-	[playPauseButton setEnabled:(skipForwardButton.enabled || skipBackwardButton.enabled || [[MusicQueueController sharedController] currentSong])];
+	[_skipBackwardButton setEnabled:[[MusicQueueController sharedController] canSkipBackward]];
+	[_skipForwardButton setEnabled:[[MusicQueueController sharedController] canSkipForward]];
+	[_playPauseButton setEnabled:(_skipForwardButton.enabled || _skipBackwardButton.enabled || [[MusicQueueController sharedController] currentSong])];
 	
-	[self setQueueButtonColor:(playPauseButton.enabled ? [UIColor pm_blueColor] : [UIColor pm_darkColor])];
+	[self setQueueButtonColor:(_playPauseButton.enabled ? [UIColor pm_blueColor] : [UIColor pm_darkColor])];
 }
 
 @end

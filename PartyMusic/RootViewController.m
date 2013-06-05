@@ -23,45 +23,55 @@
 CGFloat const kSearchBarHeight = 44;
 CGFloat const kQueueControlViewHeight = 56;
 
-@implementation RootViewController
+@implementation RootViewController {
+	RootScrollView * _scrollView;
+	
+	SearchViewController * _searchViewController;
+	SearchField * _searchField;
+	
+	DevicesView * _devicesView;
+	
+	QueueControlView * _queueControlView;
+	QueueViewController * _queueViewController;
+}
 
 - (void)viewDidLoad {
 	
-	scrollView = [[RootScrollView alloc] initWithFrame:self.view.bounds];
-	[self.view addSubview:scrollView];
-	[scrollView release];
+	_scrollView = [[RootScrollView alloc] initWithFrame:self.view.bounds];
+	[self.view addSubview:_scrollView];
+	[_scrollView release];
 	
-	devicesView = [[DevicesView alloc] initWithFrame:scrollView.bounds];
-	[scrollView addSubview:devicesView];
-	[devicesView release];
+	_devicesView = [[DevicesView alloc] initWithFrame:_scrollView.bounds];
+	[_scrollView addSubview:_devicesView];
+	[_devicesView release];
 	
-	searchField = [[SearchField alloc] initWithFrame:CGRectZero];
-	[searchField addTarget:self action:@selector(searchFieldDidBeginEditing:) forControlEvents:UIControlEventEditingDidBegin];
-	[scrollView addSubview:searchField];
-	[searchField release];
+	_searchField = [[SearchField alloc] initWithFrame:CGRectZero];
+	[_searchField addTarget:self action:@selector(searchFieldDidBeginEditing:) forControlEvents:UIControlEventEditingDidBegin];
+	[_scrollView addSubview:_searchField];
+	[_searchField release];
 	
 	UILongPressGestureRecognizer * longPressRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(searchButtonWasLongPressed:)];
-	[searchField.searchButton addGestureRecognizer:longPressRecognizer];
+	[_searchField.searchButton addGestureRecognizer:longPressRecognizer];
 	[longPressRecognizer release];
 	
-	searchViewController = [[SearchViewController alloc] init];
-	[searchViewController setSearchField:searchField];
-	[self addChildViewController:searchViewController];
-	[searchViewController release];
+	_searchViewController = [[SearchViewController alloc] init];
+	[_searchViewController setSearchField:_searchField];
+	[self addChildViewController:_searchViewController];
+	[_searchViewController release];
 	
 	DeviceView * deviceView = [[DeviceView alloc] initWithDevice:[[DevicesManager sharedManager] ownDevice]];
-	[devicesView addDeviceView:deviceView];
+	[_devicesView addDeviceView:deviceView];
 	[deviceView release];
 	
-	queueControlView = [[QueueControlView alloc] initWithFrame:CGRectZero];
-	[queueControlView.queueButton addTarget:self action:@selector(queueButtonWasTapped:) forControlEvents:UIControlEventTouchUpInside];
-	[scrollView addSubview:queueControlView];
-	[queueControlView release];
+	_queueControlView = [[QueueControlView alloc] initWithFrame:CGRectZero];
+	[_queueControlView.queueButton addTarget:self action:@selector(queueButtonWasTapped:) forControlEvents:UIControlEventTouchUpInside];
+	[_scrollView addSubview:_queueControlView];
+	[_queueControlView release];
 	
-	queueViewController = [[QueueViewController alloc] init];
-	[scrollView addSubview:queueViewController.view];
-	[self addChildViewController:queueViewController];
-	[queueViewController release];
+	_queueViewController = [[QueueViewController alloc] init];
+	[_scrollView addSubview:_queueViewController.view];
+	[self addChildViewController:_queueViewController];
+	[_queueViewController release];
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceAudioOutputDidChange:) name:UIDeviceAudioOutputDidChangeNotificationName object:nil];
 	[[UIDevice currentDevice] beginGeneratingDeviceAudioOutputChangeNotifications];
@@ -79,35 +89,35 @@ CGFloat const kQueueControlViewHeight = 56;
 
 - (void)viewDidResizeToNewOrientation {
 	
-	[scrollView setFrame:self.view.bounds];
+	[_scrollView setFrame:self.view.bounds];
 	
-	[searchField setFrame:CGRectMake(0, 0, scrollView.bounds.size.width, kSearchBarHeight)];
-	[devicesView setFrame:CGRectMake(0, CGRectGetMaxY(searchField.frame), scrollView.bounds.size.width, scrollView.bounds.size.height - kSearchBarHeight - kQueueControlViewHeight)];
+	[_searchField setFrame:CGRectMake(0, 0, _scrollView.bounds.size.width, kSearchBarHeight)];
+	[_devicesView setFrame:CGRectMake(0, CGRectGetMaxY(_searchField.frame), _scrollView.bounds.size.width, _scrollView.bounds.size.height - kSearchBarHeight - kQueueControlViewHeight)];
 	
-	[queueControlView setFrame:CGRectMake(0, CGRectGetMaxY(devicesView.frame), scrollView.bounds.size.width, kQueueControlViewHeight)];
+	[_queueControlView setFrame:CGRectMake(0, CGRectGetMaxY(_devicesView.frame), _scrollView.bounds.size.width, kQueueControlViewHeight)];
 	
-	[searchViewController.view setFrame:devicesView.frame];
-	[searchViewController viewDidResizeToNewOrientation];
+	[_searchViewController.view setFrame:_devicesView.frame];
+	[_searchViewController viewDidResizeToNewOrientation];
 	
-	[queueViewController.view setFrame:CGRectMake(0, CGRectGetMaxY(queueControlView.frame), scrollView.bounds.size.width, scrollView.bounds.size.height - kQueueControlViewHeight)];
-	[queueViewController viewDidResizeToNewOrientation];
+	[_queueViewController.view setFrame:CGRectMake(0, CGRectGetMaxY(_queueControlView.frame), _scrollView.bounds.size.width, _scrollView.bounds.size.height - kQueueControlViewHeight)];
+	[_queueViewController viewDidResizeToNewOrientation];
 	
-	[scrollView setContentSize:CGSizeMake(scrollView.bounds.size.width, CGRectGetMaxY(queueViewController.view.frame))];
+	[_scrollView setContentSize:CGSizeMake(_scrollView.bounds.size.width, CGRectGetMaxY(_queueViewController.view.frame))];
 }
 
 - (void)searchFieldDidBeginEditing:(NSNotification *)notification {
-	[scrollView addSubview:searchViewController.view];
-	[scrollView bringSubviewToFront:searchField];
-	[scrollView bringSubviewToFront:queueControlView];
+	[_scrollView addSubview:_searchViewController.view];
+	[_scrollView bringSubviewToFront:_searchField];
+	[_scrollView bringSubviewToFront:_queueControlView];
 	[self viewDidResizeToNewOrientation];
 }
 
 - (void)searchButtonWasLongPressed:(UILongPressGestureRecognizer *)sender {
 	
 	SearchSourcesViewController * viewController = [[SearchSourcesViewController alloc] init];
-	[viewController setSearchSources:searchViewController.searchSources];
+	[viewController setSearchSources:_searchViewController.searchSources];
 	ViewControllerContainer * container = [[ViewControllerContainer alloc] initWithViewController:viewController dismissHandler:^{
-		[searchViewController setSearchSources:viewController.searchSources];
+		[_searchViewController setSearchSources:viewController.searchSources];
 	}];
 	[viewController release];
 	
@@ -116,55 +126,55 @@ CGFloat const kQueueControlViewHeight = 56;
 }
 
 - (void)queueButtonWasTapped:(UIButton *)sender {
-	if (scrollView.contentOffset.y == 0) [scrollView setContentOffset:CGPointMake(0, CGRectGetMinY(queueControlView.frame)) animated:YES];
-	else [scrollView setContentOffset:CGPointMake(0, 0) animated:YES];
+	if (_scrollView.contentOffset.y == 0) [_scrollView setContentOffset:CGPointMake(0, CGRectGetMinY(_queueControlView.frame)) animated:YES];
+	else [_scrollView setContentOffset:CGPointMake(0, 0) animated:YES];
 }
 
 - (void)windowDidShake:(NSNotification *)notification {
 	
 	[[DevicesManager sharedManager] broadcastAction:DeviceActionShake];
-	[devicesView.ownDeviceView shake];
+	[_devicesView.ownDeviceView shake];
 }
 
 - (void)deviceAudioOutputDidChange:(NSNotification *)notfication {
 	
 	if ([[UIDevice currentDevice] audioOutputConnected]){
 		if (![[[DevicesManager sharedManager] ownDevice] isOutput]){
-			[devicesView.ownDeviceView showOutputPrompt];
+			[_devicesView.ownDeviceView showOutputPrompt];
 		}
 	}
 }
 
 - (void)deviceOutputStatusDidChange:(NSNotification *)notification {
-	[queueControlView setPlayerControlsHidden:![[[DevicesManager sharedManager] ownDevice] isOutput]];
+	[_queueControlView setPlayerControlsHidden:![[[DevicesManager sharedManager] ownDevice] isOutput]];
 }
 
 #pragma mark - Device Controller Stuff
 - (void)deviceControllerDidAddDevice:(NSNotification *)notification {
 	
 	DeviceView * deviceView = [[DeviceView alloc] initWithDevice:notification.object];
-	[devicesView addDeviceView:deviceView];
+	[_devicesView addDeviceView:deviceView];
 	[deviceView release];
 }
 
 - (void)deviceControllerDidRemoveDevice:(NSNotification *)notification {
 	
 	__block DeviceView * targetView = nil;
-	[devicesView.subviews enumerateObjectsUsingBlock:^(DeviceView * deviceView, NSUInteger idx, BOOL *stop) {
+	[_devicesView.subviews enumerateObjectsUsingBlock:^(DeviceView * deviceView, NSUInteger idx, BOOL *stop) {
 		if ([deviceView.device isEqual:notification.object]){
 			targetView = deviceView;
 			*stop = YES;
 		}
 	}];
 	
-	[devicesView removeDeviceView:targetView];
+	[_devicesView removeDeviceView:targetView];
 }
 
 - (void)deviceDidReceiveHarlem:(NSNotification *)notification {
 	
 	BOOL playing = [[MusicQueueController sharedController] playStatus] == AVPlayerPlayStatusPlaying;
 	if (playing) [[MusicQueueController sharedController] pause];
-	[devicesView harlemShakeWithAudio:YES completion:^{
+	[_devicesView harlemShakeWithAudio:YES completion:^{
 		if (playing) [[MusicQueueController sharedController] play];
 	}];
 }

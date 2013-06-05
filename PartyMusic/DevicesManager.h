@@ -17,26 +17,7 @@ extern NSString * const DevicesManagerDidReceiveOutputChangeNotificationName;
 extern NSString * const kUserInterfaceIdiomTXTRecordKeyName;
 
 typedef void (^DevicesManagerSearchCallback)(Device * device, NSDictionary * results);
-
-@class GCDAsyncSocket;
-
-@interface DevicesManager : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, DeviceDelegate> {
-	
-	OwnDevice * ownDevice;
-	NSNetService * ownService;
-	
-	dispatch_queue_t socketQueue;
-	GCDAsyncSocket * incomingSocket;
-	
-	NSMutableArray * devices;
-	NSMutableArray * pendingConnections;
-	NSMutableArray * services;
-	NSNetServiceBrowser * serviceBrowser;
-	
-	NSMutableDictionary * songRequestDictionary;
-	
-	BOOL searching;
-}
+@interface DevicesManager : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, DeviceDelegate>
 
 @property (nonatomic, readonly) OwnDevice * ownDevice;
 @property (nonatomic, readonly) Device * outputDevice;

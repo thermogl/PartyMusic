@@ -8,12 +8,6 @@
 
 #import "OrientationAwareViewController.h"
 
-@interface ViewControllerContainer : OrientationAwareViewController {
-	UIViewController * viewController;
-	UIView * navigationBar;
-	void (^dismissHandler)();
-}
-
+@interface ViewControllerContainer : OrientationAwareViewController
 - (id)initWithViewController:(UIViewController *)controller dismissHandler:(void(^)(void))handler;
-
 @end

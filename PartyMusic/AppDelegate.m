@@ -13,40 +13,45 @@
 #import "ShakeDetectingWindow.h"
 #import "MusicQueueController.h"
 
-@implementation AppDelegate
+@implementation AppDelegate {
+	ShakeDetectingWindow * _window;
+	UIBackgroundTaskIdentifier _backgroundTaskIdentifier;
+}
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 	[application setIdleTimerDisabled:YES];
 	[application beginReceivingRemoteControlEvents];
 	
-	window = [[ShakeDetectingWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+	_window = [[ShakeDetectingWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
 	
 	RootViewController * rootViewController = [[RootViewController alloc] init];
-	[window setRootViewController:rootViewController];
+	[_window setRootViewController:rootViewController];
 	[rootViewController release];
 	
-	[window makeKeyAndVisible];
+	[_window makeKeyAndVisible];
 	
     return YES;
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
 	
-	backgroundTaskIdentifier = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
+	_backgroundTaskIdentifier = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
 		
+		/*
 		UILocalNotification * localNotification = [[UILocalNotification alloc] init];
-		[localNotification setAlertBody:@"All My Bros DJ is about to quit. Please relaunch to continue DJ'ing."];
+		[localNotification setAlertBody:@"PartyMusic is about to quit. Please relaunch to continue DJ'ing."];
 		[[UIApplication sharedApplication] presentLocalNotificationNow:localNotification];
 		[localNotification release];
+		 */
 		
 		[[DevicesManager sharedManager] stopSearching];
-		backgroundTaskIdentifier = UIBackgroundTaskInvalid;
+		_backgroundTaskIdentifier = UIBackgroundTaskInvalid;
 	}];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
 	
-	[[UIApplication sharedApplication] endBackgroundTask:backgroundTaskIdentifier];
+	[[UIApplication sharedApplication] endBackgroundTask:_backgroundTaskIdentifier];
 	[[DevicesManager sharedManager] startSearching];
 }
 
@@ -66,7 +71,7 @@
 }
 
 - (void)dealloc {
-	[window release];
+	[_window release];
     [super dealloc];
 }
 

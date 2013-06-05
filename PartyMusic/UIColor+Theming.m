@@ -11,11 +11,13 @@
 @implementation UIColor (Theming)
 
 + (UIColor *)pm_blueColor {
-	return [UIColor colorWithRed:0.110 green:0.643 blue:0.988 alpha:1];
+	return [UIColor colorWithRed:0.267 green:0.551 blue:0.748 alpha:1];
+	//return [UIColor colorWithRed:0.110 green:0.643 blue:0.988 alpha:1];
 }
 
 + (UIColor *)pm_redColor {
-	return [UIColor colorWithRed:0.988 green:0.271 blue:0.216 alpha:1];
+	return [UIColor colorWithRed:0.7 green:0.332 blue:0.306 alpha:1];
+	//return [UIColor colorWithRed:0.988 green:0.271 blue:0.216 alpha:1];
 }
 
 + (UIColor *)pm_lightColor {

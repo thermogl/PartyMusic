@@ -13,11 +13,11 @@
 @end
 
 @implementation SearchResultsHeaderView
-@synthesize title;
+@synthesize title = _title;
 
 - (void)setTitle:(NSString *)newTitle {
-	[title release];
-	title = [newTitle copy];
+	[_title release];
+	_title = [newTitle copy];
 	[self setNeedsDisplay];
 }
 
@@ -29,7 +29,7 @@
 	CGContextSetShadowWithColor(UIGraphicsGetCurrentContext(), CGSizeMake(0, 1), 1, [[UIColor pm_darkColor] CGColor]);
 	
 	[[UIColor pm_lightColor] set];
-	[title drawInRect:CGRectInset(rect, 5, 0) withFont:[UIFont boldSystemFontOfSize:16]];
+	[_title drawInRect:CGRectInset(rect, 5, 0) withFont:[UIFont boldSystemFontOfSize:16]];
 }
 
 + (SearchResultsHeaderView *)headerViewWithTitle:(NSString *)title {
@@ -38,6 +38,11 @@
 	[headerView setBackgroundColor:[UIColor clearColor]];
 	[headerView setTitle:title];
 	return [headerView autorelease];
+}
+
+- (void)dealloc {
+	[_title release];
+	[super dealloc];
 }
 
 @end

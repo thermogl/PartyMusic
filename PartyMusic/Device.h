@@ -63,33 +63,13 @@ typedef void (^DeviceQueueCallback)(BOOL successful);
 
 @protocol DeviceDelegate;
 @class GCDAsyncSocket, DevicePacket, MusicQueueItem;
-@interface Device : NSObject <NSNetServiceDelegate> {
-	
-	id <DeviceDelegate> delegate;
-	
-	NSNetService * netService;
-	
-	dispatch_queue_t outgoingQueue;
-	dispatch_queue_t incomingQueue;
-	GCDAsyncSocket * outgoingSocket;
-	GCDAsyncSocket * incomingSocket;
-	
-	DevicePacket * incomingPacket;
-	
-	NSString * UUID;
-	UIUserInterfaceIdiom interfaceIdiom;
-	UIInterfaceOrientation interfaceOrientation;
-	BOOL isOutput;
-	
-	NSMutableDictionary * callbacks;
-}
-
+@interface Device : NSObject <NSNetServiceDelegate>
 @property (nonatomic, assign) id <DeviceDelegate> delegate;
 @property (nonatomic, readonly) NSNetService * netService;
 @property (nonatomic, readonly) GCDAsyncSocket * outgoingSocket;
 @property (nonatomic, retain) GCDAsyncSocket * incomingSocket;
 @property (nonatomic, copy) NSString * UUID;
-@property (nonatomic, readonly) UIUserInterfaceIdiom interfaceIdiom;
+@property (nonatomic, assign, readonly) UIUserInterfaceIdiom interfaceIdiom;
 @property (nonatomic, assign) UIInterfaceOrientation interfaceOrientation;
 @property (nonatomic, assign) BOOL isOutput;
 @property (nonatomic, readonly) BOOL isOwnDevice;
@@ -152,14 +132,7 @@ typedef struct {
 DevicePacketHeader DevicePacketHeaderMake(DevicePayloadType type, NSUInteger payloadLength, NSString * identifier, BOOL moreComing);
 NSData * DevicePacketHeaderToData(DevicePacketHeader header, NSData * payloadData);
 
-@interface DevicePacket : NSObject {
-	DevicePayloadType payloadType;
-	NSString * identifier;
-	NSUInteger expectedLength;
-	NSMutableData * incomingData;
-	BOOL moreComing;
-}
-
+@interface DevicePacket : NSObject
 @property (nonatomic, readonly) DevicePayloadType payloadType;
 @property (nonatomic, readonly) NSString * identifier;
 @property (nonatomic, readonly) NSUInteger lengthRequired;
@@ -168,5 +141,4 @@ NSData * DevicePacketHeaderToData(DevicePacketHeader header, NSData * payloadDat
 
 - (id)initWithDevicePacketHeader:(DevicePacketHeader)header;
 - (BOOL)appendData:(NSData *)data;
-
 @end
