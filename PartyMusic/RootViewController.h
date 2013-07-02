@@ -8,9 +8,5 @@
 
 #import "OrientationAwareViewController.h"
 
-@interface RootViewController : OrientationAwareViewController {
-	
-	
-}
-
+@interface RootViewController : OrientationAwareViewController
 @end

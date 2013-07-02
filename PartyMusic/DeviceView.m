@@ -97,7 +97,8 @@
 }
 
 - (void)showOutputPrompt {
-	[self setVelocity:CGPointMake(0, -800)];
+	
+	[UIAlertView showWithTitle:@"Become output?" message:nil];
 }
 
 #pragma mark - Property Overrides
