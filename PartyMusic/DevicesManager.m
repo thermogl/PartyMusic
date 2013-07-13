@@ -52,9 +52,9 @@ NSString * const kUserInterfaceIdiomTXTRecordKeyName = @"UserInterfaceIdiomTXTRe
 		_ownDevice = [[OwnDevice alloc] init];
 		[_ownDevice setDelegate:self];
 		
-		_devices = [[NSMutableArray alloc] init];
-		_services = [[NSMutableArray alloc] init];
-		_pendingConnections = [[NSMutableArray alloc] init];
+		_devices = [NSMutableArray array];
+		_services = [NSMutableArray array];
+		_pendingConnections = [NSMutableArray array];
 		
 		_serviceBrowser = [[NSNetServiceBrowser alloc] init];
 		
@@ -62,7 +62,7 @@ NSString * const kUserInterfaceIdiomTXTRecordKeyName = @"UserInterfaceIdiomTXTRe
 		_incomingSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:_socketQueue];
 		_searching = NO;
 		
-		_songRequestDictionary = [[NSMutableDictionary alloc] init];
+		_songRequestDictionary = [NSMutableDictionary dictionary];
 	}
 	
 	return self;

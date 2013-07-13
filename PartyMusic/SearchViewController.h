@@ -16,12 +16,7 @@ typedef NS_OPTIONS(NSUInteger, SearchSources){
 };
 
 @class SearchResultsViewController, SearchField;
-@interface SearchViewController : OrientationAwareViewController <UITextFieldDelegate> {
-	
-	
-}
-
+@interface SearchViewController : OrientationAwareViewController <UITextFieldDelegate>
 @property (nonatomic, assign) SearchSources searchSources;
 @property (nonatomic, weak) SearchField * searchField;
-
 @end

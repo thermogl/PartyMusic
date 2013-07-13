@@ -35,14 +35,6 @@
 - (void)applicationDidEnterBackground:(UIApplication *)application {
 	
 	_backgroundTaskIdentifier = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
-		
-		/*
-		UILocalNotification * localNotification = [[UILocalNotification alloc] init];
-		[localNotification setAlertBody:@"PartyMusic is about to quit. Please relaunch to continue DJ'ing."];
-		[[UIApplication sharedApplication] presentLocalNotificationNow:localNotification];
-		[localNotification release];
-		 */
-		
 		[[DevicesManager sharedManager] stopSearching];
 		_backgroundTaskIdentifier = UIBackgroundTaskInvalid;
 	}];

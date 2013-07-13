@@ -38,12 +38,12 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 	
 	if ((self = [super init])){
 		
-		_player = [[AVPlayer alloc] initWithURL:nil];
+		_player = [AVPlayer playerWithURL:nil];
 		[_player addObserver:self forKeyPath:@"rate" options:0 context:nil];
 		
-		_previousSongQueue = [[NSMutableArray alloc] init];
+		_previousSongQueue = [NSMutableArray array];
 		_currentSong = nil;
-		_nextSongQueue = [[NSMutableArray alloc] init];
+		_nextSongQueue = [NSMutableArray array];
 		
 		[[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:NULL];
 		[[AVAudioSession sharedInstance] setActive:YES error:NULL];
@@ -69,7 +69,7 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 
 - (NSArray *)queue {
 	
-	NSMutableArray * queue = [[NSMutableArray alloc] init];
+	NSMutableArray * queue = [NSMutableArray array];
 	[queue addObjectsFromArray:_previousSongQueue];
 	if (_currentSong) [queue addObject:_currentSong];
 	[queue addObjectsFromArray:_nextSongQueue];
@@ -107,7 +107,7 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 
 - (NSDictionary *)JSONQueue {
 	
-	NSMutableDictionary * dictionary = [[NSMutableDictionary alloc] init];
+	NSMutableDictionary * dictionary = [NSMutableDictionary dictionary];
 	
 	if (_currentSong){
 		[_currentSong setCurrentTime:_player.currentItem.currentTime];
@@ -116,7 +116,7 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 	
 	if (self.canSkipBackward){
 		
-		NSMutableArray * previousSongsDicts = [[NSMutableArray alloc] initWithCapacity:_previousSongQueue.count];
+		NSMutableArray * previousSongsDicts = [NSMutableArray arrayWithCapacity:_previousSongQueue.count];
 		[_previousSongQueue enumerateObjectsUsingBlock:^(MusicQueueItem * item, NSUInteger idx, BOOL *stop) {
 			[previousSongsDicts addObject:item.JSONDictionary];
 		}];
@@ -125,7 +125,7 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 	
 	if (self.canSkipForward){
 		
-		NSMutableArray * nextSongsDicts = [[NSMutableArray alloc] initWithCapacity:_nextSongQueue.count];
+		NSMutableArray * nextSongsDicts = [NSMutableArray arrayWithCapacity:_nextSongQueue.count];
 		[_nextSongQueue enumerateObjectsUsingBlock:^(MusicQueueItem * item, NSUInteger idx, BOOL *stop) {
 			[nextSongsDicts addObject:item.JSONDictionary];
 		}];

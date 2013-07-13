@@ -91,7 +91,7 @@ typedef enum {
 		
 		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (15.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 			
-			NSMutableArray * views = [[NSMutableArray alloc] init];
+			NSMutableArray * views = [NSMutableArray array];
 			[self setHarlemViews:views];
 			
 			[self.subviews enumerateObjectsUsingBlock:^(DeviceView * deviceView, NSUInteger idx, BOOL *stop) {

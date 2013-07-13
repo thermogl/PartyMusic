@@ -125,7 +125,7 @@
 #pragma mark - Gesture Handlers
 - (void)viewWasTapped:(UITapGestureRecognizer *)sender {
 	
-	NSMutableArray * items = [[NSMutableArray alloc] init];
+	NSMutableArray * items = [NSMutableArray array];
 	
 	UIMenuItem * browseItem = [[UIMenuItem alloc] initWithTitle:@"Browse Library" action:@selector(browseLibraryMenuItemWasTapped:)];
 	[items addObject:browseItem];

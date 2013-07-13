@@ -52,7 +52,7 @@
 							size_t length = CMBlockBufferGetDataLength(blockBufferRef);
 							if (length > 0){
 								
-								NSMutableData * buffer = [[NSMutableData alloc] initWithLength:length];
+								NSMutableData * buffer = [NSMutableData dataWithLength:length];
 								CMBlockBufferCopyDataBytes(blockBufferRef, 0, length, buffer.mutableBytes);
 								dispatch_async(dispatch_get_main_queue(), ^{callback(buffer, YES);});
 							}

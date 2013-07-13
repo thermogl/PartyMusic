@@ -67,7 +67,7 @@ NSInteger const kSocketReadTagBody = 1;
 		_outgoingSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:_outgoingQueue];
 		_interfaceIdiom = [[_netService.TXTRecordDictionary objectForKey:kUserInterfaceIdiomTXTRecordKeyName] integerValue];
 		_isOutput = NO;
-		_callbacks = [[NSMutableDictionary alloc] init];
+		_callbacks = [NSMutableDictionary dictionary];
 		
 		[self connect:NULL];
 	}
@@ -203,14 +203,10 @@ NSInteger const kSocketReadTagBody = 1;
 		DevicePacket * packet = [[DevicePacket alloc] initWithDevicePacketHeader:packetHeader];
 		[self setIncomingPacket:packet];
 		
-		if (packetHeader.payloadLength){
-			[sock readDataToLength:_incomingPacket.lengthRequired withTimeout:-1 tag:kSocketReadTagBody];
-		}
-		else
-		{
+		if (!packetHeader.payloadLength){
 			[self handlePacketReceived:packet];
 			[self setIncomingPacket:nil];
-		}
+		} else [sock readDataToLength:_incomingPacket.lengthRequired withTimeout:-1 tag:kSocketReadTagBody];
 	}
 	else if (tag == kSocketReadTagBody){
 		
@@ -218,11 +214,7 @@ NSInteger const kSocketReadTagBody = 1;
 			[self handlePacketReceived:_incomingPacket];
 			[self setIncomingPacket:nil];
 			[sock readDataToLength:sizeof(DevicePacketHeader) withTimeout:-1 tag:kSocketReadTagHead];
-		}
-		else
-		{
-			[sock readDataToLength:_incomingPacket.lengthRequired withTimeout:-1 tag:kSocketReadTagBody];
-		}
+		} else [sock readDataToLength:_incomingPacket.lengthRequired withTimeout:-1 tag:kSocketReadTagBody];
 	}
 }
 
@@ -510,7 +502,7 @@ NSData * DevicePacketHeaderToData(DevicePacketHeader header, NSData * payloadDat
 		header.payloadLength = payloadData.length;
 	}
 	
-	NSMutableData * data = [[NSMutableData alloc] initWithCapacity:(sizeof(header) + header.payloadLength)];
+	NSMutableData * data = [NSMutableData dataWithCapacity:(sizeof(header) + header.payloadLength)];
 	[data appendBytes:&header length:sizeof(header)];
 	[data appendData:payloadData];
 	return data;
@@ -530,7 +522,7 @@ NSData * DevicePacketHeaderToData(DevicePacketHeader header, NSData * payloadDat
 		_payloadType = header.payloadType;
 		_expectedLength = header.payloadLength;
 		_identifier = [NSString UT8StringWithBytes:header.identifier length:36];
-		_incomingData = [[NSMutableData alloc] initWithCapacity:_expectedLength];
+		_incomingData = [NSMutableData dataWithCapacity:_expectedLength];
 		_moreComing = header.moreComing;
 	}
 	

@@ -57,7 +57,7 @@ NSString * const kDictionarySubtitleKey = @"DictionarySubtitleKey";
 	MPMediaQuery * artistsQuery = [MPMediaQuery artistsQuery];
 	[artistsQuery setFilterPredicates:filterPredicates];
 	
-	NSMutableArray * containers = [[NSMutableArray alloc] init];
+	NSMutableArray * containers = [NSMutableArray array];
 	[artistsQuery.collections enumerateObjectsUsingBlock:^(MPMediaItemCollection * collection, NSUInteger idx, BOOL *stop) {
 		
 		MusicContainer * container = [[MusicContainer alloc] init];
@@ -76,7 +76,7 @@ NSString * const kDictionarySubtitleKey = @"DictionarySubtitleKey";
 	MPMediaQuery * albumsQuery = [MPMediaQuery albumsQuery];
 	[albumsQuery setFilterPredicates:filterPredicates];
 	
-	NSMutableArray * containers = [[NSMutableArray alloc] init];
+	NSMutableArray * containers = [NSMutableArray array];
 	[albumsQuery.collections enumerateObjectsUsingBlock:^(MPMediaItemCollection * collection, NSUInteger idx, BOOL *stop) {
 		
 		MusicContainer * container = [[MusicContainer alloc] init];
@@ -95,7 +95,7 @@ NSString * const kDictionarySubtitleKey = @"DictionarySubtitleKey";
 	MPMediaQuery * songsQuery = [MPMediaQuery songsQuery];
 	[songsQuery setFilterPredicates:filterPredicates];
 	
-	NSMutableArray * containers = [[NSMutableArray alloc] init];
+	NSMutableArray * containers = [NSMutableArray array];
 	[songsQuery.items enumerateObjectsUsingBlock:^(MPMediaItem * item, NSUInteger idx, BOOL *stop) {
 		
 		if ([item valueForProperty:MPMediaItemPropertyAssetURL]){
@@ -176,7 +176,7 @@ NSString * const kDictionarySubtitleKey = @"DictionarySubtitleKey";
 #pragma mark - Conversion
 + (NSArray *)containersFromJSONDictionaries:(NSArray *)jsonDictionaries device:(Device *)device {
 		
-	NSMutableArray * containers = [[NSMutableArray alloc] init];
+	NSMutableArray * containers = [NSMutableArray array];
 	[jsonDictionaries enumerateObjectsUsingBlock:^(NSDictionary * dict, NSUInteger idx, BOOL *stop) {
 		MusicContainer * container = [[MusicContainer alloc] initWithJSONDictionary:dict];
 		[container setDevice:device];

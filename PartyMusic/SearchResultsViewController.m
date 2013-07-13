@@ -43,11 +43,11 @@ NSString * const SearchResultsViewControllerScrolledNotificationName = @"SearchR
 	[self.tableView setBackgroundColor:[UIColor pm_lightColor]];
 	[self.tableView setSeparatorColor:[UIColor pm_darkLightColor]];
 	
-	_artists = [[NSMutableArray alloc] init];
-	_albums = [[NSMutableArray alloc] init];
-	_songs = [[NSMutableArray alloc] init];
-	_youTubes = [[NSMutableArray alloc] init];
-	_soundClouds = [[NSMutableArray alloc] init];
+	_artists = [NSMutableArray array];
+	_albums = [NSMutableArray array];
+	_songs = [NSMutableArray array];
+	_youTubes = [NSMutableArray array];
+	_soundClouds = [NSMutableArray array];
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceControllerDidRemoveDevice:) name:DevicesManagerDidRemoveDeviceNotificationName object:nil];
 }

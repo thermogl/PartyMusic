@@ -19,7 +19,7 @@
 
 - (NSDictionary *)TXTRecordDictionary {
 	
-	NSMutableDictionary * friendlyDict = [[NSMutableDictionary alloc] init];
+	NSMutableDictionary * friendlyDict = [NSMutableDictionary dictionary];
 	NSDictionary * TXTRecord = [NSNetService dictionaryFromTXTRecordData:self.TXTRecordData];
 	
 	for (id key in TXTRecord){
