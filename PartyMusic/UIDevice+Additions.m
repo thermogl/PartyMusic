@@ -36,13 +36,13 @@ NSString * const UIDeviceAudioOutputDidChangeNotificationName = @"UIDeviceAudioO
 
 - (void)beginGeneratingDeviceAudioOutputChangeNotifications {
 	
-	if (AudioSessionInitialize(NULL, NULL, NULL, self) == noErr){
-		AudioSessionAddPropertyListener(kAudioSessionProperty_AudioRouteChange, propListener, self);
+	if (AudioSessionInitialize(NULL, NULL, NULL, (__bridge void *)(self)) == noErr){
+		AudioSessionAddPropertyListener(kAudioSessionProperty_AudioRouteChange, propListener, (__bridge void *)(self));
 	}
 }
 
 - (void)endGeneratingDeviceAudioOutputChangeNotifications {
-	AudioSessionRemovePropertyListenerWithUserData(kAudioSessionProperty_AudioRouteChange, propListener, self);
+	AudioSessionRemovePropertyListenerWithUserData(kAudioSessionProperty_AudioRouteChange, propListener, (__bridge void *)(self));
 }
 
 - (BOOL)audioOutputConnected {

@@ -21,7 +21,7 @@
 	
 	if ((self = [super initWithFrame:frame])){
 		
-		_searchButton = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+		_searchButton = [UIButton buttonWithType:UIButtonTypeCustom];
 		[_searchButton setImage:[[UIImage imageNamed:@"Search"] imageWithColorOverlay:[UIColor pm_darkColor]] forState:UIControlStateNormal];
 		
 		_spinner = [[UIActivityIndicatorView alloc] initWithFrame:CGRectZero];
@@ -83,10 +83,5 @@
 }
 
 #pragma mark - Dealloc
-- (void)dealloc {
-	[_searchButton release];
-	[_spinner release];
-	[super dealloc];
-}
 
 @end

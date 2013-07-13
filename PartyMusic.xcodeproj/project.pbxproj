@@ -26,7 +26,7 @@
 		E230198816C9F606001685F6 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E230198716C9F606001685F6 /* Default@2x.png */; };
 		E230198A16C9F606001685F6 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E230198916C9F606001685F6 /* Default-568h@2x.png */; };
 		E230199216C9F652001685F6 /* RootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E230199116C9F652001685F6 /* RootViewController.m */; };
-		E230199516C9F8D8001685F6 /* TISpringLoadedView.m in Sources */ = {isa = PBXBuildFile; fileRef = E230199416C9F8D8001685F6 /* TISpringLoadedView.m */; };
+		E230199516C9F8D8001685F6 /* TISpringLoadedView.m in Sources */ = {isa = PBXBuildFile; fileRef = E230199416C9F8D8001685F6 /* TISpringLoadedView.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		E230199816C9FA37001685F6 /* DevicesView.m in Sources */ = {isa = PBXBuildFile; fileRef = E230199716C9FA37001685F6 /* DevicesView.m */; };
 		E230199B16C9FC56001685F6 /* DeviceView.m in Sources */ = {isa = PBXBuildFile; fileRef = E230199A16C9FC56001685F6 /* DeviceView.m */; };
 		E230199D16C9FC85001685F6 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E230199C16C9FC85001685F6 /* QuartzCore.framework */; };
@@ -64,7 +64,7 @@
 		E2B9657D16DBE1B7006FA800 /* QueueControlView.m in Sources */ = {isa = PBXBuildFile; fileRef = E2B9657C16DBE1B7006FA800 /* QueueControlView.m */; };
 		E2E1449E16DEEE01005F73B9 /* TrackFetcher.m in Sources */ = {isa = PBXBuildFile; fileRef = E2E1449D16DEEE01005F73B9 /* TrackFetcher.m */; };
 		E2FC82E316CAB38B002EDCEA /* SearchField.m in Sources */ = {isa = PBXBuildFile; fileRef = E2FC82E216CAB38B002EDCEA /* SearchField.m */; };
-		E2FC82E916CABECE002EDCEA /* GCDAsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = E2FC82E816CABECE002EDCEA /* GCDAsyncSocket.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		E2FC82E916CABECE002EDCEA /* GCDAsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = E2FC82E816CABECE002EDCEA /* GCDAsyncSocket.m */; };
 		E2FC82ED16CABFB2002EDCEA /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E2FC82EC16CABFB2002EDCEA /* CFNetwork.framework */; };
 		E2FC82EF16CABFB6002EDCEA /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E2FC82EE16CABFB6002EDCEA /* Security.framework */; };
 /* End PBXBuildFile section */
@@ -627,6 +627,7 @@
 		E230198E16C9F606001685F6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "PartyMusic/PartyMusic-Prefix.pch";
 				INFOPLIST_FILE = "PartyMusic/PartyMusic-Info.plist";
@@ -639,6 +640,7 @@
 		E230198F16C9F606001685F6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "PartyMusic/PartyMusic-Prefix.pch";
 				INFOPLIST_FILE = "PartyMusic/PartyMusic-Info.plist";

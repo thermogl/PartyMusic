@@ -48,10 +48,5 @@ NSString * const kMusicQueueItemCurrentTimeKey = @"MusicQueueItemCurrentTimeKey"
 	return [NSString stringWithFormat:@"<MusicQueueItem %p; title = \"%@\"; type = %d; identifier = \"%@\", deviceUUID = \"%@\">", self, _title, _type, _songIdentifier, _deviceUUID];
 }
 
-- (void)dealloc {
-	[_songIdentifier release];
-	[_deviceUUID release];
-	[super dealloc];
-}
 
 @end

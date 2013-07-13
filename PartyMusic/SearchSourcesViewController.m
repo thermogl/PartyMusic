@@ -39,7 +39,7 @@
 	NSString * const CellIdentifier = @"CellIdentifier";
 	UITableViewCell * cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
 	if (!cell){
-		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
 		
 		[cell.textLabel setTextColor:[UIColor pm_darkColor]];
 		[cell.detailTextLabel setTextColor:[UIColor pm_darkColor]];
@@ -50,7 +50,6 @@
 		UIView * selectedBackgroundView = [[UIView alloc] init];
 		[selectedBackgroundView setBackgroundColor:[UIColor pm_darkColor]];
 		[cell setSelectedBackgroundView:selectedBackgroundView];
-		[selectedBackgroundView release];
 	}
 	
 	if (indexPath.row == 0){

@@ -39,39 +39,31 @@ CGFloat const kQueueControlViewHeight = 56;
 	
 	_scrollView = [[RootScrollView alloc] initWithFrame:self.view.bounds];
 	[self.view addSubview:_scrollView];
-	[_scrollView release];
 	
 	_devicesView = [[DevicesView alloc] initWithFrame:_scrollView.bounds];
 	[_scrollView addSubview:_devicesView];
-	[_devicesView release];
 	
 	_searchField = [[SearchField alloc] initWithFrame:CGRectZero];
 	[_searchField addTarget:self action:@selector(searchFieldDidBeginEditing:) forControlEvents:UIControlEventEditingDidBegin];
 	[_scrollView addSubview:_searchField];
-	[_searchField release];
 	
 	UILongPressGestureRecognizer * longPressRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(searchButtonWasLongPressed:)];
 	[_searchField.searchButton addGestureRecognizer:longPressRecognizer];
-	[longPressRecognizer release];
 	
 	_searchViewController = [[SearchViewController alloc] init];
 	[_searchViewController setSearchField:_searchField];
 	[self addChildViewController:_searchViewController];
-	[_searchViewController release];
 	
 	DeviceView * deviceView = [[DeviceView alloc] initWithDevice:[[DevicesManager sharedManager] ownDevice]];
 	[_devicesView addDeviceView:deviceView];
-	[deviceView release];
 	
 	_queueControlView = [[QueueControlView alloc] initWithFrame:CGRectZero];
 	[_queueControlView.queueButton addTarget:self action:@selector(queueButtonWasTapped:) forControlEvents:UIControlEventTouchUpInside];
 	[_scrollView addSubview:_queueControlView];
-	[_queueControlView release];
 	
 	_queueViewController = [[QueueViewController alloc] init];
 	[_scrollView addSubview:_queueViewController.view];
 	[self addChildViewController:_queueViewController];
-	[_queueViewController release];
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceAudioOutputDidChange:) name:UIDeviceAudioOutputDidChangeNotificationName object:nil];
 	[[UIDevice currentDevice] beginGeneratingDeviceAudioOutputChangeNotifications];
@@ -119,10 +111,8 @@ CGFloat const kQueueControlViewHeight = 56;
 	ViewControllerContainer * container = [[ViewControllerContainer alloc] initWithViewController:viewController dismissHandler:^{
 		[_searchViewController setSearchSources:viewController.searchSources];
 	}];
-	[viewController release];
 	
 	[self presentViewController:container animated:YES completion:nil];
-	[container release];
 }
 
 - (void)queueButtonWasTapped:(UIButton *)sender {
@@ -154,7 +144,6 @@ CGFloat const kQueueControlViewHeight = 56;
 	
 	DeviceView * deviceView = [[DeviceView alloc] initWithDevice:notification.object];
 	[_devicesView addDeviceView:deviceView];
-	[deviceView release];
 }
 
 - (void)deviceControllerDidRemoveDevice:(NSNotification *)notification {

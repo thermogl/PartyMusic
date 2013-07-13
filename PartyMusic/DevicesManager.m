@@ -24,7 +24,7 @@ NSString * const kDeviceServiceType = @"_partymusic._tcp.";
 NSString * const kUserInterfaceIdiomTXTRecordKeyName = @"UserInterfaceIdiomTXTRecordKeyName";
 
 @interface DevicesManager () <GCDAsyncSocketDelegate>
-@property (nonatomic, retain) NSNetService * ownService;
+@property (nonatomic, strong) NSNetService * ownService;
 @end
 
 @implementation DevicesManager {
@@ -99,7 +99,6 @@ NSString * const kUserInterfaceIdiomTXTRecordKeyName = @"UserInterfaceIdiomTXTRe
 			
 			_searching = YES;
 			
-			[_ownService release];
 			_ownService = [[NSNetService alloc] initWithDomain:@"local" type:kDeviceServiceType name:[[UIDevice currentDevice] name] port:_incomingSocket.localPort];
 			
 			NSDictionary * TXTRecord = @{kUserInterfaceIdiomTXTRecordKeyName: [NSString stringWithFormat:@"%d", UI_USER_INTERFACE_IDIOM()]};
@@ -126,10 +125,8 @@ NSString * const kUserInterfaceIdiomTXTRecordKeyName = @"UserInterfaceIdiomTXTRe
 	[_incomingSocket disconnect];
 	
 	[_devices enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(Device * device, NSUInteger idx, BOOL *stop) {
-		[device retain];
 		[_devices removeObjectAtIndex:idx];
 		[[NSNotificationCenter defaultCenter] postNotificationName:DevicesManagerDidRemoveDeviceNotificationName object:device];
-		[device release];
 	}];
 	
 	_searching = NO;
@@ -234,7 +231,6 @@ NSString * const kUserInterfaceIdiomTXTRecordKeyName = @"UserInterfaceIdiomTXTRe
 	Device * device = [[Device alloc] initWithNetService:service];
 	[device setDelegate:self];
 	[_devices addObject:device];
-	[device release];
 	
 	[_pendingConnections enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(GCDAsyncSocket * connection, NSUInteger idx, BOOL *stop) {
 		if ([service hasSameHostAsSocket:connection]){
@@ -306,7 +302,6 @@ NSString * const kUserInterfaceIdiomTXTRecordKeyName = @"UserInterfaceIdiomTXTRe
 		[aDevice sendSongResult:chunk identifier:identifier moreComing:moreComing];
 	}];
 	[_songRequestDictionary setObject:trackFetcher forKey:persistentID];
-	[trackFetcher release];
 }
 
 - (void)device:(Device *)device didReceiveSongCancel:(NSNumber *)persistentID {
@@ -319,14 +314,7 @@ NSString * const kUserInterfaceIdiomTXTRecordKeyName = @"UserInterfaceIdiomTXTRe
 
 #pragma mark - Dealloc
 - (void)dealloc {
-	[_ownDevice release];
-	[_ownService release];
-	[_devices release];
-	[_services release];
-	[_pendingConnections release];
 	dispatch_release(_socketQueue);
-	[_songRequestDictionary release];
-	[super dealloc];
 }
 
 #pragma mark - Singleton Stuff -
@@ -337,24 +325,6 @@ NSString * const kUserInterfaceIdiomTXTRecordKeyName = @"UserInterfaceIdiomTXTRe
 	dispatch_once(&onceToken, ^{shared = [[self alloc] init];});
 	
 	return shared;
-}
-
-- (id)copyWithZone:(NSZone *)zone {
-	return self;
-}
-
-- (id)retain {
-	return self;
-}
-
-- (NSUInteger)retainCount {
-	return NSUIntegerMax;
-}
-
-- (oneway void)release {}
-
-- (id)autorelease {
-	return self;
 }
 
 @end

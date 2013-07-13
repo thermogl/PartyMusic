@@ -66,10 +66,9 @@ NSString * const kDictionarySubtitleKey = @"DictionarySubtitleKey";
 		[container setType:MusicContainerTypeArtist];
 		[container setDevice:[[DevicesManager sharedManager] ownDevice]];
 		[containers addObject:(dictionary ? container.JSONDictionary : container)];
-		[container release];
 	}];
 	
-	return [containers autorelease];
+	return containers;
 }
 
 + (NSArray *)albumsWithFilterPredicates:(NSSet *)filterPredicates dictionary:(BOOL)dictionary {
@@ -86,10 +85,9 @@ NSString * const kDictionarySubtitleKey = @"DictionarySubtitleKey";
 		[container setType:MusicContainerTypeAlbum];
 		[container setDevice:[[DevicesManager sharedManager] ownDevice]];
 		[containers addObject:(dictionary ? container.JSONDictionary : container)];
-		[container release];
 	}];
 	
-	return [containers autorelease];
+	return containers;
 }
 
 + (NSArray *)songsWithFilterPredicates:(NSSet *)filterPredicates dictionary:(BOOL)dictionary {
@@ -109,11 +107,10 @@ NSString * const kDictionarySubtitleKey = @"DictionarySubtitleKey";
 			[container setType:MusicContainerTypeSong];
 			[container setDevice:[[DevicesManager sharedManager] ownDevice]];
 			[containers addObject:(dictionary ? container.JSONDictionary : container)];
-			[container release];
 		}
 	}];
 	
-	return [containers autorelease];
+	return containers;
 }
 
 #pragma mark - Search helpers
@@ -184,10 +181,9 @@ NSString * const kDictionarySubtitleKey = @"DictionarySubtitleKey";
 		MusicContainer * container = [[MusicContainer alloc] initWithJSONDictionary:dict];
 		[container setDevice:device];
 		[containers addObject:container];
-		[container release];
 	}];
 	
-	return [containers autorelease];
+	return containers;
 }
 
 #pragma mark - Description
@@ -196,10 +192,5 @@ NSString * const kDictionarySubtitleKey = @"DictionarySubtitleKey";
 }
 
 #pragma mark - Memory Management
-- (void)dealloc {
-	[_identifier release];
-	[_title release];
-	[super dealloc];
-}
 
 @end

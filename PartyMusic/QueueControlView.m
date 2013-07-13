@@ -35,7 +35,6 @@
 		_timeView = [[UIView alloc] init];
 		[_timeView setBackgroundColor:[UIColor colorWithRed:0.716 green:0.712 blue:0.708 alpha:0.9]];
 		[self addSubview:_timeView];
-		[_timeView release];
 		
 		_queueButton = [UIButton buttonWithType:UIButtonTypeCustom];
 		[self setQueueButtonColor:[UIColor pm_darkColor]];
@@ -45,7 +44,6 @@
 		[_spinner setColor:[UIColor pm_darkColor]];
 		[_spinner setHidesWhenStopped:YES];
 		[self addSubview:_spinner];
-		[_spinner release];
 		
 		_playPauseButton = [UIButton buttonWithType:UIButtonTypeCustom];
 		[_playPauseButton setHidden:YES];

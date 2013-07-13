@@ -16,7 +16,7 @@
 
 @interface SearchViewController ()
 @property (nonatomic, copy) NSString * currentSearch;
-@property (nonatomic, readonly) SearchResultsViewController * rootResultsViewController;
+@property (weak, nonatomic, readonly) SearchResultsViewController * rootResultsViewController;
 @end
 
 @interface SearchViewController (Private)
@@ -63,19 +63,15 @@
 	[_overlayView setBackgroundColor:[UIColor blackColor]];
 	[_overlayView setAlpha:0];
 	[self.view addSubview:_overlayView];
-	[_overlayView release];
 	
 	_optionsView = [[UIView alloc] initWithFrame:CGRectZero];
 	[_optionsView setBackgroundColor:[UIColor pm_darkLightColor]];
 	[self.view addSubview:_optionsView];
-	[_optionsView release];
 	
 	SearchResultsViewController * searchResultsViewController = [[SearchResultsViewController alloc] init];
 	_navigationController = [[UINavigationController alloc] initWithRootViewController:searchResultsViewController];
-	[searchResultsViewController release];
 	
 	[self addChildViewController:_navigationController];
-	[_navigationController release];
 	
 	[_navigationController setNavigationBarHidden:YES];
 	[self.view addSubview:_navigationController.view];
@@ -83,7 +79,6 @@
 	
 	UITapGestureRecognizer * dismissRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewWasTapped:)];
 	[_overlayView addGestureRecognizer:dismissRecognizer];
-	[dismissRecognizer release];
 	
 	[_searchField setDelegate:self];
 	[_searchField addTarget:self action:@selector(searchFieldTextDidChange:) forControlEvents:UIControlEventEditingChanged];
@@ -245,9 +240,5 @@
 	} completion:completion];
 }
 
-- (void)dealloc {
-	[_currentSearch release];
-	[super dealloc];
-}
 
 @end

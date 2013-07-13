@@ -23,11 +23,11 @@ NSString * const kSoundCloudClientID = @"0cc97e216c56a543c3eca3cb370fba8c";
 		NSURL * URL = [NSURL URLWithString:[NSString stringWithFormat:@"%@/tracks.json?%@", kSoundCloudAPIEndpoint, APISearchString]];
 		
 		NSURLRequest * request = [NSURLRequest requestWithURL:URL];
-		NSOperationQueue * queue = [[[NSOperationQueue alloc] init] autorelease];
+		NSOperationQueue * queue = [[NSOperationQueue alloc] init];
 		
 		[NSURLConnection sendAsynchronousRequest:request queue:queue completionHandler:^(NSURLResponse * response, NSData * data, NSError * err){
 			
-			NSMutableArray * tracks = [[NSMutableArray alloc] init];
+			NSMutableArray * tracks = [NSMutableArray array];
 			
 			if (!err){
 				
@@ -42,12 +42,10 @@ NSString * const kSoundCloudClientID = @"0cc97e216c56a543c3eca3cb370fba8c";
 					[musicContainer setDevice:[[DevicesManager sharedManager] ownDevice]];
 					[musicContainer setIdentifier:[trackDict objectForKey:@"stream_url"]];
 					[tracks addObject:musicContainer];
-					[musicContainer release];
 				}];
 			}
 			
 			dispatch_async(dispatch_get_main_queue(), ^{callback(err, tracks);});
-			[tracks autorelease];
 		}];
 	}
 }

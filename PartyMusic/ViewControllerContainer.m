@@ -26,11 +26,9 @@
 		_navigationBar = [[UIView alloc] init];
 		[_navigationBar setBackgroundColor:[UIColor pm_darkColor]];
 		[self.view addSubview:_navigationBar];
-		[_navigationBar release];
 		
 		UITapGestureRecognizer * tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(navigationBarWasTapped:)];
 		[_navigationBar addGestureRecognizer:tapRecognizer];
-		[tapRecognizer release];
 	}
 	
 	return self;
@@ -48,9 +46,5 @@
 	else [self dismissViewControllerAnimated:YES completion:_dismissHandler];
 }
 
-- (void)dealloc {
-	[_dismissHandler release];
-	[super dealloc];
-}
 
 @end

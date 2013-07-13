@@ -22,12 +22,12 @@ typedef NS_ENUM(NSInteger, AVPlayerPlayStatus){
 };
 
 @interface MusicQueueController : NSObject
-@property (nonatomic, retain, readonly) MusicQueueItem * currentSong;
+@property (nonatomic, strong, readonly) MusicQueueItem * currentSong;
 @property (nonatomic, readonly) AVPlayerPlayStatus playStatus;
 @property (nonatomic, readonly) BOOL canSkipForward;
 @property (nonatomic, readonly) BOOL canSkipBackward;
-@property (nonatomic, readonly) NSArray * queue;
-@property (nonatomic, assign) NSDictionary * JSONQueue;
+@property (weak, nonatomic, readonly) NSArray * queue;
+@property (nonatomic, weak) NSDictionary * JSONQueue;
 
 - (BOOL)queueItem:(MusicQueueItem *)item;
 

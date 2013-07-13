@@ -64,16 +64,16 @@ typedef void (^DeviceQueueCallback)(BOOL successful);
 @protocol DeviceDelegate;
 @class GCDAsyncSocket, DevicePacket, MusicQueueItem;
 @interface Device : NSObject <NSNetServiceDelegate>
-@property (nonatomic, assign) id <DeviceDelegate> delegate;
+@property (nonatomic, weak) id <DeviceDelegate> delegate;
 @property (nonatomic, readonly) NSNetService * netService;
 @property (nonatomic, readonly) GCDAsyncSocket * outgoingSocket;
-@property (nonatomic, retain) GCDAsyncSocket * incomingSocket;
+@property (nonatomic, strong) GCDAsyncSocket * incomingSocket;
 @property (nonatomic, copy) NSString * UUID;
 @property (nonatomic, assign, readonly) UIUserInterfaceIdiom interfaceIdiom;
 @property (nonatomic, assign) UIInterfaceOrientation interfaceOrientation;
 @property (nonatomic, assign) BOOL isOutput;
 @property (nonatomic, readonly) BOOL isOwnDevice;
-@property (nonatomic, readonly) NSString * name;
+@property (weak, nonatomic, readonly) NSString * name;
 
 - (id)initWithNetService:(NSNetService *)service;
 
@@ -101,7 +101,7 @@ typedef void (^DeviceQueueCallback)(BOOL successful);
 @end
 
 @interface OwnDevice : Device
-@property (nonatomic, readonly) NSDictionary * deviceStatusDictionary;
+@property (weak, nonatomic, readonly) NSDictionary * deviceStatusDictionary;
 - (void)broadcastDeviceStatus;
 - (void)getSongURLForPersistentID:(NSNumber *)persistentID callback:(void (^)(NSURL * URL))callback;
 @end
@@ -136,7 +136,7 @@ NSData * DevicePacketHeaderToData(DevicePacketHeader header, NSData * payloadDat
 @property (nonatomic, readonly) DevicePayloadType payloadType;
 @property (nonatomic, readonly) NSString * identifier;
 @property (nonatomic, readonly) NSUInteger lengthRequired;
-@property (nonatomic, readonly) NSData * data;
+@property (weak, nonatomic, readonly) NSData * data;
 @property (nonatomic, readonly) BOOL moreComing;
 
 - (id)initWithDevicePacketHeader:(DevicePacketHeader)header;

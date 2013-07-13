@@ -19,18 +19,18 @@
 }
 
 - (NSString *)encodedURLString {
-	return [(NSString *)CFURLCreateStringByAddingPercentEscapes(NULL, (CFStringRef)self, NULL, (CFStringRef)@"?=&+",
-																kCFStringEncodingUTF8) autorelease];
+	return (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(NULL, (CFStringRef)self, NULL, (CFStringRef)@"?=&+",
+																kCFStringEncodingUTF8));
 }
 
 - (NSString *)encodedURLParameterString {
-    return [(NSString *)CFURLCreateStringByAddingPercentEscapes(NULL, (CFStringRef)self, NULL, (CFStringRef)@":/=,!$&'()*+;[]@#?",
-																kCFStringEncodingUTF8) autorelease];
+    return (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(NULL, (CFStringRef)self, NULL, (CFStringRef)@":/=,!$&'()*+;[]@#?",
+																kCFStringEncodingUTF8));
 }
 
 - (NSString *)decodedURLString {
-	return [(NSString *)CFURLCreateStringByReplacingPercentEscapesUsingEncoding(NULL, (CFStringRef)self, CFSTR(""),
-																				kCFStringEncodingUTF8) autorelease];
+	return (NSString *)CFBridgingRelease(CFURLCreateStringByReplacingPercentEscapesUsingEncoding(NULL, (CFStringRef)self, CFSTR(""),
+																				kCFStringEncodingUTF8));
 }
 
 - (NSNumber *)unsignedLongLongNumber {
@@ -38,7 +38,7 @@
 }
 
 + (NSString *)UT8StringWithBytes:(const char *)bytes length:(NSUInteger)length {
-	return bytes ? [[[NSString alloc] initWithBytes:bytes length:length encoding:NSUTF8StringEncoding] autorelease] : nil;
+	return bytes ? [[NSString alloc] initWithBytes:bytes length:length encoding:NSUTF8StringEncoding] : nil;
 }
 
 + (NSString *)UUID {
@@ -47,7 +47,7 @@
 	CFStringRef UUIDString = CFUUIDCreateString(NULL, UUIDRef);
 	CFRelease(UUIDRef);
 	
-	return [(NSString *)UUIDString autorelease];
+	return (__bridge NSString *)UUIDString;
 }
 
 NSString * Localized(NSString * key) {
@@ -59,7 +59,7 @@ NSString * LocalizedFormat(NSString * formatKey, ...) {
 	va_list args;
     va_start(args, formatKey);
 	
-    NSString * string = [[[NSString alloc] initWithFormat:Localized(formatKey) arguments:args] autorelease];
+    NSString * string = [[NSString alloc] initWithFormat:Localized(formatKey) arguments:args];
     va_end(args);
 	
     return string;

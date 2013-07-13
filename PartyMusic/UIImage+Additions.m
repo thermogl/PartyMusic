@@ -29,7 +29,7 @@
 }
 
 + (UIImage *)imageNamed:(NSString *)name extension:(NSString *)extension {
-	return [[[self alloc] initWithName:name extension:extension] autorelease];
+	return [[self alloc] initWithName:name extension:extension];
 }
 
 - (UIImage *)roundCornerImageWithCornerRadius:(CGFloat)radius {
@@ -159,7 +159,7 @@
 		
 		NSArray * colors = [NSArray arrayWithObjects:(id)[color2 CGColor], (id)[color1 CGColor], nil];	
     
-		CGGradientRef gradient = CGGradientCreateWithColors(space, (CFArrayRef)colors, NULL);
+		CGGradientRef gradient = CGGradientCreateWithColors(space, (__bridge CFArrayRef)colors, NULL);
 		CGColorSpaceRelease(space);
 	
 		CGContextDrawLinearGradient(context, gradient, CGPointZero, CGPointMake(0, self.size.height), 0);

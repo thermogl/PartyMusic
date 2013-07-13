@@ -22,8 +22,8 @@ typedef NS_ENUM(NSInteger, MusicContainerType) {
 @property (nonatomic, copy) id identifier;
 @property (nonatomic, copy) NSString * title;
 @property (nonatomic, copy) NSString * subtitle;
-@property (nonatomic, readonly) NSDictionary * JSONDictionary;
-@property (nonatomic, assign) Device * device;
+@property (weak, nonatomic, readonly) NSDictionary * JSONDictionary;
+@property (nonatomic, weak) Device * device;
 
 - (id)initWithJSONDictionary:(NSDictionary *)dictionary;
 

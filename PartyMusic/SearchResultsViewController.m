@@ -58,7 +58,7 @@ NSString * const SearchResultsViewControllerScrolledNotificationName = @"SearchR
 
 - (void)deviceControllerDidRemoveDevice:(NSNotification *)notification {
 	
-	Device * removedDevice = [notification.object retain];
+	Device * removedDevice = notification.object;
 	[_artists enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(MusicContainer * container, NSUInteger idx, BOOL *stop) {
 		if ([container.device isEqual:removedDevice]) [_artists removeObjectAtIndex:idx];
 	}];
@@ -71,7 +71,6 @@ NSString * const SearchResultsViewControllerScrolledNotificationName = @"SearchR
 		if ([container.device isEqual:removedDevice]) [_songs removeObjectAtIndex:idx];
 	}];
 	
-	[removedDevice release];
 	[self.tableView reloadData];
 }
 
@@ -128,7 +127,7 @@ NSString * const SearchResultsViewControllerScrolledNotificationName = @"SearchR
 	
 	NSString * const CellIdentifier = @"CellIdentifier";
 	UITableViewCell * cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-	if (!cell) cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier] autorelease];
+	if (!cell) cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
 	
 	MusicContainer * container = [self containerForIndexPath:indexPath];
 	
@@ -144,7 +143,6 @@ NSString * const SearchResultsViewControllerScrolledNotificationName = @"SearchR
 	UIView * selectedBackgroundView = [[UIView alloc] init];
 	[selectedBackgroundView setBackgroundColor:[UIColor pm_darkColor]];
 	[cell setSelectedBackgroundView:selectedBackgroundView];
-	[selectedBackgroundView release];
 	
 	return cell;
 }
@@ -157,12 +155,10 @@ NSString * const SearchResultsViewControllerScrolledNotificationName = @"SearchR
 		SearchResultsViewController * viewController = [[SearchResultsViewController alloc] init];
 		[viewController setHideHeaders:YES];
 		SearchResultsViewControllerContainer * containerController = [[SearchResultsViewControllerContainer alloc] initWithSearchResultsViewController:viewController];
-		[viewController release];
 		
 		[self.navigationController pushViewController:containerController animated:YES];
-		[containerController release];
 		
-		__block Device * weakDevice = container.device;
+		__weak Device * weakDevice = container.device;
 		if (container.type == MusicContainerTypeArtist){
 			[container.device sendAlbumsForArtistRequest:container.identifier callback:^(NSDictionary *results) {
 				
@@ -199,13 +195,11 @@ NSString * const SearchResultsViewControllerScrolledNotificationName = @"SearchR
 		[spinner setColor:[UIColor pm_darkColor]];
 		[cell setAccessoryView:spinner];
 		[spinner sizeToFit];
-		[spinner release];
 		
 		[[[DevicesManager sharedManager] outputDevice] queueItem:item callback:^(BOOL successful) {
 			//[cell setAccessoryView:nil];
 		}];
 		
-		[item release];
 	}
 	
 	[tableView deselectRowAtIndexPath:indexPath animated:YES];
@@ -235,14 +229,6 @@ NSString * const SearchResultsViewControllerScrolledNotificationName = @"SearchR
 }
 
 #pragma mark - Dealloc
-- (void)dealloc {
-	[_artists release];
-	[_albums release];
-	[_songs release];
-	[_soundClouds release];
-	[_youTubes release];
-	[super dealloc];
-}
 
 @end
 
@@ -261,11 +247,9 @@ NSString * const SearchResultsViewControllerScrolledNotificationName = @"SearchR
 		_navigationBar = [[UIView alloc] init];
 		[_navigationBar setBackgroundColor:[UIColor pm_darkColor]];
 		[self.view addSubview:_navigationBar];
-		[_navigationBar release];
 		
 		UITapGestureRecognizer * tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(navigationBarWasTapped:)];
 		[_navigationBar addGestureRecognizer:tapRecognizer];
-		[tapRecognizer release];
 	}
 	
 	return self;

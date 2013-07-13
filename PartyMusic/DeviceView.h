@@ -16,7 +16,7 @@
 @property (nonatomic, readonly) CGFloat rotation;
 @property (nonatomic, readonly) CGSize deviceSize;
 @property (nonatomic, readonly) CGRect screenRect;
-@property (nonatomic, retain) UIColor * screenColor;
+@property (nonatomic, strong) UIColor * screenColor;
 
 - (id)initWithDevice:(Device *)device;
 - (void)shake;

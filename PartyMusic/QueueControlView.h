@@ -11,7 +11,7 @@
 @interface QueueControlView : UIView
 @property (nonatomic, assign) BOOL playerControlsHidden;
 @property (nonatomic, assign) BOOL shadowHidden;
-@property (nonatomic, readonly) UIButton * queueButton;
+@property (weak, nonatomic, readonly) UIButton * queueButton;
 
 - (void)setQueueButtonColor:(UIColor *)color;
 

@@ -22,6 +22,6 @@ typedef NS_OPTIONS(NSUInteger, SearchSources){
 }
 
 @property (nonatomic, assign) SearchSources searchSources;
-@property (nonatomic, assign) SearchField * searchField;
+@property (nonatomic, weak) SearchField * searchField;
 
 @end

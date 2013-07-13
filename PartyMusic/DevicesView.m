@@ -22,7 +22,7 @@
 	
 	if ((self = [super initWithFrame:frame])){
 		
-		_displayLink = [[CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkTick:)] retain];
+		_displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkTick:)];
 		[_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:(id)kCFRunLoopCommonModes];
 		
 		[self setBackgroundColor:[UIColor pm_lightColor]];
@@ -89,12 +89,6 @@
 			[deviceView setTransform:CGAffineTransformMakeRotation(deviceView.rotation)];
 		}
 	}];
-}
-
-- (void)dealloc {
-	[_displayLink invalidate];
-	[_displayLink release];
-	[super dealloc];
 }
 
 @end

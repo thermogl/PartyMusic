@@ -27,7 +27,7 @@ NSInteger const kSocketReadTagHead = 0;
 NSInteger const kSocketReadTagBody = 1;
 
 @interface Device () <GCDAsyncSocketDelegate>
-@property (nonatomic, retain) DevicePacket * incomingPacket;
+@property (nonatomic, strong) DevicePacket * incomingPacket;
 @property (nonatomic, assign) UIUserInterfaceIdiom interfaceIdiom;
 - (void)sendData:(NSData *)data;
 - (BOOL)connect:(NSError **)error;
@@ -61,7 +61,7 @@ NSInteger const kSocketReadTagBody = 1;
 	
 	if ((self = [super init])){
 		
-		_netService = [service retain];
+		_netService = service;
 		_incomingQueue = nil;
 		_outgoingQueue = dispatch_queue_create("com.partymusic.device.outgoingsocketqueue", NULL);
 		_outgoingSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:_outgoingQueue];
@@ -84,8 +84,6 @@ NSInteger const kSocketReadTagBody = 1;
 	
 	if (!_incomingQueue) _incomingQueue = dispatch_queue_create("com.partymusic.device.incomingsocketqueue", NULL);
 	
-	[socket retain];
-	[_incomingSocket release];
 	_incomingSocket = socket;
 	
 	[_incomingSocket setDelegate:self delegateQueue:_incomingQueue];
@@ -120,28 +118,28 @@ NSInteger const kSocketReadTagBody = 1;
 - (void)sendSearchRequest:(NSString *)searchString callback:(DeviceSearchCallback)callback {
 	
 	NSString * identifier = [NSString UUID];
-	[_callbacks setObject:[[callback copy] autorelease] forKey:identifier];
+	[_callbacks setObject:[callback copy] forKey:identifier];
 	[self sendDictionary:@{kDeviceSearchIdentifierKeyName : searchString} payloadType:DevicePayloadTypeSearchRequest identifier:identifier];
 }
 
 - (void)sendBrowseLibraryRequestWithCallback:(DeviceSearchCallback)callback {
 	
 	NSString * identifier = [NSString UUID];
-	[_callbacks setObject:[[callback copy] autorelease] forKey:identifier];
+	[_callbacks setObject:[callback copy] forKey:identifier];
 	[self sendDictionary:nil payloadType:DevicePayloadTypeBrowseRequest identifier:identifier];
 }
 
 - (void)sendAlbumsForArtistRequest:(NSNumber *)persistentID callback:(DeviceSearchCallback)callback {
 	
 	NSString * identifier = [NSString UUID];
-	[_callbacks setObject:[[callback copy] autorelease] forKey:identifier];
+	[_callbacks setObject:[callback copy] forKey:identifier];
 	[self sendDictionary:@{kDeviceSearchIdentifierKeyName : persistentID} payloadType:DevicePayloadTypeAlbumsRequest identifier:identifier];
 }
 
 - (void)sendSongsForAlbumRequest:(NSNumber *)persistentID callback:(DeviceSearchCallback)callback {
 	
 	NSString * identifier = [NSString UUID];
-	[_callbacks setObject:[[callback copy] autorelease] forKey:identifier];
+	[_callbacks setObject:[callback copy] forKey:identifier];
 	[self sendDictionary:@{kDeviceSearchIdentifierKeyName : persistentID} payloadType:DevicePayloadTypeSongsRequest identifier:identifier];
 }
 
@@ -164,7 +162,7 @@ NSInteger const kSocketReadTagBody = 1;
 - (void)sendSongRequest:(NSNumber *)persistentID callback:(DeviceSongCallback)callback {
 	
 	NSString * identifier = [NSString UUID];
-	[_callbacks setObject:[[callback copy] autorelease] forKey:identifier];
+	[_callbacks setObject:[callback copy] forKey:identifier];
 	[self sendDictionary:@{kDeviceSongIdentifierKeyName : persistentID} payloadType:DevicePayloadTypeSongRequest identifier:identifier];
 }
 
@@ -185,7 +183,7 @@ NSInteger const kSocketReadTagBody = 1;
 - (void)queueItem:(MusicQueueItem *)item callback:(DeviceQueueCallback)callback {
 	
 	NSString * identifier = [NSString UUID];
-	[_callbacks setObject:[[callback copy] autorelease] forKey:identifier];
+	[_callbacks setObject:[callback copy] forKey:identifier];
 	[self sendDictionary:item.JSONDictionary payloadType:DevicePayloadTypeQueueChange identifier:identifier];
 }
 
@@ -204,7 +202,6 @@ NSInteger const kSocketReadTagBody = 1;
 		
 		DevicePacket * packet = [[DevicePacket alloc] initWithDevicePacketHeader:packetHeader];
 		[self setIncomingPacket:packet];
-		[packet release];
 		
 		if (packetHeader.payloadLength){
 			[sock readDataToLength:_incomingPacket.lengthRequired withTimeout:-1 tag:kSocketReadTagBody];
@@ -293,7 +290,6 @@ NSInteger const kSocketReadTagBody = 1;
 		
 		MusicQueueItem * item = [[MusicQueueItem alloc] initWithJSONDictionary:payload];
 		BOOL successful = [[MusicQueueController sharedController] queueItem:item];
-		[item release];
 		
 		[self sendDictionary:@{kDeviceQueueChangeResultKeyName : [NSNumber numberWithBool:successful]}
 				 payloadType:DevicePayloadTypeQueueChangeResult identifier:packet.identifier];
@@ -365,15 +361,8 @@ NSInteger const kSocketReadTagBody = 1;
 
 #pragma mark - Dealloc
 - (void)dealloc {
-	[_netService release];
-	[_outgoingSocket release];
-	[_incomingSocket release];
-	[_UUID release];
-	[_callbacks release];
 	dispatch_release(_incomingQueue);
 	dispatch_release(_outgoingQueue);
-	[_incomingPacket release];
-	[super dealloc];
 }
 
 @end
@@ -524,7 +513,7 @@ NSData * DevicePacketHeaderToData(DevicePacketHeader header, NSData * payloadDat
 	NSMutableData * data = [[NSMutableData alloc] initWithCapacity:(sizeof(header) + header.payloadLength)];
 	[data appendBytes:&header length:sizeof(header)];
 	[data appendData:payloadData];
-	return [data autorelease];
+	return data;
 }
 
 @implementation DevicePacket {
@@ -540,7 +529,7 @@ NSData * DevicePacketHeaderToData(DevicePacketHeader header, NSData * payloadDat
 	if ((self = [super init])){
 		_payloadType = header.payloadType;
 		_expectedLength = header.payloadLength;
-		_identifier = [[NSString UT8StringWithBytes:header.identifier length:36] retain];
+		_identifier = [NSString UT8StringWithBytes:header.identifier length:36];
 		_incomingData = [[NSMutableData alloc] initWithCapacity:_expectedLength];
 		_moreComing = header.moreComing;
 	}
@@ -561,10 +550,5 @@ NSData * DevicePacketHeaderToData(DevicePacketHeader header, NSData * payloadDat
 	return _incomingData.length >= _expectedLength;
 }
 
-- (void)dealloc {
-	[_identifier release];
-	[_incomingData release];
-	[super dealloc];
-}
 
 @end

@@ -26,10 +26,9 @@
 		NSString * stringRep = [[NSString alloc] initWithData:[TXTRecord objectForKey:key]
 													 encoding:NSUTF8StringEncoding];
 		[friendlyDict setObject:stringRep forKey:key];
-		[stringRep release];
 	}
 	
-	return [friendlyDict autorelease];
+	return friendlyDict;
 }
 
 - (void)setTXTRecordDictionary:(NSDictionary *)TXTRecordDictionary {

@@ -16,7 +16,6 @@
 @synthesize title = _title;
 
 - (void)setTitle:(NSString *)newTitle {
-	[_title release];
 	_title = [newTitle copy];
 	[self setNeedsDisplay];
 }
@@ -37,12 +36,8 @@
 	SearchResultsHeaderView * headerView = [[SearchResultsHeaderView alloc] init];
 	[headerView setBackgroundColor:[UIColor clearColor]];
 	[headerView setTitle:title];
-	return [headerView autorelease];
+	return headerView;
 }
 
-- (void)dealloc {
-	[_title release];
-	[super dealloc];
-}
 
 @end

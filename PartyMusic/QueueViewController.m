@@ -38,7 +38,7 @@
 	
 	NSString * const CellIdentifier = @"CellIdentifier";
 	UITableViewCell * cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-	if (!cell) cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier] autorelease];
+	if (!cell) cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
 	
 	MusicQueueItem * item = [[[MusicQueueController sharedController] queue] objectAtIndex:indexPath.row];
 	
@@ -56,7 +56,6 @@
 	UIView * selectedBackgroundView = [[UIView alloc] init];
 	[selectedBackgroundView setBackgroundColor:[UIColor pm_darkColor]];
 	[cell setSelectedBackgroundView:selectedBackgroundView];
-	[selectedBackgroundView release];
 	
 	return cell;
 }

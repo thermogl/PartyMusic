@@ -17,8 +17,8 @@ NSString * const kMusicQueueControllerCurrentSongKey = @"MusicQueueControllerCur
 NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextSongsKey";
 
 @interface MusicQueueController ()
-@property (nonatomic, retain) MusicQueueItem * currentSong;
-@property (nonatomic, retain) MusicQueueItem * fetchItem;
+@property (nonatomic, strong) MusicQueueItem * currentSong;
+@property (nonatomic, strong) MusicQueueItem * fetchItem;
 - (void)playQueueItem:(MusicQueueItem *)item;
 - (void)playContentAtURL:(NSURL *)URL identifier:(id)identifier;
 - (void)fetchQueueItem:(MusicQueueItem *)item identifier:(id)identifier;
@@ -73,7 +73,7 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 	[queue addObjectsFromArray:_previousSongQueue];
 	if (_currentSong) [queue addObject:_currentSong];
 	[queue addObjectsFromArray:_nextSongQueue];
-	return [queue autorelease];
+	return queue;
 }
 
 - (void)setJSONQueue:(NSDictionary *)JSONQueue {
@@ -84,7 +84,6 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 	if ([JSONQueue objectForKey:kMusicQueueControllerCurrentSongKey]){
 		MusicQueueItem * item = [[MusicQueueItem alloc] initWithJSONDictionary:[JSONQueue objectForKey:kMusicQueueControllerCurrentSongKey]];
 		[self setCurrentSong:item];
-		[item release];
 	}
 	
 	if ([JSONQueue objectForKey:kMusicQueueControllerPreviousSongsKey]){
@@ -92,7 +91,6 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 		[(NSArray *)[JSONQueue objectForKey:kMusicQueueControllerPreviousSongsKey] enumerateObjectsUsingBlock:^(NSDictionary * itemDict, NSUInteger idx, BOOL *stop) {
 			MusicQueueItem * item = [[MusicQueueItem alloc] initWithJSONDictionary:itemDict];
 			[_previousSongQueue addObject:item];
-			[item release];
 		}];
 	}
 	
@@ -101,7 +99,6 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 		[(NSArray *)[JSONQueue objectForKey:kMusicQueueControllerNextSongsKey] enumerateObjectsUsingBlock:^(NSDictionary * itemDict, NSUInteger idx, BOOL *stop) {
 			MusicQueueItem * item = [[MusicQueueItem alloc] initWithJSONDictionary:itemDict];
 			[_nextSongQueue addObject:item];
-			[item release];
 		}];
 	}
 	
@@ -124,7 +121,6 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 			[previousSongsDicts addObject:item.JSONDictionary];
 		}];
 		[dictionary setObject:previousSongsDicts forKey:kMusicQueueControllerPreviousSongsKey];
-		[previousSongsDicts release];
 	}
 	
 	if (self.canSkipForward){
@@ -134,15 +130,12 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 			[nextSongsDicts addObject:item.JSONDictionary];
 		}];
 		[dictionary setObject:nextSongsDicts forKey:kMusicQueueControllerNextSongsKey];
-		[nextSongsDicts release];
 	}
 	
-	return [dictionary autorelease];
+	return dictionary;
 }
 
 - (void)setFetchItem:(MusicQueueItem *)item {
-	[item retain];
-	[_fetchItem release];
 	_fetchItem = item;
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMusicQueuePlayerDidChangeStateNotificationName object:self];
 }
@@ -193,7 +186,6 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 		[YouTube getTrackURLFromVideoID:identifier callback:^(NSURL *URL){[self playContentAtURL:URL identifier:identifier];}];
 	}
 	
-	[identifier release];
 }
 
 - (void)playContentAtURL:(NSURL *)URL identifier:(id)identifier {
@@ -307,13 +299,6 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 }
 
 #pragma mark - Dealloc
-- (void)dealloc {
-	[_previousSongQueue release];
-	[_currentSong release];
-	[_nextSongQueue release];
-	[_fetchItem release];
-	[super dealloc];
-}
 
 #pragma mark - Singleton Stuff -
 + (MusicQueueController *)sharedController {
@@ -323,24 +308,6 @@ NSString * const kMusicQueueControllerNextSongsKey = @"MusicQueueControllerNextS
 	dispatch_once(&onceToken, ^{shared = [[self alloc] init];});
 	
 	return shared;
-}
-
-- (id)copyWithZone:(NSZone *)zone {
-	return self;
-}
-
-- (id)retain {
-	return self;
-}
-
-- (NSUInteger)retainCount {
-	return NSUIntegerMax;
-}
-
-- (oneway void)release {}
-
-- (id)autorelease {
-	return self;
 }
 
 @end

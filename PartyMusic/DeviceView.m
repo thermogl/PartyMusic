@@ -24,7 +24,7 @@
 	
 	if ((self = [super init])){
 		
-		_device = [aDevice retain];
+		_device = aDevice;
 		_scale = [[UIDevice currentDevice] isPhone] ? 1 : 1.5;
 		
 		[self setPanDragCoefficient:0.4];
@@ -39,7 +39,6 @@
 		_screenView = [[UIView alloc] initWithFrame:self.screenRect];
 		[_screenView setBackgroundColor:(_device.isOwnDevice ? [UIColor pm_blueColor] : [UIColor pm_redColor])];
 		[self addSubview:_screenView];
-		[_screenView release];
 		
 		_outputView = [[UIImageView alloc] initWithFrame:self.bounds];
 		[_outputView setImage:[[UIImage imageNamed:@"Speaker"] imageWithColorOverlay:[UIColor pm_darkColor]]];
@@ -47,16 +46,13 @@
 		[_outputView setContentMode:UIViewContentModeCenter];
 		[_outputView setHidden:!_device.isOutput];
 		[self addSubview:_outputView];
-		[_outputView release];
 		
 		if (_device){
 			UILongPressGestureRecognizer * longPressRecongizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(viewWasLongPressed:)];
 			[self addGestureRecognizer:longPressRecongizer];
-			[longPressRecongizer release];
 			
 			UITapGestureRecognizer * tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewWasTapped:)];
 			[self addGestureRecognizer:tapRecognizer];
-			[tapRecognizer release];
 			
 			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceDidReceiveShake:)
 														 name:DevicesManagerDidReceiveShakeEventNotificationName object:_device];
@@ -133,20 +129,17 @@
 	
 	UIMenuItem * browseItem = [[UIMenuItem alloc] initWithTitle:@"Browse Library" action:@selector(browseLibraryMenuItemWasTapped:)];
 	[items addObject:browseItem];
-	[browseItem release];
 	
 	if (_device.isOwnDevice){
 		if (!_device.isOutput){
 			UIMenuItem * menuItem = [[UIMenuItem alloc] initWithTitle:@"Become Output" action:@selector(becomeOutputMenuItemWasTapped:)];
 			[items addObject:menuItem];
-			[menuItem release];
 		}
 	}
 	else
 	{
 		UIMenuItem * nudgeItem = [[UIMenuItem alloc] initWithTitle:@"Nudge" action:@selector(vibrateDeviceMenuItemWasTapped:)];
 		[items addObject:nudgeItem];
-		[nudgeItem release];
 	}
 	
 	if (items){
@@ -157,7 +150,6 @@
 		[menuController setMenuVisible:YES animated:YES];
 	}
 	
-	[items release];
 }
 
 - (void)viewWasLongPressed:(UILongPressGestureRecognizer *)sender {
@@ -210,9 +202,5 @@
 }
 
 #pragma mark - Dealloc
-- (void)dealloc {
-	[_device release];
-	[super dealloc];
-}
 
 @end

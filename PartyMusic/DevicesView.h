@@ -10,7 +10,7 @@
 
 @class DeviceView;
 @interface DevicesView : UIView
-@property (nonatomic, readonly) DeviceView * ownDeviceView;
+@property (weak, nonatomic, readonly) DeviceView * ownDeviceView;
 
 - (void)addDeviceView:(DeviceView *)deviceView;
 - (void)removeDeviceView:(DeviceView *)deviceView;

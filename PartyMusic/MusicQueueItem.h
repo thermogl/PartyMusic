@@ -15,7 +15,7 @@
 @property (nonatomic, assign) DeviceSongType type;
 @property (nonatomic, copy) NSString * deviceUUID;
 @property (nonatomic, assign) CMTime currentTime;
-@property (nonatomic, readonly) NSDictionary * JSONDictionary;
+@property (weak, nonatomic, readonly) NSDictionary * JSONDictionary;
 
 - (id)initWithJSONDictionary:(NSDictionary *)dictionary;
 

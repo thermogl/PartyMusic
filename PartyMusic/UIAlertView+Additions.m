@@ -17,8 +17,7 @@ static NSString * BLOCK_KEY = @"com.thermoglobalnuclearwar.alertviewblockkey";
   actionButtonTitle:(NSString *)actionButtonTitle block:(UIAlertViewBlock)block {
 	
 	if ((self = [self initWithTitle:title message:message delegate:self cancelButtonTitle:cancelButtonTitle otherButtonTitles:actionButtonTitle, nil])){
-		objc_setAssociatedObject(self, BLOCK_KEY, block, OBJC_ASSOCIATION_COPY_NONATOMIC);
-		[self retain];
+		objc_setAssociatedObject(self, (__bridge const void *)(BLOCK_KEY), block, OBJC_ASSOCIATION_COPY_NONATOMIC);
 	}
 	
 	return self;
@@ -26,12 +25,11 @@ static NSString * BLOCK_KEY = @"com.thermoglobalnuclearwar.alertviewblockkey";
 
 - (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
 	
-	UIAlertViewBlock block = objc_getAssociatedObject(self, BLOCK_KEY);
+	UIAlertViewBlock block = objc_getAssociatedObject(self, (__bridge const void *)(BLOCK_KEY));
 	if (block && buttonIndex != alertView.cancelButtonIndex) block();
 	
-	objc_setAssociatedObject(self, BLOCK_KEY, nil, OBJC_ASSOCIATION_COPY_NONATOMIC);
+	objc_setAssociatedObject(self, (__bridge const void *)(BLOCK_KEY), nil, OBJC_ASSOCIATION_COPY_NONATOMIC);
 	
-	[self release];
 }
 
 + (void)showWithTitle:(NSString *)title message:(NSString *)message {
@@ -39,7 +37,6 @@ static NSString * BLOCK_KEY = @"com.thermoglobalnuclearwar.alertviewblockkey";
 	UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:nil 
 											   cancelButtonTitle:@"OK" otherButtonTitles:nil];
 	[alertView show];
-	[alertView release];
 }
 
 + (void)showForError:(NSError *)error {
@@ -47,7 +44,6 @@ static NSString * BLOCK_KEY = @"com.thermoglobalnuclearwar.alertviewblockkey";
 	if (error){
 		NSString * message = [[NSString alloc] initWithFormat:@"%@ (%d)", error.localizedDescription, error.code];
 		[self showWithTitle:@"Error" message:message];
-		[message release];
 	}
 }
 

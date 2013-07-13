@@ -40,36 +40,36 @@ typedef enum {
 @implementation DevicesView (HarlemShake)
 
 - (AVAudioPlayer *)harlemPlayer {
-	return objc_getAssociatedObject(self, HarlemPlayerKeyName);
+	return objc_getAssociatedObject(self, (__bridge const void *)(HarlemPlayerKeyName));
 }
 
 - (void)setHarlemPlayer:(AVAudioPlayer *)player {
-	objc_setAssociatedObject(self, HarlemPlayerKeyName, player, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+	objc_setAssociatedObject(self, (__bridge const void *)(HarlemPlayerKeyName), player, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (NSMutableArray *)harlemViews {
-	return objc_getAssociatedObject(self, HarlemViewsKeyName);
+	return objc_getAssociatedObject(self, (__bridge const void *)(HarlemViewsKeyName));
 }
 
 - (void)setHarlemViews:(NSMutableArray *)views {
-	objc_setAssociatedObject(self, HarlemViewsKeyName, views, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+	objc_setAssociatedObject(self, (__bridge const void *)(HarlemViewsKeyName), views, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (BOOL)harlemShaking {
-	NSNumber * number = objc_getAssociatedObject(self, HarlemShakingKeyName);
+	NSNumber * number = objc_getAssociatedObject(self, (__bridge const void *)(HarlemShakingKeyName));
 	return number.boolValue;
 }
 
 - (void)setHarlemShaking:(BOOL)flag {
-	objc_setAssociatedObject(self, HarlemShakingKeyName, [NSNumber numberWithBool:flag], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+	objc_setAssociatedObject(self, (__bridge const void *)(HarlemShakingKeyName), [NSNumber numberWithBool:flag], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (void(^)(void))harlemCompletion {
-	return objc_getAssociatedObject(self, HarlemCompletionKeyName);
+	return objc_getAssociatedObject(self, (__bridge const void *)(HarlemCompletionKeyName));
 }
 
 - (void)setHarlemCompletion:(void (^)())harlemCompletion {
-	objc_setAssociatedObject(self, HarlemCompletionKeyName, harlemCompletion, OBJC_ASSOCIATION_COPY_NONATOMIC);
+	objc_setAssociatedObject(self, (__bridge const void *)(HarlemCompletionKeyName), harlemCompletion, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
 - (void)harlemShakeWithAudio:(BOOL)withAudio completion:(void (^)(void))completionHandler {
@@ -83,7 +83,6 @@ typedef enum {
 		[player setDelegate:self];
 		[player prepareToPlay];
 		[self setHarlemPlayer:player];
-		[player release];
 		
 		if (!withAudio) [player setVolume:0];
 		[player play];
@@ -94,7 +93,6 @@ typedef enum {
 			
 			NSMutableArray * views = [[NSMutableArray alloc] init];
 			[self setHarlemViews:views];
-			[views release];
 			
 			[self.subviews enumerateObjectsUsingBlock:^(DeviceView * deviceView, NSUInteger idx, BOOL *stop) {
 				[views addObject:deviceView];
@@ -110,7 +108,6 @@ typedef enum {
 				DeviceView * deviceView  = [[DeviceView alloc] initWithDevice:nil];
 				[deviceView setScreenColor:[UIColor colorWithRed:red green:green blue:blue alpha:1.0]];
 				[views addObject:deviceView];
-				[deviceView release];
 				
 				[self addSubview:deviceView];
 				[self sendSubviewToBack:deviceView];

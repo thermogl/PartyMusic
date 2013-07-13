@@ -27,11 +27,11 @@ NSString * const kYouTubeUserAgent = @"Mozilla/5.0 (Macintosh; Intel Mac OS X 10
 		NSURL * URL = [NSURL URLWithString:[NSString stringWithFormat:@"%@q=%@", kYouTubeAPIEndpoint, substring.encodedURLParameterString]];
 		
 		NSURLRequest * request = [NSURLRequest requestWithURL:URL];
-		NSOperationQueue * queue = [[[NSOperationQueue alloc] init] autorelease];
+		NSOperationQueue * queue = [[NSOperationQueue alloc] init];
 		
 		[NSURLConnection sendAsynchronousRequest:request queue:queue completionHandler:^(NSURLResponse * response, NSData * data, NSError * err){
 			
-			NSMutableArray * tracks = [[NSMutableArray alloc] init];
+			NSMutableArray * tracks = [NSMutableArray array];
 			
 			if (!err){
 				
@@ -48,12 +48,10 @@ NSString * const kYouTubeUserAgent = @"Mozilla/5.0 (Macintosh; Intel Mac OS X 10
 					[container setSubtitle:[[[[videoDict objectForKey:@"author"] objectAtIndex:0] objectForKey:@"name"] objectForKey:@"$t"]];
 					[container setIdentifier:[[[videoDict objectForKey:@"id"] objectForKey:@"$t"] lastPathComponent]];
 					[tracks addObject:container];
-					[container release];
 				}];
 			}
 			
 			dispatch_async(dispatch_get_main_queue(), ^{callback(err, tracks);});
-			[tracks autorelease];
 		}];
 	}
 }
@@ -67,14 +65,13 @@ NSString * const kYouTubeUserAgent = @"Mozilla/5.0 (Macintosh; Intel Mac OS X 10
         [request setValue:kYouTubeUserAgent forHTTPHeaderField:@"User-Agent"];
         [request setHTTPMethod:@"GET"];
 		
-		NSOperationQueue * queue = [[[NSOperationQueue alloc] init] autorelease];
+		NSOperationQueue * queue = [[NSOperationQueue alloc] init];
 		[NSURLConnection sendAsynchronousRequest:request queue:queue completionHandler:^(NSURLResponse * response , NSData * responseData, NSError * error) {
 			
 			if (!error) {
 				
 				NSString * responseString = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
 				NSMutableDictionary * parts = [responseString dictionaryFromQueryStringComponents];
-				[responseString release];
 				
 				if (parts) {
 					
@@ -145,7 +142,7 @@ NSString * const kYouTubeUserAgent = @"Mozilla/5.0 (Macintosh; Intel Mac OS X 10
 		}
 	}];
 	
-    return [parameters autorelease];
+    return parameters;
 }
 
 @end

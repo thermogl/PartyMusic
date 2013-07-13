@@ -20,8 +20,8 @@ typedef void (^DevicesManagerSearchCallback)(Device * device, NSDictionary * res
 @interface DevicesManager : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, DeviceDelegate>
 
 @property (nonatomic, readonly) OwnDevice * ownDevice;
-@property (nonatomic, readonly) Device * outputDevice;
-@property (nonatomic, readonly) NSArray * devices;
+@property (weak, nonatomic, readonly) Device * outputDevice;
+@property (weak, nonatomic, readonly) NSArray * devices;
 
 - (void)startSearching;
 - (void)stopSearching;

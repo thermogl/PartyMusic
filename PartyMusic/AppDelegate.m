@@ -26,7 +26,6 @@
 	
 	RootViewController * rootViewController = [[RootViewController alloc] init];
 	[_window setRootViewController:rootViewController];
-	[rootViewController release];
 	
 	[_window makeKeyAndVisible];
 	
@@ -70,9 +69,5 @@
 	else if (event.subtype == UIEventSubtypeRemoteControlPreviousTrack) [[MusicQueueController sharedController] skipBackward];
 }
 
-- (void)dealloc {
-	[_window release];
-    [super dealloc];
-}
 
 @end

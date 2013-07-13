@@ -39,7 +39,6 @@
 				[output setAlwaysCopiesSampleData:NO];
 				
 				[reader addOutput:output];
-				[output release];
 				
 				[reader startReading];
 				while (reader.status == AVAssetReaderStatusReading){
@@ -56,7 +55,6 @@
 								NSMutableData * buffer = [[NSMutableData alloc] initWithLength:length];
 								CMBlockBufferCopyDataBytes(blockBufferRef, 0, length, buffer.mutableBytes);
 								dispatch_async(dispatch_get_main_queue(), ^{callback(buffer, YES);});
-								[buffer release];
 							}
 							
 							CMSampleBufferInvalidate(sampleBufferRef);
@@ -69,11 +67,9 @@
 				if (_cancelled || reader.status == AVAssetReaderStatusCompleted) dispatch_async(dispatch_get_main_queue(), ^{callback(nil, NO);});
 				else if (reader.status == AVAssetReaderStatusFailed || reader.status == AVAssetReaderStatusUnknown) NSLog(@"Track getting error: %@", error);
 				
-				[reader release];
 			}
 			else dispatch_async(dispatch_get_main_queue(), ^{callback(nil, NO);});
 			
-			[songsQuery release];
 			
 			if (_completionHandler) dispatch_async(dispatch_get_main_queue(), ^{_completionHandler();});
 		});
@@ -82,9 +78,5 @@
 	}
 }
 
-- (void)dealloc {
-	[_completionHandler release];
-	[super dealloc];
-}
 
 @end
